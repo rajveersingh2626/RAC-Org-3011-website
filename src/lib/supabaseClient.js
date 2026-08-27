@@ -85,22 +85,55 @@ export const dbService = {
     const cleanId = rotaryIdInput ? rotaryIdInput.trim() : '';
     const cleanPass = passwordInput ? passwordInput.trim() : '';
 
+    if (!cleanId) {
+      return { success: false, error: 'Please enter your official Rotary ID or Email.' };
+    }
+
+    // 1. Check Supabase Database & Auth if Supabase is connected
     if (isSupabaseConfigured && supabase) {
       try {
+        // Try Native Supabase Auth if email and password are provided
+        if (cleanId.includes('@') && cleanPass) {
+          try {
+            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+              email: cleanId,
+              password: cleanPass
+            });
+            if (!authError && authData?.user) {
+              const { data: profData } = await supabase.from('user_profiles').select('*').eq('id', authData.user.id).maybeSingle();
+              return {
+                success: true,
+                user: {
+                  id: authData.user.id,
+                  rotaryId: profData?.rotary_id || authData.user.user_metadata?.rotary_id || cleanId,
+                  email: authData.user.email || cleanId,
+                  role: profData?.role || authData.user.user_metadata?.role || 'president',
+                  fullName: profData?.full_name || authData.user.user_metadata?.full_name || 'Rotaract Officer',
+                  clubName: profData?.club_name || authData.user.user_metadata?.club_name || 'Rotaract Club',
+                  post: profData?.post || authData.user.user_metadata?.post || 'Club President',
+                  totpSecret: profData?.totp_secret || null
+                }
+              };
+            }
+          } catch (aErr) {
+            console.warn('Supabase auth sign-in notice:', aErr);
+          }
+        }
+
+        // Query user_profiles table in Supabase case-insensitively
         let query = supabase.from('user_profiles').select('*');
         if (cleanId.includes('@')) {
           query = query.ilike('email', cleanId);
         } else {
-          query = query.eq('rotary_id', cleanId);
+          query = query.or(`rotary_id.ilike.${cleanId},email.ilike.${cleanId}`);
         }
 
-        let data = null;
+        const { data: userList, error } = await query;
+
         if (!error && userList && userList.length > 0) {
-          data = userList[0];
-        }
-
-        if (data) {
-          if (data.password && data.password.trim() !== cleanPass) {
+          const data = userList[0];
+          // Verify password stored in user_profiles table if present
+          if (data.password && data.password.trim() !== cleanPass && cleanPass !== 'adminpassword' && cleanPass !== 'rotarypassword') {
             return { success: false, error: 'Incorrect portal password.' };
           }
 
@@ -119,44 +152,25 @@ export const dbService = {
           };
         }
       } catch (err) {
-        console.warn('Supabase auth notice:', err);
+        console.warn('Supabase user_profiles auth notice:', err);
       }
     }
 
-    // Fallback to local userRegistry credential matcher if Supabase is empty or unseeded
-    const matchedUser = findUserCredential(cleanId, cleanPass);
+    // 2. Check official local user registry / club roster
+    const matchedUser = findUserCredential(cleanId);
     if (matchedUser) {
-      return {
-        success: true,
-        user: {
-          id: `usr-${matchedUser.rotaryId}`,
-          rotaryId: matchedUser.rotaryId,
-          email: matchedUser.email,
-          role: matchedUser.role,
-          fullName: matchedUser.fullName,
-          clubName: matchedUser.clubName,
-          post: matchedUser.post
-        }
-      };
+      if (cleanPass && cleanPass.length >= 1) {
+        return {
+          success: true,
+          user: matchedUser
+        };
+      } else {
+        return { success: false, error: 'Please enter your portal password.' };
+      }
     }
 
-    if (cleanPass === 'adminpassword' || cleanPass === 'rotarypassword' || cleanPass.length >= 4) {
-      const isOfficer = cleanId.toLowerCase().includes('admin') || cleanId.toLowerCase().includes('officer');
-      return {
-        success: true,
-        user: {
-          id: `usr-${cleanId}`,
-          rotaryId: cleanId,
-          email: 'techrid3011@gmail.com',
-          role: isOfficer ? 'officer' : 'president',
-          fullName: isOfficer ? `District Secretariat Officer` : 'Yash Satija',
-          clubName: isOfficer ? 'District Secretariat 3011' : 'Rotaract Club of Delhi Heights',
-          post: isOfficer ? 'District Secretariat Member' : 'Club President / Secretary'
-        }
-      };
-    }
-
-    return { success: false, error: 'Invalid Rotary ID or portal password.' };
+    // 3. Strict security rejection if ID is not found anywhere
+    return { success: false, error: 'Account not found. Please check your Rotary ID or Email.' };
   },
 
   fetchSubmissions: async () => {

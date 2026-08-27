@@ -270,6 +270,9 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                     />
                     <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--rotaract-pink)' }} />
                   </div>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                    Tip: Use your Rotary ID, Club Email (e.g. <code>president.delhiheights@rotaract3011.org</code>), or Secretariat ID (<code>3011-ADMIN</code>).
+                  </span>
                 </div>
 
                 {/* Password */}
