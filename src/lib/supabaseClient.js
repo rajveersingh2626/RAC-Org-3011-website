@@ -274,12 +274,6 @@ export const dbService = {
       }
     }
 
-    // Fallback check against District 3011 Roster
-    const matchedUser = findUserCredential(cleanId);
-    if (matchedUser) {
-      return { success: true, user: matchedUser };
-    }
-
     return { success: false, error: 'Account not found in District 3011 database. Please check your Rotary ID or Email.' };
   },
 
