@@ -18,9 +18,8 @@ export default function DistrictAccess({
 
   return (
     <div style={{ background: (activeDistrictTab === 'map-clubs' || !activeDistrictTab) ? '#FDF8FA' : 'linear-gradient(180deg, #D81B60 0%, #AD1457 100%)', minHeight: '100vh', padding: (activeDistrictTab === 'map-clubs' || !activeDistrictTab) ? '0px' : '40px 24px 80px 24px', color: 'var(--text-primary)' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        
-        {(!activeDistrictTab || activeDistrictTab === 'map-clubs') && (
+      {(!activeDistrictTab || activeDistrictTab === 'map-clubs') ? (
+        <div style={{ width: '100%', minHeight: 'calc(100vh - 70px)' }}>
           <DistrictMap
             clubs={clubs}
             isLoggedIn={isLoggedIn}
@@ -29,7 +28,9 @@ export default function DistrictAccess({
             onOpenUploadClubModal={onOpenUploadClubModal}
             onOpenPostInitiativeModal={onOpenPostInitiativeModal}
           />
-        )}
+        </div>
+      ) : (
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
 
         {activeDistrictTab === 'heritage' && (
           <PastDRRShowcase />
@@ -90,8 +91,8 @@ export default function DistrictAccess({
             </div>
           </div>
         )}
-
-      </div>
+        </div>
+      )}
     </div>
   );
 }

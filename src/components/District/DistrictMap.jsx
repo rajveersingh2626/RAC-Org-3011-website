@@ -218,14 +218,31 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
       return matchesSearch && matchesZone;
     });
 
-    filtered.forEach(club => {
-      const lat = club.lat || 28.5800;
-      const lng = club.lng || 77.1025;
+    const coordCounts = {};
+
+    filtered.forEach((club, index) => {
+      let lat = club.lat || 28.5800;
+      let lng = club.lng || 77.1025;
+
+      // Smart coordinate dispersion so close pins don't overlap
+      const key = `${lat.toFixed(3)}_${lng.toFixed(3)}`;
+      if (coordCounts[key]) {
+        const count = coordCounts[key];
+        const angle = (count * 60) * (Math.PI / 180);
+        const radius = 0.007 * Math.ceil(count / 5);
+        lat += Math.sin(angle) * radius;
+        lng += Math.cos(angle) * radius;
+        coordCounts[key] = count + 1;
+      } else {
+        coordCounts[key] = 1;
+      }
 
       let neonColor = '#D81B60';
       if (club.zone?.toLowerCase().includes('west')) neonColor = '#0088cc';
       if (club.zone?.toLowerCase().includes('gurugram')) neonColor = '#d97706';
       if (club.zone?.toLowerCase().includes('faridabad') || club.zone?.toLowerCase().includes('noida')) neonColor = '#10b981';
+
+      const displayName = (club.shortName || club.name).replace(/^RAC\s+/i, '');
 
       const customIcon = L.divIcon({
         className: 'leaflet-neon-marker',
@@ -233,7 +250,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
           <div class="neon-marker-container">
             <div class="neon-marker-core" style="background-color: ${neonColor}; box-shadow: 0 0 16px ${neonColor};"></div>
             <div class="neon-marker-pulse" style="border: 2px solid ${neonColor};"></div>
-            <div class="neon-marker-label" style="border-color: ${neonColor}88; background: rgba(255,255,255,0.96); color: #1E1E24; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">RAC ${club.shortName || club.name}</div>
+            <div class="neon-marker-label" style="border-color: ${neonColor}88; background: rgba(255,255,255,0.96); color: #1E1E24; font-weight: 800;">RAC ${displayName}</div>
           </div>
         `,
         iconSize: [30, 30],
@@ -247,7 +264,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
       marker.on('click', () => {
         setActiveSlideoutClub(club);
         if (onSelectClub) onSelectClub(club.id);
-        map.flyTo([lat, lng], 13, { duration: 1.2 });
+        map.flyTo([lat, lng], 13.5, { duration: 1.2 });
       });
 
       markersRef.current.push(marker);
@@ -270,12 +287,13 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
         inset: isFullScreen ? 0 : 'auto',
         zIndex: isFullScreen ? 99999 : 1,
         width: '100%',
-        height: isFullScreen ? '100vh' : '760px',
+        height: isFullScreen ? '100vh' : 'calc(100vh - 72px)',
+        minHeight: isFullScreen ? '100vh' : '780px',
         backgroundColor: '#FDF8FA',
-        borderRadius: isFullScreen ? '0px' : '24px',
+        borderRadius: '0px',
         overflow: 'hidden',
-        border: '1px solid rgba(216, 27, 96, 0.15)',
-        boxShadow: '0 20px 60px rgba(216, 27, 96, 0.08)',
+        border: 'none',
+        boxShadow: 'none',
         transition: 'all 0.3s ease'
       }}
     >
