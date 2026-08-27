@@ -212,11 +212,22 @@ export default function PortalPage({
     setEditingReportId(null);
   };
 
-  // Confirm flag comment (District Officer)
+  // Confirm flag comment (District Officer) with Email Notification
   const handleConfirmFlag = async () => {
     if (!flaggingSub || !flagComment.trim()) return;
     const updated = await dbService.flagSubmission(flaggingSub.id, flagComment);
     setSubmissions(updated);
+
+    // Trigger Email Notification payload to Club Officers
+    const recipientEmail = flaggingSub.clubEmail || 'techrid3011@gmail.com';
+    const emailSubject = encodeURIComponent(`[District 3011 Alert] Action Required: Monthly Report Flagged - ${flaggingSub.month}`);
+    const emailBody = encodeURIComponent(
+      `Dear Club Officers of ${flaggingSub.clubName},\n\nYour Monthly Project Report for ${flaggingSub.month} has been flagged by District Secretariat 3011 with the following officer feedback comment:\n\n"${flagComment}"\n\nPlease log into the District Portal to edit and re-submit your report.\n\nRegards,\nRotaract District Organization 3011`
+    );
+
+    // Open mail client or log broadcast payload
+    window.open(`mailto:${recipientEmail},techrid3011@gmail.com?subject=${emailSubject}&body=${emailBody}`, '_blank');
+
     setFlaggingSub(null);
     setFlagComment('');
   };
@@ -451,7 +462,7 @@ export default function PortalPage({
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
               <div>
                 <h3 style={{ fontSize: '1.55rem', fontWeight: 900, color: 'var(--text-primary)' }}>
-                  {isDistrictOfficer ? 'Master District Monthly Reports Stream (70+ Clubs)' : 'Monthly Project Reporting Workspace'}
+                  {isDistrictOfficer ? 'Master District Monthly Reports Stream' : 'Monthly Project Reporting Workspace'}
                 </h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
                   {isDistrictOfficer 

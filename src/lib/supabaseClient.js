@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { findUserCredential } from '../data/userRegistry';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -117,6 +118,21 @@ export const dbService = {
         console.warn('Supabase auth notice, checking fallback:', err);
       }
     }
+    const matchedUser = findUserCredential(cleanId, cleanPass);
+    if (matchedUser) {
+      return {
+        success: true,
+        user: {
+          id: `usr-${matchedUser.rotaryId}`,
+          rotaryId: matchedUser.rotaryId,
+          email: matchedUser.email,
+          role: matchedUser.role,
+          fullName: matchedUser.fullName,
+          clubName: matchedUser.clubName,
+          post: matchedUser.post
+        }
+      };
+    }
 
     if (cleanPass === 'adminpassword' || cleanPass === 'rotarypassword' || cleanPass.length >= 4) {
       const isOfficer = cleanId.toLowerCase().includes('admin') || cleanId.toLowerCase().includes('officer');
@@ -127,14 +143,14 @@ export const dbService = {
           rotaryId: cleanId,
           email: 'techrid3011@gmail.com',
           role: isOfficer ? 'officer' : 'president',
-          fullName: isOfficer ? `Officer ${cleanId}` : 'Yash Satija',
+          fullName: isOfficer ? `District Secretariat Officer` : 'Yash Satija',
           clubName: isOfficer ? 'District Secretariat 3011' : 'Rotaract Club of Delhi Heights',
-          post: isOfficer ? 'District Secretariat Member' : 'Club President'
+          post: isOfficer ? 'District Secretariat Member' : 'Club President / Secretary'
         }
       };
     }
 
-    return { success: false, error: 'Invalid Rotary ID or password.' };
+    return { success: false, error: 'Invalid Rotary ID or portal password.' };
   },
 
   fetchSubmissions: async () => {
