@@ -343,9 +343,21 @@ export default function PortalPage({
     setTimeout(() => setCopiedReminderClubId(null), 3000);
   };
 
+  const userClubName = (userSession?.clubName || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+
   const clubSubmissions = isDistrictOfficer 
     ? submissions 
-    : submissions.filter(s => s.clubEmail === userEmail || s.clubName.toLowerCase().includes(userEmail.split('.')[1] || 'heights'));
+    : submissions.filter(s => {
+        if (!s) return false;
+        const subClubName = (s.clubName || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+        const subEmail = (s.clubEmail || '').toLowerCase();
+        const uEmail = (userEmail || '').toLowerCase();
+        return (
+          subEmail === uEmail || 
+          (userClubName.length > 3 && subClubName.includes(userClubName)) || 
+          (subClubName.length > 3 && userClubName.includes(subClubName))
+        );
+      });
 
   // Calculate compliance data for the selected month
   const clubComplianceList = allDistrictClubs.map(c => {

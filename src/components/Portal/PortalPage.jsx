@@ -163,10 +163,21 @@ export default function PortalPage({
     setTimeout(() => setAnnouncementSuccessMsg(''), 4500);
   };
 
-  // Filter submissions for Club President view vs District Officer View
+  const userClubName = (userSession?.clubName || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+
   const clubSubmissions = isDistrictOfficer 
     ? submissions 
-    : submissions.filter(s => s.clubEmail === userEmail || s.clubName.toLowerCase().includes(userEmail.split('.')[1] || 'heights'));
+    : submissions.filter(s => {
+        if (!s) return false;
+        const subClubName = (s.clubName || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+        const subEmail = (s.clubEmail || '').toLowerCase();
+        const uEmail = (userEmail || '').toLowerCase();
+        return (
+          subEmail === uEmail || 
+          (userClubName.length > 3 && subClubName.includes(userClubName)) || 
+          (subClubName.length > 3 && userClubName.includes(subClubName))
+        );
+      });
 
   return (
     <div style={{ backgroundColor: '#FDF8FA', minHeight: '100vh', padding: '36px 24px 80px 24px', position: 'relative' }}>
