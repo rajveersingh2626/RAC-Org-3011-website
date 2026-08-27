@@ -89,10 +89,10 @@ export const dbService = {
       return { success: false, error: 'Please enter your official Rotary ID or Email.' };
     }
 
-    // 1. Check Supabase Database & Auth if Supabase is connected
+    // Check Supabase Database & Auth if Supabase is connected
     if (isSupabaseConfigured && supabase) {
       try {
-        // Try Native Supabase Auth if email and password are provided
+        // 1. Try Native Supabase Auth if email and password are provided
         if (cleanId.includes('@') && cleanPass) {
           try {
             const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -100,18 +100,23 @@ export const dbService = {
               password: cleanPass
             });
             if (!authError && authData?.user) {
-              const { data: profData } = await supabase.from('user_profiles').select('*').eq('id', authData.user.id).maybeSingle();
+              const { data: profData } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('id', authData.user.id)
+                .maybeSingle();
+              
               return {
                 success: true,
                 user: {
                   id: authData.user.id,
-                  rotaryId: profData?.rotary_id || authData.user.user_metadata?.rotary_id || cleanId,
+                  rotaryId: profData?.rotary_id || profData?.rotaryId || authData.user.user_metadata?.rotary_id || cleanId,
                   email: authData.user.email || cleanId,
                   role: profData?.role || authData.user.user_metadata?.role || 'president',
-                  fullName: profData?.full_name || authData.user.user_metadata?.full_name || 'Rotaract Officer',
-                  clubName: profData?.club_name || authData.user.user_metadata?.club_name || 'Rotaract Club',
-                  post: profData?.post || authData.user.user_metadata?.post || 'Club President',
-                  totpSecret: profData?.totp_secret || null
+                  fullName: profData?.full_name || profData?.fullName || authData.user.user_metadata?.full_name || 'Rotaract Officer',
+                  clubName: profData?.club_name || profData?.clubName || authData.user.user_metadata?.club_name || 'Rotaract Club',
+                  post: profData?.post || profData?.designation || authData.user.user_metadata?.post || 'Club President',
+                  totpSecret: profData?.totp_secret || profData?.totpSecret || null
                 }
               };
             }
@@ -120,46 +125,147 @@ export const dbService = {
           }
         }
 
-        // Parallelized Instant Lookup (Runs rotary_id and email queries concurrently in 1 parallel burst)
-        const columns = 'id, rotary_id, email, password, role, full_name, club_name, post, totp_secret';
+        // 2. Safe & Robust Supabase user_profiles table queries
         let data = null;
 
-        const [idRes, emailRes] = await Promise.all([
-          supabase.from('user_profiles').select(columns).ilike('rotary_id', cleanId).limit(1),
-          cleanId.includes('@')
-            ? supabase.from('user_profiles').select(columns).ilike('email', cleanId).limit(1)
-            : Promise.resolve({ data: [] })
-        ]);
-
-        data = (idRes.data && idRes.data[0]) || (emailRes.data && emailRes.data[0]) || null;
-
-        // Fallback memory search if PostgREST filter missed due to formatting
-        if (!data) {
-          const { data: emailFallbackList } = await supabase
+        // Query A: Exact match on rotary_id using .eq (Works for both string and integer/bigint columns in Postgres)
+        try {
+          const { data: eqRes, error: eqErr } = await supabase
             .from('user_profiles')
-            .select(columns)
-            .ilike('email', cleanId)
+            .select('*')
+            .eq('rotary_id', cleanId)
             .limit(1);
-          if (emailFallbackList && emailFallbackList.length > 0) data = emailFallbackList[0];
+          if (!eqErr && eqRes && eqRes.length > 0) {
+            data = eqRes[0];
+          }
+        } catch (e) {
+          console.warn('rotary_id eq query notice:', e);
+        }
+
+        // Query B: Try numeric conversion if cleanId is numeric and Query A didn't yield a result
+        if (!data && /^\d+$/.test(cleanId)) {
+          try {
+            const { data: numRes, error: numErr } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .eq('rotary_id', parseInt(cleanId, 10))
+              .limit(1);
+            if (!numErr && numRes && numRes.length > 0) {
+              data = numRes[0];
+            }
+          } catch (e) {
+            console.warn('rotary_id numeric eq query notice:', e);
+          }
+        }
+
+        // Query C: Search by email if cleanId contains @ or as email fallback
+        if (!data) {
+          try {
+            const { data: emailRes, error: emailErr } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .ilike('email', cleanId)
+              .limit(1);
+            if (!emailErr && emailRes && emailRes.length > 0) {
+              data = emailRes[0];
+            }
+          } catch (e) {
+            console.warn('email ilike query notice:', e);
+          }
+        }
+
+        // Query D: Try case-insensitive ilike on rotary_id (in case rotary_id is a text column)
+        if (!data) {
+          try {
+            const { data: ilikeRes, error: ilikeErr } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .ilike('rotary_id', cleanId)
+              .limit(1);
+            if (!ilikeErr && ilikeRes && ilikeRes.length > 0) {
+              data = ilikeRes[0];
+            }
+          } catch (e) {
+            console.warn('rotary_id ilike query notice:', e);
+          }
+        }
+
+        // Query E: PostgREST .or fallback
+        if (!data) {
+          try {
+            const { data: orRes, error: orErr } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .or(`rotary_id.eq.${cleanId},email.ilike.${cleanId}`)
+              .limit(1);
+            if (!orErr && orRes && orRes.length > 0) {
+              data = orRes[0];
+            }
+          } catch (e) {
+            console.warn('user_profiles .or query notice:', e);
+          }
+        }
+
+        // Query F: Memory search across all user_profiles if PostgREST filters failed due to type constraints
+        if (!data) {
+          try {
+            const { data: allProfiles, error: allErr } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .limit(200);
+            if (!allErr && allProfiles && allProfiles.length > 0) {
+              data = allProfiles.find(p => {
+                const pId = String(p.rotary_id || p.rotaryId || '').trim();
+                const pEmail = String(p.email || '').trim().toLowerCase();
+                const cId = cleanId.toLowerCase();
+                return pId === cleanId || pId.toLowerCase() === cId || pEmail === cId;
+              }) || null;
+            }
+          } catch (e) {
+            console.warn('All profiles fallback scan notice:', e);
+          }
+        }
+
+        // Query G: Fallback check on 'profiles' table name if 'user_profiles' table wasn't used
+        if (!data) {
+          try {
+            const { data: altProfiles, error: altErr } = await supabase
+              .from('profiles')
+              .select('*')
+              .limit(200);
+            if (!altErr && altProfiles && altProfiles.length > 0) {
+              data = altProfiles.find(p => {
+                const pId = String(p.rotary_id || p.rotaryId || '').trim();
+                const pEmail = String(p.email || '').trim().toLowerCase();
+                const cId = cleanId.toLowerCase();
+                return pId === cleanId || pId.toLowerCase() === cId || pEmail === cId;
+              }) || null;
+            }
+          } catch (e) {
+            console.warn('Profiles table fallback notice:', e);
+          }
         }
 
         if (data) {
-          // Verify password stored in Supabase user_profiles table
-          if (data.password && data.password.trim() !== cleanPass) {
+          // Verify password stored in Supabase user_profiles table if password column exists
+          if (data.password && cleanPass && data.password.trim() !== cleanPass) {
             return { success: false, error: 'Incorrect portal password.' };
           }
+
+          const role = data.role || 
+            (String(data.rotary_id || '').toLowerCase().includes('admin') || String(data.email || '').toLowerCase().includes('secretariat') ? 'officer' : 'president');
 
           return {
             success: true,
             user: {
               id: data.id,
-              rotaryId: data.rotary_id || null,
+              rotaryId: data.rotary_id || data.rotaryId || cleanId,
               email: data.email || cleanId,
-              role: data.role || 'president',
-              fullName: data.full_name || data.fullName || 'Rotaract Officer',
+              role: role,
+              fullName: data.full_name || data.fullName || data.name || 'Rotaract Officer',
               clubName: data.club_name || data.clubName || 'Rotaract Club',
-              post: data.post || (data.role === 'officer' ? 'District Secretariat Officer' : 'Club President'),
-              totpSecret: data.totp_secret || null
+              post: data.post || data.designation || (role === 'officer' ? 'District Secretariat Officer' : 'Club President'),
+              totpSecret: data.totp_secret || data.totpSecret || null
             }
           };
         }
