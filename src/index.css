@@ -1,0 +1,780 @@
+:root {
+  /* Rotaract Brand Colors */
+  --rotaract-pink: #D81B60;
+  --rotaract-pink-hover: #C21350;
+  --rotaract-pink-light: #FDF0F5;
+  --rotaract-pink-subtle: #FBE4EC;
+  --rotaract-cranberry-dark: #880E4F;
+
+  /* Skyline Gold & Accents */
+  --skyline-gold: #123499;
+  --skyline-gold-light: #123499;
+  --skyline-gold-dark: #123499;
+
+  /* Surfaces & Backgrounds */
+  --bg-main: #FFFFFF;
+  --bg-subtle: #FDF8FA;
+  --bg-card: #FFFFFF;
+  --bg-overlay: rgba(216, 27, 96, 0.04);
+
+  /* Typography */
+  --text-primary: #1E1E24;
+  --text-secondary: #4A4A5A;
+  --text-muted: #71717A;
+  --text-pink: #D81B60;
+
+  /* Borders & Shadows */
+  --border-subtle: rgba(216, 27, 96, 0.12);
+  --border-light: #F3E5EB;
+  --shadow-sm: 0 4px 15px rgba(216, 27, 96, 0.04);
+  --shadow-md: 0 10px 30px rgba(216, 27, 96, 0.08);
+  --shadow-lg: 0 20px 50px rgba(216, 27, 96, 0.14);
+
+  /* Uniform Sans-Serif Font */
+  --font-family: 'Montserrat', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family) !important;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: var(--font-family);
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Enforce font family globally across all headings, inputs, buttons */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+input,
+button,
+select,
+textarea,
+span,
+p,
+a,
+label {
+  font-family: var(--font-family) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FDF5F8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(216, 27, 96, 0.25);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rotaract-pink);
+}
+
+/* Glassmorphism & Cards */
+.rotaract-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rotaract-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(216, 27, 96, 0.3);
+}
+
+.rotaract-glass {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Primary Rotaract Buttons (Rounded Rectangles) */
+.btn-rotaract {
+  background: linear-gradient(135deg, var(--rotaract-pink) 0%, var(--rotaract-pink-hover) 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 26px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(216, 27, 96, 0.25);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+}
+
+.btn-rotaract:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(216, 27, 96, 0.38);
+  background: linear-gradient(135deg, #E91E63 0%, var(--rotaract-pink) 100%);
+}
+
+.btn-rotaract-outline {
+  background: transparent;
+  color: var(--rotaract-pink);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 11px 25px;
+  border-radius: 8px;
+  border: 2px solid var(--rotaract-pink);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+}
+
+.btn-rotaract-outline:hover {
+  background: var(--rotaract-pink-light);
+  transform: translateY(-2px);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--skyline-gold) 0%, var(--skyline-gold-dark) 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 26px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(197, 160, 89, 0.3);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(197, 160, 89, 0.45);
+}
+
+/* Badges & Pills (Rounded Rectangles) */
+.pill-pink {
+  background: var(--rotaract-pink-light);
+  border: 1px solid rgba(216, 27, 96, 0.2);
+  color: var(--rotaract-pink);
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.3px;
+}
+
+.pill-gold {
+  background: #123499;
+  border: 1px solid #123499;
+  color: #FFFFFF;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Rotaract Wheel Spin */
+@keyframes spinWheel {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Typewriter Cursor Blink Animation */
+@keyframes typewriterBlink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.rotaract-wheel-spin {
+  animation: spinWheel 20s linear infinite;
+}
+
+.rotaract-wheel-spin:hover {
+  animation-play-state: paused;
+}
+
+/* Pulse animation for map pins */
+@keyframes mapPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(216, 27, 96, 0.6);
+  }
+
+  70% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 12px rgba(216, 27, 96, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(216, 27, 96, 0);
+  }
+}
+
+.map-pin-pulse {
+  animation: mapPulse 2.5s infinite ease-in-out;
+}
+
+/* Custom Range Slider Bar Styling */
+.rotaract-slider-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3px solid var(--rotaract-pink);
+  box-shadow: 0 2px 10px rgba(216, 27, 96, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rotaract-slider-bar::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 4px 16px rgba(216, 27, 96, 0.6);
+}
+
+.rotaract-slider-bar::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3px solid var(--rotaract-pink);
+  box-shadow: 0 2px 10px rgba(216, 27, 96, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rotaract-slider-bar::-moz-range-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 4px 16px rgba(216, 27, 96, 0.6);
+}
+
+/* ==========================================================================
+   100VH SCREEN-WIDE SCROLL SNAP LAYOUT & ANIMATIONS
+   ========================================================================== */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+  scroll-behavior: smooth;
+  overflow: hidden;
+}
+
+.snap-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: auto;
+  height: 100vh;
+  width: 100%;
+  scroll-behavior: smooth;
+}
+
+.snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 30px 24px;
+}
+
+.snap-section-footer {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+  width: 100%;
+}
+
+/* Smooth Fade-Up Reveal Animation on Section Entry */
+@keyframes sectionFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.section-content-animate {
+  animation: sectionFadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+
+/* ==========================================================================
+   SCROLL-DRIVEN ROTARY GEAR ANCHOR
+   ========================================================================== */
+.rotary-scroll-gear {
+  position: fixed;
+  right: -120px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 90;
+  opacity: 0.18;
+  transition: transform 0.1s linear;
+}
+
+/* ==========================================================================
+   CONTEXTUAL MORPHING CURSOR
+   ========================================================================== */
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: default;
+  }
+}
+
+.custom-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background-color: var(--rotaract-pink);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
+}
+
+.custom-cursor-follower {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 38px;
+  height: 38px;
+  border: 2px solid rgba(216, 27, 96, 0.4);
+  background: rgba(216, 27, 96, 0.05);
+  backdrop-filter: blur(2px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease, height 0.25s ease, border-radius 0.25s ease, background-color 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.custom-cursor-follower.hovered {
+  width: 64px;
+  height: 64px;
+  background: var(--rotaract-pink);
+  border-color: var(--rotaract-pink);
+  box-shadow: 0 8px 24px rgba(216, 27, 96, 0.35);
+}
+
+/* ==========================================================================
+   LIQUID PAGE WAVE TRANSITION
+   ========================================================================== */
+.liquid-wave-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  background: linear-gradient(135deg, var(--rotaract-pink) 0%, var(--rotaract-cranberry-dark) 50%, var(--skyline-gold-dark) 100%);
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 0.75s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.liquid-wave-overlay.active {
+  clip-path: circle(150% at 50% 50%);
+}
+
+/* ==========================================================================
+   ODOMETER ROLLING NUMBERS
+   ========================================================================== */
+.odometer-wrapper {
+  display: inline-flex;
+  overflow: hidden;
+  height: 1.1em;
+  line-height: 1.1em;
+}
+
+.odometer-digit-column {
+  display: flex;
+  flex-direction: column;
+  transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   ACCORDION IMAGE SLICES
+   ========================================================================== */
+.accordion-slices-wrapper {
+  display: flex;
+  width: 100%;
+  height: 520px;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.accordion-slice {
+  flex: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: flex 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.accordion-slice:hover {
+  flex: 3.5;
+  box-shadow: var(--shadow-lg);
+}
+
+.accordion-slice-content {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.85) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+  color: #FFFFFF;
+}
+
+/* ==========================================================================
+   DELHI NCR MAP ZONE HOVER GLOW
+   ========================================================================== */
+.ncr-map-zone {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  fill-opacity: 0.15;
+}
+
+.ncr-map-zone:hover,
+.ncr-map-zone.active-zone {
+  fill-opacity: 0.65;
+  filter: drop-shadow(0 0 16px rgba(216, 27, 96, 0.6));
+  stroke: var(--rotaract-pink);
+  stroke-width: 3;
+}
+
+/* ==========================================================================
+   SMOG-TO-CLARITY ENVIRONMENTAL REVEAL
+   ========================================================================== */
+.smog-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.smog-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(200, 200, 210, 0.75) 0%, rgba(160, 165, 180, 0.85) 100%);
+  backdrop-filter: blur(14px);
+  z-index: 2;
+  transition: opacity 0.8s ease, filter 0.8s ease;
+  pointer-events: none;
+}
+
+.smog-container:hover .smog-overlay,
+.smog-container.clear-view .smog-overlay {
+  opacity: 0;
+  filter: blur(0px);
+}
+
+/* ==========================================================================
+   BIOMETRIC SCANNING RING & MEMBER PORTAL ANIMATIONS
+   ========================================================================== */
+@keyframes biometricScan {
+  0% {
+    transform: rotate(0deg) scale(1);
+    border-color: var(--rotaract-pink);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.15);
+    border-color: var(--skyline-gold);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+    border-color: var(--rotaract-pink);
+  }
+}
+
+.biometric-scan-ring {
+  width: 44px;
+  height: 44px;
+  border: 3px dashed var(--rotaract-pink);
+  border-radius: 50%;
+  animation: biometricScan 1.2s linear infinite;
+  display: inline-block;
+}
+
+@keyframes skeletonPulse {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #F3E5EB 25%, #FDF0F5 50%, #F3E5EB 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ==========================================================================
+   FROSTED SLIDEOUT SIDEBAR & MAP MARKERS
+   ========================================================================== */
+.frosted-slideout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 99999;
+}
+
+.frosted-slideout-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.frosted-slideout-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 580px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-left: 1px solid rgba(216, 27, 96, 0.18);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.2);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100000;
+}
+
+.frosted-slideout-panel.open {
+  transform: translateX(0);
+}
+
+/* Leaflet Neon Map Markers */
+.leaflet-neon-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.neon-marker-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.neon-marker-core {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+  position: relative;
+  z-index: 2;
+}
+
+.neon-marker-pulse {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: mapPulse 2s infinite ease-in-out;
+  z-index: 1;
+}
+
+.neon-marker-label {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+  font-size: 0.72rem;
+  pointer-events: auto;
+}
+
+.glass-hover-tooltip {
+  position: fixed;
+  transform: translate(-50%, -120%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(216, 27, 96, 0.2);
+  padding: 12px 18px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 320px;
+}
+
+/* ==========================================================================
+   GLOBAL ROUNDED RECTANGLE BUTTON & PILL OVERRIDES
+   ========================================================================== */
+button,
+.btn-rotaract,
+.btn-rotaract-outline,
+.btn-gold,
+.pill-pink,
+.pill-gold,
+.neon-marker-label {
+  border-radius: 8px !important;
+}
+
+/* ==========================================================================
+   STAGGERED CURTAIN REVEAL TRANSITION (INITIAL SITE ENTRANCE)
+   ========================================================================== */
+.curtain-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  z-index: 999999;
+  pointer-events: none;
+}
+
+.curtain-strip {
+  flex: 1;
+  height: 100vh;
+  background-color: var(--rotaract-pink);
+  transform: translateY(0);
+  transition: transform 1.4s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+.curtain-container.animate .curtain-strip {
+  transform: translateY(-100%);
+}
+
+.curtain-strip:nth-child(1) { transition-delay: 0.0s; }
+.curtain-strip:nth-child(2) { transition-delay: 0.12s; }
+.curtain-strip:nth-child(3) { transition-delay: 0.24s; }
+.curtain-strip:nth-child(4) { transition-delay: 0.36s; }
+.curtain-strip:nth-child(5) { transition-delay: 0.48s; }
+
+/* ==========================================================================
+   TRANSLUCENT GLASS LOADING SCREEN & ROTARY SPIN ANIMATION
+   ========================================================================== */
+@keyframes rotarySpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.glass-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(15, 18, 24, 0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  opacity: 1;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+.glass-loading-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  padding: 36px 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 900px) {
+  .desktop-nav-links {
+    display: none !important;
+  }
+}

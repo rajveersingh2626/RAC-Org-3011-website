@@ -1,0 +1,30 @@
+# Environment Variables & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Sensitive Contact & Member Excel/CSV Databases
+*.xlsx
+*.xls
+*.csv
+President Database*.xlsx
+Secretary Database*.xlsx
+
+# Dependencies
+node_modules/
+.pnpm-store
+
+# Build Outputs
+dist/
+build/
+out/
+.vite/
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
