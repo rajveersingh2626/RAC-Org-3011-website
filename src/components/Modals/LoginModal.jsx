@@ -302,13 +302,16 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
 
             {mode === 'google2fa' && (
               <form onSubmit={handleOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ background: '#FDF5F8', padding: '14px', borderRadius: '14px', border: '1px solid rgba(216,27,96,0.15)', textAlign: 'center' }}>
+                <div style={{ background: '#FDF5F8', padding: '16px 14px', borderRadius: '14px', border: '1px solid rgba(216,27,96,0.15)', textAlign: 'center' }}>
                   <Smartphone size={24} style={{ color: 'var(--rotaract-pink)', marginBottom: '4px' }} />
-                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                    Google Authenticator 2FA
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Google Authenticator 2FA Verification
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                    User: {authenticatedUser?.fullName || rotaryId} • Designation: <strong>{(authenticatedUser?.post || authenticatedUser?.role || 'OFFICER').toUpperCase()}</strong>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--rotaract-pink)', marginTop: '4px' }}>
+                    {authenticatedUser?.fullName || authenticatedUser?.name || rotaryId}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '2px' }}>
+                    {authenticatedUser?.post || (authenticatedUser?.role === 'officer' ? 'District Secretariat Officer' : 'Club Officer')}
                   </div>
                 </div>
 

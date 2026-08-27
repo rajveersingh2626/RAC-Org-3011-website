@@ -106,6 +106,16 @@ export default function PortalPage({
     loadCloudData();
   }, []);
 
+  const handleDeleteReport = async (reportId) => {
+    if (window.confirm("Are you sure you want to permanently delete this report submission? This will remove it from Supabase.")) {
+      const updated = await dbService.deleteSubmission(reportId);
+      setSubmissions(updated);
+      if (expandedReportId === reportId) {
+        setExpandedReportId(null);
+      }
+    }
+  };
+
   // Helper to create blank project entry
   const createEmptyProject = () => ({
     id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -687,6 +697,26 @@ export default function PortalPage({
                               }}
                             >
                               <Eye size={14} /> {isExpanded ? 'Collapse Report' : 'Inspect Report'}
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteReport(report.id)}
+                              style={{
+                                background: '#FFF1F2',
+                                border: '1px solid #FECDD3',
+                                color: '#E11D48',
+                                padding: '6px 14px',
+                                borderRadius: '100px',
+                                fontSize: '0.8rem',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                              title="Permanently delete this report submission from Supabase"
+                            >
+                              <Trash2 size={14} /> Delete Report
                             </button>
                           </div>
                         </div>

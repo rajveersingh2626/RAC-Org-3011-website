@@ -156,8 +156,8 @@ export const dbService = {
               rotaryId: data.rotary_id || null,
               email: data.email || cleanId,
               role: data.role || 'president',
-              fullName: data.full_name || 'Rotaract Officer',
-              clubName: data.club_name || 'Rotaract Club',
+              fullName: data.full_name || data.fullName || 'Rotaract Officer',
+              clubName: data.club_name || data.clubName || 'Rotaract Club',
               post: data.post || (data.role === 'officer' ? 'District Secretariat Officer' : 'Club President'),
               totpSecret: data.totp_secret || null
             }
@@ -174,33 +174,33 @@ export const dbService = {
       return { success: true, user: matchedUser };
     }
 
-    return { success: false, error: 'Account not found. Please check your Rotary ID or Email.' };
+    return { success: false, error: 'Account not found in District 3011 database. Please check your Rotary ID or Email.' };
   },
 
   fetchSubmissions: async () => {
     if (isSupabaseConfigured && supabase) {
       try {
-        // Try fetching from dedicated monthly_reports table first
+        // 1. Try fetching from dedicated monthly_reports table first
         const { data: reportData, error: reportErr } = await supabase
           .from('monthly_reports')
           .select('*')
           .order('submitted_at', { ascending: false });
 
-        if (!reportErr && reportData && reportData.length > 0) {
+        if (!reportErr && reportData) {
           return reportData.map(parseSubFromDB);
         }
 
-        // Fallback to project_submissions table
+        // 2. Fallback to project_submissions table
         const { data: subData, error: subErr } = await supabase
           .from('project_submissions')
           .select('*')
           .order('submitted_at', { ascending: false });
 
-        if (!subErr && subData && subData.length > 0) {
+        if (!subErr && subData) {
           return subData.map(parseSubFromDB);
         }
       } catch (err) {
-        console.warn('Supabase fetch notice, using fallback store:', err);
+        console.error('Supabase fetch error:', err);
       }
     }
     return mockStore.getSubmissions();
@@ -211,7 +211,7 @@ export const dbService = {
       try {
         const totalProjs = Object.values(newReport.sections || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
 
-        // 1. Try inserting to dedicated monthly_reports table
+        // 1. Insert to dedicated monthly_reports table
         const reportPayload = {
           month: newReport.month,
           club_name: newReport.clubName,
@@ -226,10 +226,13 @@ export const dbService = {
           .insert([reportPayload]);
 
         if (!mrErr) {
+          console.log('Successfully saved report to Supabase monthly_reports table!');
           return await dbService.fetchSubmissions();
+        } else {
+          console.warn('Supabase monthly_reports insert notice:', mrErr.message || mrErr);
         }
 
-        // 2. Fallback to project_submissions table
+        // 2. Fallback insert to project_submissions table
         const subPayload = {
           club_name: newReport.clubName,
           club_email: newReport.clubEmail,
@@ -248,10 +251,13 @@ export const dbService = {
           .insert([subPayload]);
 
         if (!subErr) {
+          console.log('Successfully saved report to Supabase project_submissions table!');
           return await dbService.fetchSubmissions();
+        } else {
+          console.warn('Supabase project_submissions insert notice:', subErr.message || subErr);
         }
       } catch (err) {
-        console.warn('Supabase insert notice, using fallback store:', err);
+        console.error('Supabase insert submission error:', err);
       }
     }
     return mockStore.addSubmission(newReport);
@@ -284,6 +290,30 @@ export const dbService = {
       }
     }
     return mockStore.flagSubmission(id, comment);
+  },
+
+  deleteSubmission: async (id) => {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error: mrErr } = await supabase
+          .from('monthly_reports')
+          .delete()
+          .eq('id', id);
+
+        const { error: subErr } = await supabase
+          .from('project_submissions')
+          .delete()
+          .eq('id', id);
+
+        if (!mrErr || !subErr) {
+          console.log(`Successfully deleted report ${id} from Supabase!`);
+          return await dbService.fetchSubmissions();
+        }
+      } catch (err) {
+        console.error('Supabase delete error:', err);
+      }
+    }
+    return mockStore.deleteSubmission(id);
   },
 
   fetchAnnouncements: async () => {
@@ -368,6 +398,13 @@ export const mockStore = {
   flagSubmission: (id, comment) => {
     const subs = mockStore.getSubmissions();
     const updated = subs.map(s => s.id === id ? { ...s, status: 'flagged', flagComment: comment } : s);
+    mockStore.saveSubmissions(updated);
+    return updated;
+  },
+
+  deleteSubmission: (id) => {
+    const subs = mockStore.getSubmissions();
+    const updated = subs.filter(s => s.id !== id);
     mockStore.saveSubmissions(updated);
     return updated;
   },
