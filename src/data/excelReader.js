@@ -3,9 +3,10 @@
  * Uses standard DecompressionStream API (supported in Node 18+ and modern browsers)
  */
 
-import excelFileUrl from '../../President Database 2026-27.xlsx?url';
+const excelFileUrl = '';
 
 export async function parseExcelClubs(fileUrl = excelFileUrl) {
+  if (!fileUrl) return null;
   try {
     const res = await fetch(fileUrl);
     if (!res.ok) return null;

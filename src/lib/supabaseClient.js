@@ -90,11 +90,11 @@ export const dbService = {
         const { data, error } = await supabase
           .from('user_profiles')
           .select('*')
-          .eq('rotary_id', cleanId)
-          .single();
+          .or(`rotary_id.eq.${cleanId},email.ilike.${cleanId}`)
+          .maybeSingle();
 
         if (error || !data) {
-          return { success: false, error: `Rotary ID "${cleanId}" not found in District 3011 database.` };
+          return { success: false, error: `Account "${cleanId}" not found in District 3011 database. Please check your Rotary ID or Email.` };
         }
 
         if (data.password && data.password !== cleanPass) {
@@ -105,17 +105,17 @@ export const dbService = {
           success: true,
           user: {
             id: data.id,
-            rotaryId: data.rotary_id,
-            email: 'techrid3011@gmail.com',
+            rotaryId: data.rotary_id || null,
+            email: data.email || cleanId,
             role: data.role || 'president',
             fullName: data.full_name || 'Rotaract Officer',
-            clubName: data.club_name || 'Rotaract Club of Delhi Heights',
-            post: data.post || data.designation || (data.role === 'officer' ? 'District Secretariat Council Member' : 'Club President'),
+            clubName: data.club_name || 'Rotaract Club',
+            post: data.post || (data.role === 'officer' ? 'District Secretariat Officer' : 'Club President'),
             totpSecret: data.totp_secret || null
           }
         };
       } catch (err) {
-        console.warn('Supabase auth notice, checking fallback:', err);
+        console.warn('Supabase auth notice:', err);
       }
     }
     const matchedUser = findUserCredential(cleanId, cleanPass);

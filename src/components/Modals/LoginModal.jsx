@@ -308,7 +308,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                     Google Authenticator 2FA
                   </div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                    User: {authenticatedUser?.fullName || rotaryId} • Role: <strong>{(authenticatedUser?.role || 'officer').toUpperCase()}</strong>
+                    User: {authenticatedUser?.fullName || rotaryId} • Designation: <strong>{(authenticatedUser?.post || authenticatedUser?.role || 'OFFICER').toUpperCase()}</strong>
                   </div>
                 </div>
 

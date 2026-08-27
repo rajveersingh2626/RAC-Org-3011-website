@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { dbService, mockStore, REPORT_SECTIONS } from '../../lib/supabaseClient';
+import { sendReportFlaggedEmail, sendAnnouncementBroadcastEmail, sendReportingReminderEmail } from '../../lib/emailService';
 import { INITIAL_CLUBS } from '../../data/districtData';
 import { 
   Bell, FileText, ShieldCheck, Flag, PlusCircle, 
@@ -81,6 +82,7 @@ export default function PortalPage({
 
   const [announcementTitle, setAnnouncementTitle] = useState('');
   const [announcementCategory, setAnnouncementCategory] = useState('District Event');
+  const [announcementTargetAudience, setAnnouncementTargetAudience] = useState('all'); // 'all' | 'presidents' | 'secretaries' | 'dac'
   const [announcementContent, setAnnouncementContent] = useState('');
   const [announcementSuccessMsg, setAnnouncementSuccessMsg] = useState('');
 
@@ -218,42 +220,107 @@ export default function PortalPage({
     const updated = await dbService.flagSubmission(flaggingSub.id, flagComment);
     setSubmissions(updated);
 
-    // Trigger Email Notification payload to Club Officers
+    // Trigger Automated Email Dispatch via Resend API
     const recipientEmail = flaggingSub.clubEmail || 'techrid3011@gmail.com';
-    const emailSubject = encodeURIComponent(`[District 3011 Alert] Action Required: Monthly Report Flagged - ${flaggingSub.month}`);
-    const emailBody = encodeURIComponent(
-      `Dear Club Officers of ${flaggingSub.clubName},\n\nYour Monthly Project Report for ${flaggingSub.month} has been flagged by District Secretariat 3011 with the following officer feedback comment:\n\n"${flagComment}"\n\nPlease log into the District Portal to edit and re-submit your report.\n\nRegards,\nRotaract District Organization 3011`
-    );
+    const emailRes = await sendReportFlaggedEmail({
+      clubName: flaggingSub.clubName,
+      month: flaggingSub.month,
+      recipientEmail: recipientEmail,
+      flagComment: flagComment
+    });
 
-    // Open mail client or log broadcast payload
-    window.open(`mailto:${recipientEmail},techrid3011@gmail.com?subject=${emailSubject}&body=${emailBody}`, '_blank');
+    if (!emailRes.success && emailRes.fallbackMailto) {
+      const emailSubject = encodeURIComponent(`[District 3011 Alert] Action Required: Monthly Report Flagged - ${flaggingSub.month}`);
+      const emailBody = encodeURIComponent(
+        `Dear Club Officers of ${flaggingSub.clubName},\n\nYour Monthly Project Report for ${flaggingSub.month} has been flagged by District Secretariat 3011 with the following officer feedback comment:\n\n"${flagComment}"\n\nPlease log into the District Portal to edit and re-submit your report.\n\nRegards,\nRotaract District Organization 3011`
+      );
+      window.open(`mailto:${recipientEmail},techrid3011@gmail.com?subject=${emailSubject}&body=${emailBody}`, '_blank');
+    }
 
     setFlaggingSub(null);
     setFlagComment('');
   };
 
-  // Post District Announcement
+  // Post District Announcement with Audience-Targeted Email Broadcast
   const handlePostAnnouncement = async (e) => {
     e.preventDefault();
     if (!announcementTitle || !announcementContent) return;
+
+    const authorLabel = userSession?.fullName 
+      ? `${userSession.fullName}${userSession.post ? ` (${userSession.post})` : ''}`
+      : 'District Secretariat 3011';
 
     const newAnno = {
       id: `a-${Date.now()}`,
       title: announcementTitle,
       category: announcementCategory,
-      author: 'District Secretariat',
+      targetAudience: announcementTargetAudience,
+      author: authorLabel,
       date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       content: announcementContent,
-      sentViaEmail: false
+      sentViaEmail: true
     };
 
     const updated = await dbService.insertAnnouncement(newAnno);
     setAnnouncements(updated);
 
-    setAnnouncementSuccessMsg('Announcement published to Portal Announcements Feed & saved to Cloud Database!');
+    // Fetch target emails dynamically based on selected audience group
+    const TEST_GROUP_EMAILS = [
+      'itsdrrarchit@gmail.com',
+      'sarthakmanchanda2@gmail.com',
+      'rtrshefali2004@gmail.com',
+      'himanshugulati.rotary@gmail.com',
+      'harshitam2636@gmail.com',
+      'jasraj2626@gmail.com',
+      'rtrdivyanshu3011@gmail.com',
+      'dhruvika038@gmail.com'
+    ];
+
+    let recipientEmails = ['techrid3011@gmail.com'];
+
+    if (announcementTargetAudience === 'test_group') {
+      recipientEmails = TEST_GROUP_EMAILS;
+    } else {
+      try {
+        let query = supabase.from('user_profiles').select('email, role, post');
+        if (announcementTargetAudience === 'presidents') {
+          query = query.eq('post', 'Club President');
+        } else if (announcementTargetAudience === 'secretaries') {
+          query = query.eq('post', 'Club Secretary');
+        } else if (announcementTargetAudience === 'dac') {
+          query = query.or('role.eq.officer,role.eq.dac_member');
+        }
+        const { data: profileList } = await query;
+        if (profileList && profileList.length > 0) {
+          recipientEmails = Array.from(new Set(profileList.map(p => p.email).filter(Boolean)));
+        }
+      } catch (err) {
+        console.warn('Audience email query notice:', err);
+      }
+    }
+
+    const audienceLabel = announcementTargetAudience === 'test_group' ? 'Secretariat & Tech Test Group (8 Members)' :
+                          announcementTargetAudience === 'presidents' ? 'Club Presidents' :
+                          announcementTargetAudience === 'secretaries' ? 'Club Secretaries' :
+                          announcementTargetAudience === 'dac' ? 'DAC District Officers' : 'All Members & Officers';
+
+    const emailResult = await sendAnnouncementBroadcastEmail({
+      title: announcementTitle,
+      category: announcementCategory,
+      author: authorLabel,
+      content: announcementContent,
+      recipients: recipientEmails,
+      audienceLabel: audienceLabel
+    });
+
+    if (emailResult && emailResult.success) {
+      setAnnouncementSuccessMsg(`Announcement published to Portal & emailed to ${audienceLabel} (${recipientEmails.length} recipients)! ${emailResult.notice || ''}`);
+    } else {
+      setAnnouncementSuccessMsg(`Announcement published to Portal! (Email Notice: ${emailResult?.error || 'Resend domain restriction - see Resend Dashboard'})`);
+    }
     setAnnouncementTitle('');
     setAnnouncementContent('');
-    setTimeout(() => setAnnouncementSuccessMsg(''), 4500);
+    setTimeout(() => setAnnouncementSuccessMsg(''), 7000);
   };
 
   // Copy Reminder Message to Clipboard for pending clubs
@@ -341,17 +408,18 @@ export default function PortalPage({
               </span>
             </div>
             <h2 style={{ fontSize: '1.7rem', fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
-              Welcome, Rtr. {userSession?.fullName ? userSession.fullName.replace(/^Rtr\.\s*/i, '') : 'Officer'}
+              Welcome, {userSession?.fullName || 'Officer'}
             </h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--rotaract-pink)' }}>
                 {isDistrictOfficer 
-                  ? (userSession?.post || userSession?.designation || 'District Secretariat Member') 
-                  : (userSession?.clubName || 'Rotaract Club of Delhi Heights')}
+                  ? (userSession?.post || userSession?.designation || 'District Rotaract Representative') 
+                  : `${userSession?.clubName || 'Rotaract Club'} • ${userSession?.post || 'Club Officer'}`
+                }
               </span>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>•</span>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                Rotary ID: <strong>{userSession?.rotaryId || '10482950'}</strong>
+                {userSession?.rotaryId ? `Rotary ID: ${userSession.rotaryId}` : `Email: ${userSession?.email || 'N/A'}`}
               </span>
             </div>
           </div>
@@ -1015,7 +1083,7 @@ export default function PortalPage({
                 )}
 
                 <form onSubmit={handlePostAnnouncement} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, marginBottom: '6px' }}>Announcement Title *</label>
                       <input
@@ -1038,6 +1106,20 @@ export default function PortalPage({
                         <option value="Reporting Alert">Reporting Alert</option>
                         <option value="Service Project">Service Project</option>
                         <option value="Secretariat Notice">Secretariat Notice</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, marginBottom: '6px' }}>Email Target Audience</label>
+                      <select
+                        value={announcementTargetAudience}
+                        onChange={(e) => setAnnouncementTargetAudience(e.target.value)}
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(216,27,96,0.25)', fontSize: '0.9rem', outline: 'none', backgroundColor: '#FFFFFF', fontWeight: 800, color: 'var(--rotaract-pink)' }}
+                      >
+                        <option value="all">All Members & Officers</option>
+                        <option value="test_group">Test Group</option>
+                        <option value="presidents">Club Presidents Only</option>
+                        <option value="secretaries">Club Secretaries Only</option>
+                        <option value="dac">DAC District Officers Only</option>
                       </select>
                     </div>
                   </div>
@@ -1070,7 +1152,7 @@ export default function PortalPage({
                     Official Portal Announcements Feed
                   </h3>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
-                    Official alerts issued by the District Secretariat to all members.
+                    Official alerts issued by District Secretariat Officers.
                   </p>
                 </div>
                 <span className="pill-gold" style={{ fontSize: '0.78rem' }}>
@@ -1078,36 +1160,82 @@ export default function PortalPage({
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {announcements.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className="rotaract-card" 
-                    style={{ 
-                      padding: '24px 28px',
-                      borderLeft: '5px solid var(--rotaract-pink)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span className="pill-pink" style={{ fontSize: '0.76rem' }}>
-                        {item.category}
-                      </span>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        {item.date} • By {item.author}
-                      </span>
+              {(() => {
+                const TEST_GROUP_EMAILS = [
+                  'itsdrrarchit@gmail.com',
+                  'sarthakmanchanda2@gmail.com',
+                  'rtrshefali2004@gmail.com',
+                  'himanshugulati.rotary@gmail.com',
+                  'harshitam2636@gmail.com',
+                  'jasraj2626@gmail.com',
+                  'rtrdivyanshu3011@gmail.com',
+                  'dhruvika038@gmail.com'
+                ];
+
+                const visibleAnnouncements = announcements.filter(anno => {
+                  if (isDistrictOfficer) return true; // District Officers see all announcements
+                  
+                  const target = anno.targetAudience || 'all';
+                  if (target === 'all') return true;
+
+                  const userPost = (userSession?.post || '').toLowerCase();
+                  const userEmail = (userSession?.email || '').toLowerCase();
+                  const uRole = (userSession?.role || '').toLowerCase();
+
+                  if (target === 'presidents' && userPost.includes('president')) return true;
+                  if (target === 'secretaries' && userPost.includes('secretary')) return true;
+                  if (target === 'dac' && (uRole === 'officer' || uRole === 'dac_member')) return true;
+                  if (target === 'test_group' && TEST_GROUP_EMAILS.some(e => e.toLowerCase() === userEmail)) return true;
+
+                  return false;
+                });
+
+                if (visibleAnnouncements.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '40px', background: '#FFFFFF', borderRadius: '16px', border: '1px solid rgba(216,27,96,0.15)', color: 'var(--text-muted)' }}>
+                      No announcements posted for your target group yet.
                     </div>
-                    <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                      {item.title}
-                    </h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6 }}>
-                      {item.content}
-                    </p>
+                  );
+                }
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {visibleAnnouncements.map((item) => (
+                      <div 
+                        key={item.id} 
+                        className="rotaract-card" 
+                        style={{ 
+                          padding: '24px 28px',
+                          borderLeft: '5px solid var(--rotaract-pink)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="pill-pink" style={{ fontSize: '0.76rem' }}>
+                              {item.category}
+                            </span>
+                            <span style={{ fontSize: '0.74rem', background: '#F1F5F9', color: '#475569', padding: '3px 10px', borderRadius: '100px', fontWeight: 700 }}>
+                              Target: {item.targetAudience === 'test_group' ? 'Test Group' : (item.targetAudience || 'All')}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                            {item.date} • Issued by <strong style={{ color: 'var(--rotaract-pink)' }}>{item.author || 'District Secretariat'}</strong>
+                          </span>
+                        </div>
+                        <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>
+                          {item.title}
+                        </h4>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                          {item.content}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           </div>
         )}
