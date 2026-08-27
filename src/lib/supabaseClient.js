@@ -94,34 +94,36 @@ export const dbService = {
           query = query.eq('rotary_id', cleanId);
         }
 
-        const { data: userList, error } = await query;
-        const data = userList && userList.length > 0 ? userList[0] : null;
-
-        if (error || !data) {
-          return { success: false, error: `Account "${cleanId}" not found in District 3011 database. Please check your Rotary ID or Email.` };
+        let data = null;
+        if (!error && userList && userList.length > 0) {
+          data = userList[0];
         }
 
-        if (data.password && data.password.trim() !== cleanPass) {
-          return { success: false, error: 'Incorrect portal password.' };
-        }
-
-        return {
-          success: true,
-          user: {
-            id: data.id,
-            rotaryId: data.rotary_id || null,
-            email: data.email || cleanId,
-            role: data.role || 'president',
-            fullName: data.full_name || 'Rotaract Officer',
-            clubName: data.club_name || 'Rotaract Club',
-            post: data.post || (data.role === 'officer' ? 'District Secretariat Officer' : 'Club President'),
-            totpSecret: data.totp_secret || null
+        if (data) {
+          if (data.password && data.password.trim() !== cleanPass) {
+            return { success: false, error: 'Incorrect portal password.' };
           }
-        };
+
+          return {
+            success: true,
+            user: {
+              id: data.id,
+              rotaryId: data.rotary_id || null,
+              email: data.email || cleanId,
+              role: data.role || 'president',
+              fullName: data.full_name || 'Rotaract Officer',
+              clubName: data.club_name || 'Rotaract Club',
+              post: data.post || (data.role === 'officer' ? 'District Secretariat Officer' : 'Club President'),
+              totpSecret: data.totp_secret || null
+            }
+          };
+        }
       } catch (err) {
         console.warn('Supabase auth notice:', err);
       }
     }
+
+    // Fallback to local userRegistry credential matcher if Supabase is empty or unseeded
     const matchedUser = findUserCredential(cleanId, cleanPass);
     if (matchedUser) {
       return {
