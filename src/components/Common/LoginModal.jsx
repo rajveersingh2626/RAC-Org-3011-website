@@ -84,12 +84,24 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
       return;
     }
 
+    const rawRole = (authenticatedUser.role || '').toLowerCase().trim();
+    const isOfficer = 
+      rawRole === 'officer' || 
+      rawRole === 'admin' || 
+      String(authenticatedUser.rotaryId || '').toLowerCase().includes('admin') || 
+      String(authenticatedUser.rotaryId || '').toLowerCase().includes('officer') ||
+      String(authenticatedUser.clubName || '').toLowerCase().includes('secretariat') ||
+      String(authenticatedUser.post || '').toLowerCase().includes('district');
+
+    const userRole = isOfficer ? 'officer' : (authenticatedUser.role || 'president');
+
     onLoginSuccess({
       rotaryId: authenticatedUser.rotaryId,
       email: authenticatedUser.email,
-      role: authenticatedUser.role || 'president',
-      fullName: authenticatedUser.fullName || 'Rotaract Officer',
-      clubName: authenticatedUser.clubName || 'District 3011',
+      role: userRole,
+      fullName: authenticatedUser.fullName || (isOfficer ? 'District Secretariat Officer' : 'Rotaract Officer'),
+      clubName: authenticatedUser.clubName || (isOfficer ? 'District Secretariat 3011' : 'Rotaract Club of Delhi Heights'),
+      post: authenticatedUser.post || authenticatedUser.designation || (isOfficer ? 'District Secretariat Member' : 'Club President / Secretary'),
       mfaVerified: true,
       sessionToken: `sec_jwt_${Math.random().toString(36).substring(2)}`
     });
