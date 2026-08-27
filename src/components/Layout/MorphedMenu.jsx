@@ -64,8 +64,11 @@ export default function MorphedMenu({
       icon: <Globe size={18} />,
       hasSubNav: true,
       action: () => {
-        setActivePage('district');
-        if (setActiveDistrictTab) setActiveDistrictTab('map-clubs');
+        if (setActiveDistrictTab) {
+          setActiveDistrictTab('map-clubs');
+        } else {
+          setActivePage('district', 'map-clubs');
+        }
         setIsOpen(false);
       },
       active: activePage === 'district',
@@ -75,8 +78,11 @@ export default function MorphedMenu({
           title: 'Interactive Map & Clubs',
           icon: <MapPin size={15} />,
           action: () => {
-            setActivePage('district');
-            if (setActiveDistrictTab) setActiveDistrictTab('map-clubs');
+            if (setActiveDistrictTab) {
+              setActiveDistrictTab('map-clubs');
+            } else {
+              setActivePage('district', 'map-clubs');
+            }
             setIsOpen(false);
           },
           active: activePage === 'district' && activeDistrictTab === 'map-clubs'
@@ -86,8 +92,11 @@ export default function MorphedMenu({
           title: 'Past DRR & Heritage',
           icon: <Award size={15} />,
           action: () => {
-            setActivePage('district');
-            if (setActiveDistrictTab) setActiveDistrictTab('heritage');
+            if (setActiveDistrictTab) {
+              setActiveDistrictTab('heritage');
+            } else {
+              setActivePage('district', 'heritage');
+            }
             setIsOpen(false);
           },
           active: activePage === 'district' && activeDistrictTab === 'heritage'
@@ -97,8 +106,11 @@ export default function MorphedMenu({
           title: 'Initiatives Showcase',
           icon: <Sparkles size={15} />,
           action: () => {
-            setActivePage('district');
-            if (setActiveDistrictTab) setActiveDistrictTab('initiatives');
+            if (setActiveDistrictTab) {
+              setActiveDistrictTab('initiatives');
+            } else {
+              setActivePage('district', 'initiatives');
+            }
             setIsOpen(false);
           },
           active: activePage === 'district' && activeDistrictTab === 'initiatives'
@@ -108,8 +120,11 @@ export default function MorphedMenu({
           title: 'District Leadership',
           icon: <Users size={15} />,
           action: () => {
-            setActivePage('district');
-            if (setActiveDistrictTab) setActiveDistrictTab('leadership');
+            if (setActiveDistrictTab) {
+              setActiveDistrictTab('leadership');
+            } else {
+              setActivePage('district', 'leadership');
+            }
             setIsOpen(false);
           },
           active: activePage === 'district' && activeDistrictTab === 'leadership'

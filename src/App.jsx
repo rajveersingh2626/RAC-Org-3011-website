@@ -213,8 +213,7 @@ export default function App() {
   // Add uploaded club
   const handleAddClub = (newClub) => {
     setClubs((prevClubs) => [newClub, ...prevClubs]);
-    handlePageChange('district');
-    setActiveDistrictTab('map-clubs');
+    handlePageChange('district', 'map-clubs');
   };
 
   // Add posted initiative
@@ -230,8 +229,7 @@ export default function App() {
         return club;
       })
     );
-    handlePageChange('district');
-    setActiveDistrictTab('map-clubs');
+    handlePageChange('district', 'map-clubs');
   };
 
   return (
