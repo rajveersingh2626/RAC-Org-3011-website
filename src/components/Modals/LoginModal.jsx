@@ -76,12 +76,15 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
       return;
     }
 
+    const isOfficer = (authenticatedUser.role === 'officer' || authenticatedUser.role === 'admin' || (authenticatedUser.rotaryId || '').toLowerCase().includes('admin') || (authenticatedUser.rotaryId || '').toLowerCase().includes('officer'));
+
     onLoginSuccess({
       rotaryId: authenticatedUser.rotaryId,
       email: authenticatedUser.email,
-      role: authenticatedUser.role || 'president',
-      fullName: authenticatedUser.fullName || 'Rotaract Officer',
-      clubName: authenticatedUser.clubName || 'District 3011',
+      role: authenticatedUser.role || (isOfficer ? 'officer' : 'president'),
+      fullName: authenticatedUser.fullName || (isOfficer ? 'District Secretariat Officer' : 'Rotaract Officer'),
+      clubName: authenticatedUser.clubName || (isOfficer ? 'District Secretariat 3011' : 'Rotaract Club of Delhi Heights'),
+      post: authenticatedUser.post || authenticatedUser.designation || (isOfficer ? 'District Secretariat Member' : 'Club President / Secretary'),
       mfaVerified: true,
       sessionToken: `sec_jwt_${Math.random().toString(36).substring(2)}`
     });

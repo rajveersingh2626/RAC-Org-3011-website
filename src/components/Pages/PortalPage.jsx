@@ -329,27 +329,23 @@ export default function PortalPage({
                 <ShieldCheck size={12} /> Google 2FA Verified ({isDistrictOfficer ? 'DISTRICT SECRETARIAT' : 'CLUB OFFICER'})
               </span>
             </div>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)' }}>
-              Logged in as: Rotary ID {userSession?.rotaryId || '10482950'}
+            <h2 style={{ fontSize: '1.7rem', fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>
+              Welcome, Rtr. {userSession?.fullName ? userSession.fullName.replace(/^Rtr\.\s*/i, '') : 'Officer'}
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '2px' }}>
-              Monthly Project Reporting Studio • 6 Avenues of Service • Compliance Matrix
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--rotaract-pink)' }}>
+                {isDistrictOfficer 
+                  ? (userSession?.post || userSession?.designation || 'District Secretariat Member') 
+                  : (userSession?.clubName || 'Rotaract Club of Delhi Heights')}
+              </span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>•</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Rotary ID: <strong>{userSession?.rotaryId || '10482950'}</strong>
+              </span>
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <div style={{ background: '#FDF5F8', padding: '10px 18px', borderRadius: '16px', border: '1px solid rgba(216, 27, 96, 0.2)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={18} color="var(--rotaract-pink)" />
-              <div>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  Authenticated Role
-                </div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 900, color: 'var(--rotaract-pink)' }}>
-                  {isDistrictOfficer ? 'DISTRICT SECRETARIAT OFFICER' : 'CLUB PRESIDENT / SECRETARY'}
-                </div>
-              </div>
-            </div>
-
             {onLogout && (
               <button
                 onClick={onLogout}
@@ -481,9 +477,6 @@ export default function PortalPage({
                 <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                   {isDistrictOfficer ? `All Monthly Reports (${submissions.length})` : `My Club Monthly Reports (${clubSubmissions.length})`}
                 </h4>
-                <span className="pill-pink" style={{ fontSize: '0.78rem' }}>
-                  6-Avenue Standardized Format Active
-                </span>
               </div>
 
               {clubSubmissions.length === 0 ? (

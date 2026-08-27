@@ -21,88 +21,7 @@ export const REPORT_SECTIONS = [
   { id: 'districtProjects', label: 'District Projects', icon: 'Award' }
 ];
 
-export const INITIAL_STRUCTURED_REPORT = {
-  id: 'report-demo-aug-2026',
-  month: 'August 2026',
-  clubName: 'Rotaract Club of Delhi Heights',
-  clubEmail: 'techrid3011@gmail.com',
-  submittedBy: 'Rtr. Officer (techrid3011@gmail.com)',
-  submittedAt: '2026-08-24',
-  status: 'reported',
-  flagComment: null,
-  sections: {
-    clubMeetings: [
-      {
-        id: 'pm-1',
-        eventName: '1st General Body & Planning Assembly',
-        date: '2026-08-04',
-        venue: 'Rotary Service Center, Delhi',
-        areaOfFocus: 'Youth Service & Leadership',
-        clubStrength: '34 Members',
-        initiatedBy: 'Rotaract',
-        collaboratingOrgs: 'Rotary Sponsor Club Delhi Heights',
-        districtOfficials: 'ZRR Zone 2 & District Council Members',
-        beneficiaryCount: 'N/A (Internal Assembly)',
-        description: 'Held the first General Body Assembly of RY 2026-27 to finalize the annual project roadmap, budget allocations, and avenue chair appointments.',
-        showcaseLink: 'https://showcase.rotary.org/project/gb-assembly',
-        driveLink: 'https://drive.google.com/drive/folders/demo-assembly-photos'
-      }
-    ],
-    clubServices: [
-      {
-        id: 'pm-2',
-        eventName: 'Fellowship Night & Orientation',
-        date: '2026-08-10',
-        venue: 'Cultural Center Auditorium',
-        areaOfFocus: 'Community Economic Development',
-        clubStrength: '40 Members',
-        initiatedBy: 'Rotaract',
-        collaboratingOrgs: 'RAC Delhi Central',
-        districtOfficials: 'District Fellowship Chair',
-        beneficiaryCount: '50 Rotaractors',
-        description: 'Conducted new member orientation session explaining Rotary International history, avenue roles, and district participation guidelines.',
-        showcaseLink: '',
-        driveLink: 'https://drive.google.com/drive/folders/demo-orientation-media'
-      }
-    ],
-    communityServices: [
-      {
-        id: 'pm-3',
-        eventName: 'Mahadan 9.0 Mega Blood Drive',
-        date: '2026-08-15',
-        venue: 'Connaught Place Central Park',
-        areaOfFocus: 'Disease Prevention & Treatment',
-        clubStrength: '28 Members',
-        initiatedBy: 'Rotaract',
-        collaboratingOrgs: 'Indian Red Cross Society',
-        districtOfficials: 'District Governor & DRR',
-        beneficiaryCount: '320 Donors',
-        description: 'Organized flagship blood donation camp collecting 320 blood units for government hospital blood banks.',
-        showcaseLink: 'https://showcase.rotary.org/project/mahadan-9',
-        driveLink: 'https://drive.google.com/drive/folders/demo-mahadan-photos'
-      }
-    ],
-    internationalServices: [
-      {
-        id: 'pm-4',
-        eventName: 'Indo-Sri Lanka Twin Club Cultural Exchange',
-        date: '2026-08-20',
-        venue: 'Zoom Online Portal',
-        areaOfFocus: 'Peacebuilding & Conflict Prevention',
-        clubStrength: '22 Members',
-        initiatedBy: 'Rotaract',
-        collaboratingOrgs: 'RAC Colombo West (RID 3220)',
-        districtOfficials: 'District International Service Director',
-        beneficiaryCount: '65 Youth Participants',
-        description: 'Conducted virtual twin club interaction exchanging culture, service best practices, and joint peace initiatives.',
-        showcaseLink: '',
-        driveLink: ''
-      }
-    ],
-    vocationalServices: [],
-    districtProjects: []
-  }
-};
+export const INITIAL_STRUCTURED_REPORT = null;
 
 const parseSubFromDB = (item) => {
   let sections = {
@@ -189,6 +108,8 @@ export const dbService = {
             email: 'techrid3011@gmail.com',
             role: data.role || 'president',
             fullName: data.full_name || 'Rotaract Officer',
+            clubName: data.club_name || 'Rotaract Club of Delhi Heights',
+            post: data.post || data.designation || (data.role === 'officer' ? 'District Secretariat Council Member' : 'Club President'),
             totpSecret: data.totp_secret || null
           }
         };
@@ -206,7 +127,9 @@ export const dbService = {
           rotaryId: cleanId,
           email: 'techrid3011@gmail.com',
           role: isOfficer ? 'officer' : 'president',
-          fullName: `Officer ${cleanId}`
+          fullName: isOfficer ? `Officer ${cleanId}` : 'Yash Satija',
+          clubName: isOfficer ? 'District Secretariat 3011' : 'Rotaract Club of Delhi Heights',
+          post: isOfficer ? 'District Secretariat Member' : 'Club President'
         }
       };
     }
@@ -379,11 +302,11 @@ export const mockStore = {
       const data = localStorage.getItem(MOCK_STORAGE_KEY);
       if (data) {
         const raw = JSON.parse(data);
-        return raw.map(parseSubFromDB);
+        return raw.filter(Boolean).map(parseSubFromDB);
       }
-      return [INITIAL_STRUCTURED_REPORT];
+      return [];
     } catch {
-      return [INITIAL_STRUCTURED_REPORT];
+      return [];
     }
   },
   
