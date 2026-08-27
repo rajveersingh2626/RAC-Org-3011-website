@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { dbService, mockStore, REPORT_SECTIONS } from '../../lib/supabaseClient';
+import { INITIAL_CLUBS } from '../../data/districtData';
 import { 
   Bell, FileText, ShieldCheck, Flag, PlusCircle, 
   Send, AlertTriangle, CheckCircle2, Megaphone, Lock, Mail, RefreshCw, X, 
   MessageSquare, ExternalLink, LogOut, Calendar, ChevronDown, ChevronUp, Trash2, 
-  Users, HeartHandshake, Globe, Plane, Briefcase, Award, Sparkles, Building, Link2, Eye
+  Users, HeartHandshake, Globe, Plane, Briefcase, Award, Sparkles, Building, Link2, Eye,
+  Check, Search, Copy, Clock, BarChart3, AlertCircle
 } from 'lucide-react';
 
 const MONTH_OPTIONS = [
@@ -42,7 +44,8 @@ export default function PortalPage({
   userRole = 'president',
   setUserRole,
   userSession,
-  onLogout
+  onLogout,
+  clubs = INITIAL_CLUBS
 }) {
   const [activePortalTab, setActivePortalTab] = useState('management');
   
@@ -57,6 +60,12 @@ export default function PortalPage({
   const [selectedMonth, setSelectedMonth] = useState('August 2026');
   const [activeFormSection, setActiveFormSection] = useState('clubMeetings');
   
+  // Compliance Matrix State
+  const [complianceMonth, setComplianceMonth] = useState('August 2026');
+  const [complianceSearch, setComplianceSearch] = useState('');
+  const [complianceFilter, setComplianceFilter] = useState('all'); // 'all' | 'submitted' | 'pending' | 'flagged'
+  const [copiedReminderClubId, setCopiedReminderClubId] = useState(null);
+
   // Sections project array state
   const [sectionsData, setSectionsData] = useState({
     clubMeetings: [],
@@ -77,6 +86,8 @@ export default function PortalPage({
 
   const userEmail = userSession?.email || 'techrid3011@gmail.com';
   const isDistrictOfficer = userRole === 'officer' || userRole === 'admin';
+
+  const allDistrictClubs = clubs && clubs.length > 0 ? clubs : INITIAL_CLUBS;
 
   useEffect(() => {
     async function loadCloudData() {
@@ -104,7 +115,8 @@ export default function PortalPage({
     districtOfficials: '',
     beneficiaryCount: '',
     description: '',
-    showcaseLink: ''
+    showcaseLink: '',
+    driveLink: ''
   });
 
   // Open modal to submit new report
@@ -233,9 +245,60 @@ export default function PortalPage({
     setTimeout(() => setAnnouncementSuccessMsg(''), 4500);
   };
 
+  // Copy Reminder Message to Clipboard for pending clubs
+  const handleCopyReminder = (clubName, presidentName) => {
+    const reminderText = `Dear Rtr. ${presidentName || 'President'} (President, ${clubName}),\nThis is an official reminder from District Secretariat 3011 to submit your Monthly Project Report for ${complianceMonth} on the District Portal.\n\nPlease submit your report at your earliest convenience.\n- Rotaract District Organization 3011`;
+    navigator.clipboard.writeText(reminderText);
+    setCopiedReminderClubId(clubName);
+    setTimeout(() => setCopiedReminderClubId(null), 3000);
+  };
+
   const clubSubmissions = isDistrictOfficer 
     ? submissions 
     : submissions.filter(s => s.clubEmail === userEmail || s.clubName.toLowerCase().includes(userEmail.split('.')[1] || 'heights'));
+
+  // Calculate compliance data for the selected month
+  const clubComplianceList = allDistrictClubs.map(c => {
+    const matchingReport = submissions.find(s => {
+      if (s.month !== complianceMonth) return false;
+      const subName = (s.clubName || '').toLowerCase();
+      const clubFull = (c.name || '').toLowerCase();
+      const clubShort = (c.shortName || '').toLowerCase();
+      return subName.includes(clubShort) || clubFull.includes(subName) || s.clubEmail === c.email;
+    });
+
+    let status = 'pending'; // 'submitted' | 'flagged' | 'pending'
+    if (matchingReport) {
+      status = matchingReport.status === 'flagged' ? 'flagged' : 'submitted';
+    }
+
+    return {
+      club: c,
+      report: matchingReport || null,
+      status: status
+    };
+  });
+
+  const totalClubsCount = clubComplianceList.length;
+  const submittedClubsCount = clubComplianceList.filter(item => item.status === 'submitted' || item.status === 'flagged').length;
+  const pendingClubsCount = totalClubsCount - submittedClubsCount;
+  const flaggedClubsCount = clubComplianceList.filter(item => item.status === 'flagged').length;
+  const complianceRate = totalClubsCount > 0 ? Math.round((submittedClubsCount / totalClubsCount) * 100) : 0;
+
+  // Filter compliance list by search & status
+  const filteredComplianceList = clubComplianceList.filter(item => {
+    const matchesSearch = !complianceSearch || 
+      item.club.name.toLowerCase().includes(complianceSearch.toLowerCase()) || 
+      item.club.zone.toLowerCase().includes(complianceSearch.toLowerCase()) ||
+      (item.club.president && item.club.president.toLowerCase().includes(complianceSearch.toLowerCase()));
+
+    const matchesStatus = complianceFilter === 'all' || 
+      (complianceFilter === 'submitted' && (item.status === 'submitted' || item.status === 'flagged')) ||
+      (complianceFilter === 'pending' && item.status === 'pending') ||
+      (complianceFilter === 'flagged' && item.status === 'flagged');
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div style={{ backgroundColor: '#FDF8FA', minHeight: '100vh', padding: '36px 24px 80px 24px', position: 'relative' }}>
@@ -270,7 +333,7 @@ export default function PortalPage({
               Logged in as: Rotary ID {userSession?.rotaryId || '10482950'}
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '2px' }}>
-              Monthly Project Reporting Studio • 6 Avenues of Service • Encrypted Workspace
+              Monthly Project Reporting Studio • 6 Avenues of Service • Compliance Matrix
             </p>
           </div>
 
@@ -342,6 +405,28 @@ export default function PortalPage({
             <FileText size={18} />
             {isDistrictOfficer ? 'Master District Submissions' : 'My Monthly Reports'}
           </button>
+
+          {isDistrictOfficer && (
+            <button
+              onClick={() => setActivePortalTab('compliance')}
+              style={{
+                background: activePortalTab === 'compliance' ? 'var(--rotaract-pink)' : 'transparent',
+                color: activePortalTab === 'compliance' ? '#FFFFFF' : 'var(--text-secondary)',
+                border: 'none',
+                padding: '10px 22px',
+                borderRadius: '100px',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <BarChart3 size={18} />
+              Compliance Matrix ({submittedClubsCount}/{totalClubsCount} Submitted)
+            </button>
+          )}
 
           <button
             onClick={() => setActivePortalTab('announcements')}
@@ -572,11 +657,19 @@ export default function PortalPage({
                                             {proj.description}
                                           </p>
 
-                                          {proj.showcaseLink && (
-                                            <a href={proj.showcaseLink} target="_blank" rel="noreferrer" style={{ fontSize: '0.78rem', color: '#123499', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
-                                              <Link2 size={12} /> Rotary Showcase Link <ExternalLink size={10} />
-                                            </a>
-                                          )}
+                                          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed #E2E8F0' }}>
+                                            {proj.showcaseLink && (
+                                              <a href={proj.showcaseLink} target="_blank" rel="noreferrer" style={{ fontSize: '0.78rem', color: '#123499', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
+                                                <Link2 size={12} /> Rotary Showcase Link <ExternalLink size={10} />
+                                              </a>
+                                            )}
+
+                                            {proj.driveLink && (
+                                              <a href={proj.driveLink} target="_blank" rel="noreferrer" style={{ fontSize: '0.78rem', color: 'var(--rotaract-pink)', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
+                                                <ExternalLink size={12} /> Drive Photos & Videos Folder <ExternalLink size={10} />
+                                              </a>
+                                            )}
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
@@ -595,7 +688,311 @@ export default function PortalPage({
           </div>
         )}
 
-        {/* TAB 2: PORTAL ANNOUNCEMENTS */}
+        {/* TAB 2: DISTRICT COMPLIANCE MATRIX (70+ CLUBS TRACKER) */}
+        {activePortalTab === 'compliance' && isDistrictOfficer && (
+          <div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.55rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+                  District 3011 Monthly Compliance Matrix
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
+                  Track which of the 70+ Rotaract Clubs have submitted their monthly reports for the selected Rotary month.
+                </p>
+              </div>
+
+              {/* Month Selector for Compliance */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', padding: '8px 16px', borderRadius: '14px', border: '2px solid var(--rotaract-pink)' }}>
+                <span style={{ fontSize: '0.84rem', fontWeight: 900, color: 'var(--rotaract-pink)' }}>Select Month:</span>
+                <select
+                  value={complianceMonth}
+                  onChange={(e) => setComplianceMonth(e.target.value)}
+                  style={{
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: 'var(--rotaract-pink)',
+                    fontWeight: 900,
+                    fontSize: '0.92rem',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {MONTH_OPTIONS.map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* KPI STAT CARDS */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+              <div style={{ background: '#FFFFFF', border: '1px solid rgba(216, 27, 96, 0.18)', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  Total District 3011 Clubs
+                </div>
+                <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '4px' }}>
+                  {totalClubsCount} <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Active Clubs</span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--rotaract-pink)', marginTop: '4px', fontWeight: 700 }}>
+                  Across 3 Regional Zones
+                </div>
+              </div>
+
+              <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '16px', padding: '20px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>
+                  Reports Submitted ({complianceMonth})
+                </div>
+                <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#15803D', marginTop: '4px' }}>
+                  {submittedClubsCount} <span style={{ fontSize: '0.9rem', color: '#166534', fontWeight: 600 }}>({complianceRate}%)</span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#166534', marginTop: '4px', fontWeight: 700 }}>
+                  Submitted & Verified
+                </div>
+              </div>
+
+              <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '16px', padding: '20px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#9F1239', textTransform: 'uppercase' }}>
+                  Pending Submissions
+                </div>
+                <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#E11D48', marginTop: '4px' }}>
+                  {pendingClubsCount} <span style={{ fontSize: '0.9rem', color: '#9F1239', fontWeight: 600 }}>({100 - complianceRate}%)</span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#9F1239', marginTop: '4px', fontWeight: 700 }}>
+                  Awaiting Monthly Report
+                </div>
+              </div>
+
+              <div style={{ background: '#FEFCE8', border: '1px solid #FEF08A', borderRadius: '16px', padding: '20px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#854D0E', textTransform: 'uppercase' }}>
+                  Flagged for Changes
+                </div>
+                <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#CA8A04', marginTop: '4px' }}>
+                  {flaggedClubsCount} <span style={{ fontSize: '0.9rem', color: '#854D0E', fontWeight: 600 }}>Clubs</span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#854D0E', marginTop: '4px', fontWeight: 700 }}>
+                  Needs Officer Revision
+                </div>
+              </div>
+            </div>
+
+            {/* SEARCH & FILTER CONTROLS */}
+            <div style={{ background: '#FFFFFF', border: '1px solid rgba(216, 27, 96, 0.15)', borderRadius: '20px', padding: '20px 24px', marginBottom: '24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+              <div style={{ position: 'relative', width: '320px', maxWidth: '100%' }}>
+                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Search club name, zone, or president..."
+                  value={complianceSearch}
+                  onChange={(e) => setComplianceSearch(e.target.value)}
+                  style={{ width: '100%', padding: '10px 14px 10px 38px', borderRadius: '100px', border: '1px solid rgba(216,27,96,0.25)', fontSize: '0.86rem', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setComplianceFilter('all')}
+                  style={{
+                    background: complianceFilter === 'all' ? 'var(--rotaract-pink)' : '#F1F5F9',
+                    color: complianceFilter === 'all' ? '#FFFFFF' : '#475569',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '100px',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  All Clubs ({totalClubsCount})
+                </button>
+                <button
+                  onClick={() => setComplianceFilter('submitted')}
+                  style={{
+                    background: complianceFilter === 'submitted' ? '#166534' : '#F0FDF4',
+                    color: complianceFilter === 'submitted' ? '#FFFFFF' : '#166534',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '100px',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Submitted ({submittedClubsCount})
+                </button>
+                <button
+                  onClick={() => setComplianceFilter('pending')}
+                  style={{
+                    background: complianceFilter === 'pending' ? '#E11D48' : '#FFF1F2',
+                    color: complianceFilter === 'pending' ? '#FFFFFF' : '#E11D48',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '100px',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Pending ({pendingClubsCount})
+                </button>
+                <button
+                  onClick={() => setComplianceFilter('flagged')}
+                  style={{
+                    background: complianceFilter === 'flagged' ? '#CA8A04' : '#FEFCE8',
+                    color: complianceFilter === 'flagged' ? '#FFFFFF' : '#854D0E',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '100px',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Flagged ({flaggedClubsCount})
+                </button>
+              </div>
+            </div>
+
+            {/* COMPLIANCE CLUBS TABLE / LIST */}
+            <div className="rotaract-card" style={{ padding: '0', overflow: 'hidden' }}>
+              <div style={{ padding: '20px 24px', background: '#FDF5F8', borderBottom: '1px solid rgba(216,27,96,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+                  District 3011 Clubs Compliance List for {complianceMonth} ({filteredComplianceList.length} Clubs Shown)
+                </h4>
+                <span className="pill-pink" style={{ fontSize: '0.74rem' }}>
+                  {submittedClubsCount} of {totalClubsCount} Clubs Compliant
+                </span>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                  <thead>
+                    <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: 'var(--text-muted)', fontSize: '0.78rem', textTransform: 'uppercase', fontWeight: 800 }}>
+                      <th style={{ padding: '14px 20px' }}>Rotaract Club</th>
+                      <th style={{ padding: '14px 20px' }}>Zone</th>
+                      <th style={{ padding: '14px 20px' }}>President Contact</th>
+                      <th style={{ padding: '14px 20px' }}>{complianceMonth} Status</th>
+                      <th style={{ padding: '14px 20px', textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredComplianceList.map(({ club, report, status }, idx) => {
+                      const totalProjs = report ? Object.values(report.sections || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0) : 0;
+                      const isCopied = copiedReminderClubId === club.name;
+
+                      return (
+                        <tr key={club.id || idx} style={{ borderBottom: '1px solid #F1F5F9', backgroundColor: idx % 2 === 0 ? '#FFFFFF' : '#FDFBFD' }}>
+                          
+                          {/* Club Name */}
+                          <td style={{ padding: '16px 20px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                            <div style={{ fontSize: '0.95rem', color: 'var(--rotaract-pink)' }}>{club.name}</div>
+                          </td>
+
+                          {/* Zone */}
+                          <td style={{ padding: '16px 20px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.82rem' }}>
+                            {club.zone || 'District 3011'}
+                          </td>
+
+                          {/* President Contact */}
+                          <td style={{ padding: '16px 20px', color: 'var(--text-secondary)' }}>
+                            <div style={{ fontWeight: 700 }}>{club.president || 'Rtr. President'}</div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{club.email || 'techrid3011@gmail.com'}</div>
+                          </td>
+
+                          {/* Status */}
+                          <td style={{ padding: '16px 20px' }}>
+                            {status === 'submitted' && (
+                              <div>
+                                <span style={{ background: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', padding: '4px 12px', borderRadius: '100px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <CheckCircle2 size={13} /> Report Submitted
+                                </span>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                  {totalProjs} Projects • Submitted {report?.submittedAt}
+                                </div>
+                              </div>
+                            )}
+
+                            {status === 'flagged' && (
+                              <div>
+                                <span style={{ background: '#FFE4E6', color: '#E11D48', border: '1px solid #FECDD3', padding: '4px 12px', borderRadius: '100px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <Flag size={13} /> Flagged by District
+                                </span>
+                                <div style={{ fontSize: '0.75rem', color: '#9F1239', marginTop: '4px' }}>
+                                  "{report?.flagComment || 'Needs revision'}"
+                                </div>
+                              </div>
+                            )}
+
+                            {status === 'pending' && (
+                              <div>
+                                <span style={{ background: '#FFF1F2', color: '#9F1239', border: '1px solid #FECDD3', padding: '4px 12px', borderRadius: '100px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <Clock size={13} /> Pending Submission
+                                </span>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                  Report not submitted yet
+                                </div>
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Actions */}
+                          <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                            {status === 'pending' ? (
+                              <button
+                                onClick={() => handleCopyReminder(club.name, club.president)}
+                                style={{
+                                  background: isCopied ? '#166534' : '#FFFFFF',
+                                  color: isCopied ? '#FFFFFF' : '#E11D48',
+                                  border: '1px solid #E11D48',
+                                  padding: '6px 14px',
+                                  borderRadius: '100px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                              >
+                                {isCopied ? <Check size={13} /> : <Copy size={13} />}
+                                {isCopied ? 'Reminder Copied!' : 'Copy Reminder Notice'}
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setActivePortalTab('management');
+                                  if (report) setExpandedReportId(report.id);
+                                }}
+                                style={{
+                                  background: '#FFFFFF',
+                                  color: 'var(--rotaract-pink)',
+                                  border: '1px solid rgba(216, 27, 96, 0.3)',
+                                  padding: '6px 14px',
+                                  borderRadius: '100px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                              >
+                                <Eye size={13} /> Inspect Report
+                              </button>
+                            )}
+                          </td>
+
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: PORTAL ANNOUNCEMENTS */}
         {activePortalTab === 'announcements' && (
           <div>
             {isDistrictOfficer && (
@@ -903,7 +1300,7 @@ export default function PortalPage({
                                 </button>
                               </div>
 
-                              {/* 11 PROJECT FIELDS */}
+                              {/* 12 PROJECT FIELDS */}
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                                 
                                 {/* Row 1: Event Name & Date */}
@@ -1035,16 +1432,28 @@ export default function PortalPage({
                                   />
                                 </div>
 
-                                {/* Row 6: Rotary Showcase Link */}
-                                <div>
-                                  <label style={labelStyle}>11. Rotary Showcase Link (URL)</label>
-                                  <input
-                                    type="url"
-                                    placeholder="https://showcase.rotary.org/project/..."
-                                    value={proj.showcaseLink}
-                                    onChange={(e) => handleUpdateProjectField(activeFormSection, proj.id, 'showcaseLink', e.target.value)}
-                                    style={inputStyle}
-                                  />
+                                {/* Row 6: Rotary Showcase Link & Drive Media Link */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                  <div>
+                                    <label style={labelStyle}>11. Rotary Showcase Link (URL)</label>
+                                    <input
+                                      type="url"
+                                      placeholder="https://showcase.rotary.org/project/..."
+                                      value={proj.showcaseLink}
+                                      onChange={(e) => handleUpdateProjectField(activeFormSection, proj.id, 'showcaseLink', e.target.value)}
+                                      style={inputStyle}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label style={labelStyle}>12. Google Drive Link (Photos & Videos)</label>
+                                    <input
+                                      type="url"
+                                      placeholder="https://drive.google.com/drive/folders/..."
+                                      value={proj.driveLink || ''}
+                                      onChange={(e) => handleUpdateProjectField(activeFormSection, proj.id, 'driveLink', e.target.value)}
+                                      style={inputStyle}
+                                    />
+                                  </div>
                                 </div>
 
                               </div>

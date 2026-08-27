@@ -9,7 +9,7 @@ export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-const MOCK_STORAGE_KEY = 'district3011_monthly_reports_v2';
+const MOCK_STORAGE_KEY = 'district3011_monthly_reports_v3';
 const MOCK_ANNOUNCEMENTS_KEY = 'district3011_announcements_v2';
 
 export const REPORT_SECTIONS = [
@@ -44,7 +44,8 @@ export const INITIAL_STRUCTURED_REPORT = {
         districtOfficials: 'ZRR Zone 2 & District Council Members',
         beneficiaryCount: 'N/A (Internal Assembly)',
         description: 'Held the first General Body Assembly of RY 2026-27 to finalize the annual project roadmap, budget allocations, and avenue chair appointments.',
-        showcaseLink: 'https://showcase.rotary.org/project/gb-assembly'
+        showcaseLink: 'https://showcase.rotary.org/project/gb-assembly',
+        driveLink: 'https://drive.google.com/drive/folders/demo-assembly-photos'
       }
     ],
     clubServices: [
@@ -60,7 +61,8 @@ export const INITIAL_STRUCTURED_REPORT = {
         districtOfficials: 'District Fellowship Chair',
         beneficiaryCount: '50 Rotaractors',
         description: 'Conducted new member orientation session explaining Rotary International history, avenue roles, and district participation guidelines.',
-        showcaseLink: ''
+        showcaseLink: '',
+        driveLink: 'https://drive.google.com/drive/folders/demo-orientation-media'
       }
     ],
     communityServices: [
@@ -76,7 +78,8 @@ export const INITIAL_STRUCTURED_REPORT = {
         districtOfficials: 'District Governor & DRR',
         beneficiaryCount: '320 Donors',
         description: 'Organized flagship blood donation camp collecting 320 blood units for government hospital blood banks.',
-        showcaseLink: 'https://showcase.rotary.org/project/mahadan-9'
+        showcaseLink: 'https://showcase.rotary.org/project/mahadan-9',
+        driveLink: 'https://drive.google.com/drive/folders/demo-mahadan-photos'
       }
     ],
     internationalServices: [
@@ -92,7 +95,8 @@ export const INITIAL_STRUCTURED_REPORT = {
         districtOfficials: 'District International Service Director',
         beneficiaryCount: '65 Youth Participants',
         description: 'Conducted virtual twin club interaction exchanging culture, service best practices, and joint peace initiatives.',
-        showcaseLink: ''
+        showcaseLink: '',
+        driveLink: ''
       }
     ],
     vocationalServices: [],
@@ -109,10 +113,13 @@ const parseSubFromDB = (item) => {
     vocationalServices: [],
     districtProjects: []
   };
-  let month = 'August 2026';
+  let month = item.month || 'August 2026';
 
   try {
-    if (item.description && (item.description.startsWith('{') || item.description.startsWith('['))) {
+    if (item.sections_json) {
+      const sec = typeof item.sections_json === 'string' ? JSON.parse(item.sections_json) : item.sections_json;
+      sections = { ...sections, ...sec };
+    } else if (item.description && (item.description.startsWith('{') || item.description.startsWith('['))) {
       const parsed = JSON.parse(item.description);
       if (parsed.sections) {
         sections = { ...sections, ...parsed.sections };
@@ -131,7 +138,8 @@ const parseSubFromDB = (item) => {
         districtOfficials: 'District Officials',
         beneficiaryCount: item.beneficiaries || '200 People',
         description: item.description || item.narrative || 'Legacy project submission.',
-        showcaseLink: item.proof_url || ''
+        showcaseLink: item.proof_url || '',
+        driveLink: ''
       });
       month = item.category?.includes('Monthly') ? item.category.replace('Monthly Report (', '').replace(')', '') : 'August 2026';
     }
@@ -141,7 +149,7 @@ const parseSubFromDB = (item) => {
 
   return {
     id: item.id,
-    month: item.month || month,
+    month: month,
     clubName: item.club_name || item.clubName || 'Rotaract Club of Delhi Heights',
     clubEmail: item.club_email || item.clubEmail || 'techrid3011@gmail.com',
     submittedBy: item.submitted_by || item.submittedBy || 'Rotaract Officer',
@@ -209,13 +217,24 @@ export const dbService = {
   fetchSubmissions: async () => {
     if (isSupabaseConfigured && supabase) {
       try {
-        const { data, error } = await supabase
+        // Try fetching from dedicated monthly_reports table first
+        const { data: reportData, error: reportErr } = await supabase
+          .from('monthly_reports')
+          .select('*')
+          .order('submitted_at', { ascending: false });
+
+        if (!reportErr && reportData && reportData.length > 0) {
+          return reportData.map(parseSubFromDB);
+        }
+
+        // Fallback to project_submissions table
+        const { data: subData, error: subErr } = await supabase
           .from('project_submissions')
           .select('*')
           .order('submitted_at', { ascending: false });
-        
-        if (!error && data && data.length > 0) {
-          return data.map(parseSubFromDB);
+
+        if (!subErr && subData && subData.length > 0) {
+          return subData.map(parseSubFromDB);
         }
       } catch (err) {
         console.warn('Supabase fetch notice, using fallback store:', err);
@@ -228,7 +247,27 @@ export const dbService = {
     if (isSupabaseConfigured && supabase) {
       try {
         const totalProjs = Object.values(newReport.sections || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
-        const payload = {
+        
+        // 1. Try inserting to dedicated monthly_reports table
+        const reportPayload = {
+          month: newReport.month,
+          club_name: newReport.clubName,
+          club_email: newReport.clubEmail,
+          submitted_by: newReport.submittedBy,
+          status: newReport.status || 'reported',
+          sections_json: newReport.sections
+        };
+
+        const { error: mrErr } = await supabase
+          .from('monthly_reports')
+          .insert([reportPayload]);
+
+        if (!mrErr) {
+          return await dbService.fetchSubmissions();
+        }
+
+        // 2. Fallback to project_submissions table
+        const subPayload = {
           club_name: newReport.clubName,
           club_email: newReport.clubEmail,
           submitted_by: newReport.submittedBy,
@@ -241,11 +280,11 @@ export const dbService = {
           status: newReport.status || 'reported'
         };
 
-        const { error } = await supabase
+        const { error: subErr } = await supabase
           .from('project_submissions')
-          .insert([payload]);
-        
-        if (!error) {
+          .insert([subPayload]);
+
+        if (!subErr) {
           return await dbService.fetchSubmissions();
         }
       } catch (err) {
@@ -258,12 +297,23 @@ export const dbService = {
   flagSubmission: async (id, comment) => {
     if (isSupabaseConfigured && supabase) {
       try {
-        const { error } = await supabase
+        // Try updating monthly_reports
+        const { error: mrErr } = await supabase
+          .from('monthly_reports')
+          .update({ status: 'flagged', flag_comment: comment })
+          .eq('id', id);
+
+        if (!mrErr) {
+          return await dbService.fetchSubmissions();
+        }
+
+        // Fallback update project_submissions
+        const { error: subErr } = await supabase
           .from('project_submissions')
           .update({ status: 'flagged', flag_comment: comment })
           .eq('id', id);
 
-        if (!error) {
+        if (!subErr) {
           return await dbService.fetchSubmissions();
         }
       } catch (err) {
