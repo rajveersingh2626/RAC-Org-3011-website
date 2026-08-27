@@ -665,7 +665,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                       textTransform: 'uppercase'
                     }}
                   >
-                    PROJECT SPOTLIGHT
+                    CLUB KPIs
                   </span>
                 </div>
 
@@ -822,7 +822,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
             boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
           }}
         >
-          Click pin to view Club Overview & Project Spotlight
+          Click pin to view Club Overview & Club KPIs
         </div>
       </div>
 

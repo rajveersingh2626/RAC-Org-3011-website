@@ -80,17 +80,7 @@ export const INITIAL_CLUBS = [
     isDirector: "",
     phone: "9711504506",
     email: "president.delhiheights@rotaract3011.org",
-    initiatives: [
-      {
-        id: "i1-1",
-        title: "Youth Leadership Conclave",
-        category: "Youth Empowerment",
-        impact: "300+ Attendees",
-        date: "July 2026",
-        description: "Interactive skill development and leadership workshop for college students across Delhi.",
-        beneficiaries: "300 Students"
-      }
-    ]
+    initiatives: []
   },
   {
     id: "c2",

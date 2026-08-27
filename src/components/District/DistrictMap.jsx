@@ -638,7 +638,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                       textTransform: 'uppercase'
                     }}
                   >
-                    PROJECT SPOTLIGHT
+                    CLUB KPIs
                   </span>
                 </div>
 
@@ -688,7 +688,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                       fontWeight: 500
                     }}
                   >
-                    No initiatives uploaded yet for this club.
+                    No monthly report KPIs uploaded yet for this club.
                   </div>
                 )}
               </div>
@@ -708,18 +708,14 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                   borderRadius: '10px',
                   fontWeight: 800,
                   fontSize: '0.95rem',
-                  textDecoration: 'none',
-                  whiteSpace: 'normal',
-                  textAlign: 'center',
-                  backgroundColor: '#123499',
                   color: '#FFFFFF',
-                  boxShadow: '0 6px 22px rgba(18, 52, 153, 0.28)',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                  boxSizing: 'border-box'
+                  background: 'linear-gradient(135deg, #D81B60 0%, #AD1457 100%)',
+                  textDecoration: 'none',
+                  boxShadow: '0 8px 24px rgba(216, 27, 96, 0.25)',
+                  transition: 'transform 0.2s ease'
                 }}
               >
-                Connect with {currentSlideoutClub.name}
+                Connect via Email <ChevronRight size={18} />
               </a>
             </div>
 

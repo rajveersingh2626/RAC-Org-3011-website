@@ -34,10 +34,10 @@ export default function ClubInitiativesList({
           <span className="pill-gold" style={{ marginBottom: '8px' }}>
             DIRECTORY (RY 2026-27)
           </span>
-          <h2 style={{ fontSize: '2.3rem', fontWeight: 900, color: '#18181B' }}>
+          <h2 style={{ fontSize: '2.3rem', fontWeight: 900, color: '#FFFFFF' }}>
             Rotaract Clubs & Initiatives List (RY 2026-27)
           </h2>
-          <p style={{ color: '#4A4A5A', fontSize: '0.95rem', marginTop: '6px', fontWeight: 500 }}>
+          <p style={{ color: 'rgba(255, 255, 255, 0.92)', fontSize: '0.95rem', marginTop: '6px', fontWeight: 500 }}>
             Explore active community service initiatives led by Rotaract clubs across District 3011.
           </p>
         </div>
