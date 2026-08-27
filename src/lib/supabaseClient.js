@@ -120,36 +120,27 @@ export const dbService = {
           }
         }
 
-        // Query user_profiles table in Supabase case-insensitively and safely
+        // Parallelized Instant Lookup (Runs rotary_id and email queries concurrently in 1 parallel burst)
+        const columns = 'id, rotary_id, email, password, role, full_name, club_name, post, totp_secret';
         let data = null;
 
-        // Query 1: Search by rotary_id
-        const { data: idList } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .ilike('rotary_id', cleanId);
-        if (idList && idList.length > 0) data = idList[0];
+        const [idRes, emailRes] = await Promise.all([
+          supabase.from('user_profiles').select(columns).ilike('rotary_id', cleanId).limit(1),
+          cleanId.includes('@')
+            ? supabase.from('user_profiles').select(columns).ilike('email', cleanId).limit(1)
+            : Promise.resolve({ data: [] })
+        ]);
 
-        // Query 2: Search by email if not matched by rotary_id
+        data = (idRes.data && idRes.data[0]) || (emailRes.data && emailRes.data[0]) || null;
+
+        // Fallback memory search if PostgREST filter missed due to formatting
         if (!data) {
-          const { data: emailList } = await supabase
+          const { data: emailFallbackList } = await supabase
             .from('user_profiles')
-            .select('*')
-            .ilike('email', cleanId);
-          if (emailList && emailList.length > 0) data = emailList[0];
-        }
-
-        // Query 3: JavaScript memory search if PostgREST filter missed due to spaces or type
-        if (!data) {
-          const { data: allProfiles } = await supabase.from('user_profiles').select('*');
-          if (allProfiles && allProfiles.length > 0) {
-            data = allProfiles.find(p => {
-              const rId = (p.rotary_id || '').toString().trim().toLowerCase();
-              const em = (p.email || '').toString().trim().toLowerCase();
-              const target = cleanId.toLowerCase();
-              return rId === target || em === target || (target.length > 4 && em.includes(target));
-            }) || null;
-          }
+            .select(columns)
+            .ilike('email', cleanId)
+            .limit(1);
+          if (emailFallbackList && emailFallbackList.length > 0) data = emailFallbackList[0];
         }
 
         if (data) {
@@ -219,7 +210,7 @@ export const dbService = {
     if (isSupabaseConfigured && supabase) {
       try {
         const totalProjs = Object.values(newReport.sections || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
-        
+
         // 1. Try inserting to dedicated monthly_reports table
         const reportPayload = {
           month: newReport.month,
@@ -333,7 +324,7 @@ export const dbService = {
             author_name: announcement.author || 'District Secretariat',
             sent_via_email: Boolean(announcement.sentViaEmail)
           }]);
-        
+
         if (!error) {
           return await dbService.fetchAnnouncements();
         }
@@ -358,7 +349,7 @@ export const mockStore = {
       return [];
     }
   },
-  
+
   saveSubmissions: (submissions) => {
     try {
       localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(submissions));

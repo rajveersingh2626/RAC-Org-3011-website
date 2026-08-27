@@ -51,7 +51,7 @@ async function sendResendEmail({ to, subject, html, text }) {
  */
 export async function sendReportFlaggedEmail({ clubName, month, recipientEmail, flagComment }) {
   const subject = `[Action Required] District 3011 Monthly Report Flagged - ${month}`;
-  
+
   const html = `
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #eee;">
       <div style="background: #D81B60; padding: 24px; text-align: center; color: #ffffff;">
