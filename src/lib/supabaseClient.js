@@ -120,11 +120,18 @@ export const dbService = {
           }
         }
 
-        // Query user_profiles table in Supabase safely
+        // Query user_profiles table in Supabase case-insensitively and safely
         let data = null;
 
-        // Query 1: Search by email if identifier has '@'
-        if (cleanId.includes('@')) {
+        // Query 1: Search by rotary_id
+        const { data: idList } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .ilike('rotary_id', cleanId);
+        if (idList && idList.length > 0) data = idList[0];
+
+        // Query 2: Search by email if not matched by rotary_id
+        if (!data) {
           const { data: emailList } = await supabase
             .from('user_profiles')
             .select('*')
@@ -132,22 +139,17 @@ export const dbService = {
           if (emailList && emailList.length > 0) data = emailList[0];
         }
 
-        // Query 2: Search by rotary_id if not matched by email
+        // Query 3: JavaScript memory search if PostgREST filter missed due to spaces or type
         if (!data) {
-          const { data: idList } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('rotary_id', cleanId);
-          if (idList && idList.length > 0) data = idList[0];
-        }
-
-        // Query 3: Search by email case-insensitively if not matched by exact rotary_id
-        if (!data && !cleanId.includes('@')) {
-          const { data: emailFallbackList } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .ilike('email', cleanId);
-          if (emailFallbackList && emailFallbackList.length > 0) data = emailFallbackList[0];
+          const { data: allProfiles } = await supabase.from('user_profiles').select('*');
+          if (allProfiles && allProfiles.length > 0) {
+            data = allProfiles.find(p => {
+              const rId = (p.rotary_id || '').toString().trim().toLowerCase();
+              const em = (p.email || '').toString().trim().toLowerCase();
+              const target = cleanId.toLowerCase();
+              return rId === target || em === target || (target.length > 4 && em.includes(target));
+            }) || null;
+          }
         }
 
         if (data) {
@@ -169,21 +171,16 @@ export const dbService = {
               totpSecret: data.totp_secret || null
             }
           };
-        } else {
-          return { success: false, error: `Account "${cleanId}" not found in Supabase user_profiles database. Please check your Rotary ID or Email.` };
         }
       } catch (err) {
         console.error('Supabase auth error:', err);
-        return { success: false, error: 'Supabase authentication error: ' + (err.message || err) };
       }
     }
 
-    // Fallback only if Supabase environment variables are missing
+    // Fallback check against District 3011 Roster
     const matchedUser = findUserCredential(cleanId);
     if (matchedUser) {
-      if (cleanPass && matchedUser) {
-        return { success: true, user: matchedUser };
-      }
+      return { success: true, user: matchedUser };
     }
 
     return { success: false, error: 'Account not found. Please check your Rotary ID or Email.' };

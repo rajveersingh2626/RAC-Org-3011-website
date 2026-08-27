@@ -42,10 +42,12 @@ const getWordCount = (text) => {
 };
 
 export default function PortalPage({
+  isLoggedIn = false,
   userRole = 'president',
   setUserRole,
   userSession,
   onLogout,
+  onOpenLoginModal,
   clubs = INITIAL_CLUBS
 }) {
   const [activePortalTab, setActivePortalTab] = useState('management');
@@ -87,7 +89,7 @@ export default function PortalPage({
   const [announcementSuccessMsg, setAnnouncementSuccessMsg] = useState('');
 
   const userEmail = userSession?.email || 'techrid3011@gmail.com';
-  const isDistrictOfficer = userRole === 'officer' || userRole === 'admin';
+  const isDistrictOfficer = userRole === 'officer' || userRole === 'admin' || userSession?.role === 'officer' || userSession?.role === 'admin';
 
   const allDistrictClubs = clubs && clubs.length > 0 ? clubs : INITIAL_CLUBS;
 
@@ -382,6 +384,26 @@ export default function PortalPage({
     <div style={{ backgroundColor: '#FDF8FA', minHeight: '100vh', padding: '36px 24px 80px 24px', position: 'relative' }}>
       <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
         
+        {/* UNAUTHENTICATED LOCK SCREEN */}
+        {!isLoggedIn && !userSession && (
+          <div style={{ backgroundColor: '#FFFFFF', border: '2px solid var(--rotaract-pink)', borderRadius: '24px', padding: '40px 32px', textAlign: 'center', marginBottom: '32px', boxShadow: '0 14px 40px rgba(216, 27, 96, 0.12)' }}>
+            <Lock size={44} style={{ color: 'var(--rotaract-pink)', marginBottom: '14px' }} />
+            <h3 style={{ fontSize: '1.7rem', fontWeight: 900, color: 'var(--text-primary)', marginBottom: '8px' }}>
+              District 3011 Portal Login Required
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.96rem', maxWidth: '560px', margin: '0 auto 24px auto', lineHeight: 1.5 }}>
+              Access to Monthly Compliance Reporting, Secretariat Matrix, and Internal Announcements requires 2FA authentication via your official Rotary ID or Email.
+            </p>
+            <button
+              onClick={onOpenLoginModal}
+              className="btn-rotaract"
+              style={{ padding: '14px 32px', fontSize: '1rem' }}
+            >
+              <ShieldCheck size={20} /> Log In to District Portal
+            </button>
+          </div>
+        )}
+
         {/* WORKSPACE HEADER */}
         <div 
           style={{ 

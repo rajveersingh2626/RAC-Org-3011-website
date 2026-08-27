@@ -323,6 +323,7 @@ export default function App() {
               setUserSession(null);
               handlePageChange('home');
             }}
+            onOpenLoginModal={() => setIsLoginModalOpen(true)}
             onOpenUploadClubModal={() => setUploaderModalMode('uploadClub')}
             onOpenPostInitiativeModal={() => {
               setPreselectedClubForModal(null);
