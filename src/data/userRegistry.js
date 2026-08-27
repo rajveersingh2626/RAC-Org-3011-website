@@ -52,7 +52,7 @@ export function findUserCredential(identifier) {
     return {
       id: `usr-${matchedClub.id}`,
       rotaryId: `3011-${(matchedClub.shortName || matchedClub.name).toUpperCase().replace(/[^A-Z0-9]/g, '')}`,
-      email: matchedClub.email || `${matchedClub.shortName.toLowerCase()}@rotaract3011.org`,
+      email: matchedClub.email || `${(matchedClub.shortName || 'club').toLowerCase()}@rotaract3011.org`,
       role: 'president',
       fullName: matchedClub.president,
       clubName: matchedClub.name,

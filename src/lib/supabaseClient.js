@@ -120,20 +120,39 @@ export const dbService = {
           }
         }
 
-        // Query user_profiles table in Supabase case-insensitively
-        let query = supabase.from('user_profiles').select('*');
+        // Query user_profiles table in Supabase safely
+        let data = null;
+
+        // Query 1: Search by email if identifier has '@'
         if (cleanId.includes('@')) {
-          query = query.ilike('email', cleanId);
-        } else {
-          query = query.or(`rotary_id.ilike.${cleanId},email.ilike.${cleanId}`);
+          const { data: emailList } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .ilike('email', cleanId);
+          if (emailList && emailList.length > 0) data = emailList[0];
         }
 
-        const { data: userList, error } = await query;
+        // Query 2: Search by rotary_id if not matched by email
+        if (!data) {
+          const { data: idList } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('rotary_id', cleanId);
+          if (idList && idList.length > 0) data = idList[0];
+        }
 
-        if (!error && userList && userList.length > 0) {
-          const data = userList[0];
-          // Verify password stored in user_profiles table if present
-          if (data.password && data.password.trim() !== cleanPass && cleanPass !== 'adminpassword' && cleanPass !== 'rotarypassword') {
+        // Query 3: Search by email case-insensitively if not matched by exact rotary_id
+        if (!data && !cleanId.includes('@')) {
+          const { data: emailFallbackList } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .ilike('email', cleanId);
+          if (emailFallbackList && emailFallbackList.length > 0) data = emailFallbackList[0];
+        }
+
+        if (data) {
+          // Verify password stored in Supabase user_profiles table
+          if (data.password && data.password.trim() !== cleanPass) {
             return { success: false, error: 'Incorrect portal password.' };
           }
 
@@ -150,26 +169,23 @@ export const dbService = {
               totpSecret: data.totp_secret || null
             }
           };
+        } else {
+          return { success: false, error: `Account "${cleanId}" not found in Supabase user_profiles database. Please check your Rotary ID or Email.` };
         }
       } catch (err) {
-        console.warn('Supabase user_profiles auth notice:', err);
+        console.error('Supabase auth error:', err);
+        return { success: false, error: 'Supabase authentication error: ' + (err.message || err) };
       }
     }
 
-    // 2. Check official local user registry / club roster
+    // Fallback only if Supabase environment variables are missing
     const matchedUser = findUserCredential(cleanId);
     if (matchedUser) {
-      if (cleanPass && cleanPass.length >= 1) {
-        return {
-          success: true,
-          user: matchedUser
-        };
-      } else {
-        return { success: false, error: 'Please enter your portal password.' };
+      if (cleanPass && matchedUser) {
+        return { success: true, user: matchedUser };
       }
     }
 
-    // 3. Strict security rejection if ID is not found anywhere
     return { success: false, error: 'Account not found. Please check your Rotary ID or Email.' };
   },
 
