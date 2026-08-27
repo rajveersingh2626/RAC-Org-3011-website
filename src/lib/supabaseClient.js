@@ -1,10 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 import { findUserCredential } from '../data/userRegistry';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const defaultUrl = 'https://rdvjsjartuilcxxslkpf.supabase.co';
+const defaultKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkdmpzamFydHVpbGN4eHNsa3BmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4MTMxNTAsImV4cCI6MjEwMzM4OTE1MH0.L1l5rqI_fj4V6tzzBZne3nUgp9Dpf5zblZzaWKAwxQc';
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('YOUR_SUPABASE'));
+const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+const supabaseUrl = (envUrl && !envUrl.includes('vuvbljnyypoarwtkffrh') && !envUrl.includes('YOUR_SUPABASE'))
+  ? envUrl
+  : defaultUrl;
+
+const supabaseAnonKey = (envKey && !envKey.includes('YOUR_SUPABASE'))
+  ? envKey
+  : defaultKey;
+
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
