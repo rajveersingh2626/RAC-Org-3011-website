@@ -28,12 +28,80 @@ function RotaryLoaderLogo({ size = 96 }) {
   );
 }
 
+// URL Route Mapping Table for Browser Deep Linking & History Navigation
+const ROUTE_MAP = {
+  '/': { page: 'home', tab: 'map-clubs' },
+  '/directory': { page: 'district', tab: 'map-clubs' },
+  '/map': { page: 'district', tab: 'map-clubs' },
+  '/heritage': { page: 'district', tab: 'heritage' },
+  '/initiatives': { page: 'district', tab: 'initiatives' },
+  '/governance': { page: 'district', tab: 'leadership' },
+  '/leadership': { page: 'district', tab: 'leadership' },
+  '/portal': { page: 'portal', tab: 'map-clubs' }
+};
+
+const getPathFromState = (page, tab) => {
+  if (page === 'home') return '/';
+  if (page === 'portal') return '/portal';
+  if (page === 'district') {
+    if (tab === 'heritage') return '/heritage';
+    if (tab === 'initiatives') return '/initiatives';
+    if (tab === 'leadership') return '/governance';
+    return '/directory';
+  }
+  return '/';
+};
+
 export default function App() {
+  // Get initial route from browser URL
+  const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
+  const initialRoute = ROUTE_MAP[initialPath] || { page: 'home', tab: 'map-clubs' };
+
   // Navigation State ('home' | 'district' | 'portal')
-  const [activePage, setActivePage] = useState('home');
+  const [activePage, setActivePageState] = useState(initialRoute.page);
 
   // District Sub-navigation ('map-clubs' | 'heritage' | 'initiatives' | 'leadership')
-  const [activeDistrictTab, setActiveDistrictTab] = useState('map-clubs');
+  const [activeDistrictTab, setActiveDistrictTabState] = useState(initialRoute.tab);
+
+  // Router Handlers with HTML5 History API Sync
+  const handlePageChange = (page, tab = null) => {
+    const targetTab = tab || (page === 'district' ? (activeDistrictTab || 'map-clubs') : 'map-clubs');
+    if (page === activePage && targetTab === activeDistrictTab) return;
+
+    setActivePageState(page);
+    setActiveDistrictTabState(targetTab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const path = getPathFromState(page, targetTab);
+    if (window.location.pathname !== path) {
+      window.history.pushState({ page, tab: targetTab }, '', path);
+    }
+  };
+
+  const handleDistrictTabChange = (tab) => {
+    if (tab === activeDistrictTab && activePage === 'district') return;
+
+    setActivePageState('district');
+    setActiveDistrictTabState(tab);
+
+    const path = getPathFromState('district', tab);
+    if (window.location.pathname !== path) {
+      window.history.pushState({ page: 'district', tab }, '', path);
+    }
+  };
+
+  // Listen to Browser Back / Forward buttons (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const currentPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
+      const route = ROUTE_MAP[currentPath] || { page: 'home', tab: 'map-clubs' };
+      setActivePageState(route.page);
+      setActiveDistrictTabState(route.tab);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Dynamic Clubs Data State
   const [clubs, setClubs] = useState(INITIAL_CLUBS);
@@ -139,31 +207,8 @@ export default function App() {
     };
   }, []);
 
-  // Universal Page & Sub-Tab Loader State (For all subsequent page/tab transitions)
+  // Universal Page & Sub-Tab Loader State
   const [isPageLoading, setIsPageLoading] = useState(false);
-
-  // Trigger loading screen on page navigation
-  const handlePageChange = (newPage) => {
-    if (newPage === activePage) return;
-    setIsPageLoading(true);
-    setTimeout(() => {
-      setActivePage(newPage);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 380);
-    setTimeout(() => {
-      setIsPageLoading(false);
-    }, 650);
-  };
-
-  // Trigger loading screen on sub-tab navigation
-  const handleTabChange = (newTab) => {
-    if (newTab === activeDistrictTab) return;
-    setIsPageLoading(true);
-    setTimeout(() => {
-      setActiveDistrictTab(newTab);
-      setIsPageLoading(false);
-    }, 450);
-  };
 
   // Add uploaded club
   const handleAddClub = (newClub) => {
@@ -232,7 +277,7 @@ export default function App() {
         activePage={activePage}
         setActivePage={handlePageChange}
         activeDistrictTab={activeDistrictTab}
-        setActiveDistrictTab={handleTabChange}
+        setActiveDistrictTab={handleDistrictTabChange}
         isLoggedIn={isLoggedIn}
         userRole={userRole}
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
@@ -248,8 +293,7 @@ export default function App() {
         {activePage === 'home' && (
           <PublicHome
             onNavigateDistrict={() => {
-              handlePageChange('district');
-              setActiveDistrictTab('map-clubs');
+              handlePageChange('district', 'map-clubs');
             }}
             onOpenLoginModal={() => setIsLoginModalOpen(true)}
           />

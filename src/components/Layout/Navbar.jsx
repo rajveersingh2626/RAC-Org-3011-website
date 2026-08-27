@@ -172,8 +172,11 @@ export default function Navbar({
                   <button
                     key={tab.id}
                     onClick={() => {
-                      setActivePage('district');
-                      if (setActiveDistrictTab) setActiveDistrictTab(tab.id);
+                      if (setActiveDistrictTab) {
+                        setActiveDistrictTab(tab.id);
+                      } else {
+                        setActivePage('district', tab.id);
+                      }
                     }}
                     onMouseEnter={() => setHoveredSubTab(tab.id)}
                     onMouseLeave={() => setHoveredSubTab(null)}
