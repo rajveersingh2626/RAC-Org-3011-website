@@ -32,26 +32,30 @@ export default function ClubInitiativesList({
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '20px', marginBottom: '30px' }}>
         <div>
           <span className="pill-gold" style={{ marginBottom: '8px' }}>
-            DIRECTORY (RY 2026-27)
+            FEATURED SHOWCASE (RY 2026-27)
           </span>
           <h2 style={{ fontSize: '2.3rem', fontWeight: 900, color: '#FFFFFF' }}>
-            Rotaract Clubs & Initiatives List (RY 2026-27)
+            Rotaract Featured Initiatives (RY 2026-27)
           </h2>
           <p style={{ color: 'rgba(255, 255, 255, 0.92)', fontSize: '0.95rem', marginTop: '6px', fontWeight: 500 }}>
-            Explore active community service initiatives led by Rotaract clubs across District 3011.
+            Manually curated flagship community service initiatives selected by Club Presidents & District Officers.
           </p>
         </div>
 
-        {isPresidentLoggedIn && (
-          <button
-            onClick={onOpenUploadClubModal}
-            className="btn-rotaract"
-            style={{ padding: '12px 24px', fontSize: '0.95rem' }}
-          >
-            <PlusCircle size={18} />
-            + Upload New Club (President Access)
-          </button>
-        )}
+        <button
+          onClick={() => {
+            if (onOpenPostInitiativeModal) {
+              onOpenPostInitiativeModal(null);
+            } else if (onOpenUploadClubModal) {
+              onOpenUploadClubModal();
+            }
+          }}
+          className="btn-rotaract"
+          style={{ padding: '12px 24px', fontSize: '0.95rem', backgroundColor: '#FFFFFF', color: 'var(--rotaract-pink)', fontWeight: 800, border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}
+        >
+          <PlusCircle size={18} />
+          + Add Featured Initiative
+        </button>
       </div>
 
       <div

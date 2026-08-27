@@ -60,7 +60,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     const user = authResult.user;
     setAuthenticatedUser(user);
 
-    const secret = user.totpSecret || await getSecretForRotaryId(user.rotaryId);
+    const secret = user.totpSecret || await getSecretForRotaryId(user.rotaryId || user.email);
     setTotpSecret(secret);
 
     setMode('google2fa');

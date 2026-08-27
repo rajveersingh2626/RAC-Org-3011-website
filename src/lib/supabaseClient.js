@@ -87,17 +87,21 @@ export const dbService = {
 
     if (isSupabaseConfigured && supabase) {
       try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .or(`rotary_id.eq.${cleanId},email.ilike.${cleanId}`)
-          .maybeSingle();
+        let query = supabase.from('user_profiles').select('*');
+        if (cleanId.includes('@')) {
+          query = query.ilike('email', cleanId);
+        } else {
+          query = query.eq('rotary_id', cleanId);
+        }
+
+        const { data: userList, error } = await query;
+        const data = userList && userList.length > 0 ? userList[0] : null;
 
         if (error || !data) {
           return { success: false, error: `Account "${cleanId}" not found in District 3011 database. Please check your Rotary ID or Email.` };
         }
 
-        if (data.password && data.password !== cleanPass) {
+        if (data.password && data.password.trim() !== cleanPass) {
           return { success: false, error: 'Incorrect portal password.' };
         }
 
