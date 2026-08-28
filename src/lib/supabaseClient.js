@@ -74,8 +74,8 @@ const parseSubFromDB = (item) => {
   return {
     id: item.id,
     month: month,
-    clubName: item.club_name || item.clubName || 'Rotaract Club of Delhi Heights',
-    clubEmail: item.club_email || item.clubEmail || 'techrid3011@gmail.com',
+    clubName: item.club_name || item.clubName || '',
+    clubEmail: item.club_email || item.clubEmail || '',
     submittedBy: item.submitted_by || item.submittedBy || 'Rotaract Officer',
     submittedAt: item.submitted_at ? item.submitted_at.split('T')[0] : item.submittedAt || new Date().toISOString().split('T')[0],
     status: item.status || 'reported',
@@ -297,8 +297,9 @@ export const dbService = {
         }
 
         if (data) {
-          // Verify password stored in Supabase user_profiles table if password column exists
-          if (data.password && cleanPass && data.password.trim() !== cleanPass) {
+          // Strictly verify password stored in Supabase user_profiles table
+          const dbPassword = (data.password || '').trim();
+          if (!dbPassword || dbPassword !== cleanPass) {
             return { success: false, error: 'Incorrect portal password.' };
           }
 
@@ -331,31 +332,6 @@ export const dbService = {
       } catch (err) {
         console.warn('Supabase auth notice:', err);
       }
-    }
-
-    // Standalone / Network Failure Fallback (only used if network is disconnected)
-    if (cleanId && cleanPass && (cleanPass === 'adminpassword' || cleanPass === 'rotarypassword' || cleanPass.length >= 4)) {
-      const cId = cleanId.toLowerCase();
-      const isOfficer = cId === '12670309' || 
-                        cId === 'jasraj2626@gmail.com' ||
-                        cId === '11459935' || cId === 'rtrshefali2004@gmail.com' ||
-                        cId === '11923095' || cId === 'harshitam2636@gmail.com' ||
-                        cId === '10256305' || cId === 'sarthakmanchanda2@gmail.com' ||
-                        cId === '10391101' || cId === 'himanshugulati.rotary@gmail.com' ||
-                        cId === '10915322' || cId === 'itsdrrarchit@gmail.com' ||
-                        cId.includes('admin') || cId.includes('officer') || cId.includes('secretariat');
-      return {
-        success: true,
-        user: {
-          id: `usr-${cleanId}`,
-          rotaryId: cleanId,
-          email: cleanId.includes('@') ? cleanId : 'techrid3011@gmail.com',
-          role: isOfficer ? 'officer' : 'president',
-          fullName: isOfficer ? 'District Secretariat Officer' : 'Rotaract Officer',
-          clubName: isOfficer ? 'District Secretariat 3011' : 'Rotaract Club of Delhi Heights',
-          post: isOfficer ? 'District Secretariat Officer' : 'Club President / Secretary'
-        }
-      };
     }
 
     return { success: false, error: 'Account not found in District 3011 database. Please check your Rotary ID or Email.' };
@@ -680,26 +656,7 @@ export const mockStore = {
   getAnnouncements: () => {
     try {
       const data = localStorage.getItem(MOCK_ANNOUNCEMENTS_KEY);
-      return data ? JSON.parse(data) : [
-        {
-          id: 'a1',
-          title: 'RY 2026-27 District Assembly Registration Open',
-          category: 'District Event',
-          author: 'District Secretariat',
-          date: 'August 24, 2026',
-          content: 'Registration for all Club Presidents & Secretaries for the flagship District 3011 Assembly is now officially open.',
-          sentViaEmail: true
-        },
-        {
-          id: 'a2',
-          title: 'Monthly Project Reporting Format Active',
-          category: 'Reporting Alert',
-          author: 'District Secretariat',
-          date: 'August 18, 2026',
-          content: 'Monthly Project Reporting format (6 Sections) is active. Submit monthly reports via the District Portal.',
-          sentViaEmail: true
-        }
-      ];
+      return data ? JSON.parse(data) : [];
     } catch {
       return [];
     }
