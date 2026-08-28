@@ -77,20 +77,13 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     }
 
     const rawRole = (authenticatedUser.role || '').toLowerCase().trim();
-    const isOfficer = 
-      rawRole === 'officer' || 
-      rawRole === 'admin' || 
-      String(authenticatedUser.rotaryId || '').toLowerCase().includes('admin') || 
-      String(authenticatedUser.rotaryId || '').toLowerCase().includes('officer') ||
-      String(authenticatedUser.clubName || '').toLowerCase().includes('secretariat') ||
-      String(authenticatedUser.post || '').toLowerCase().includes('district');
-
-    const userRole = isOfficer ? 'officer' : (authenticatedUser.role || 'president');
+    const assignedRole = rawRole === 'officer' ? 'officer' : 'president';
+    const isOfficer = assignedRole === 'officer';
 
     onLoginSuccess({
       rotaryId: authenticatedUser.rotaryId,
       email: authenticatedUser.email,
-      role: userRole,
+      role: assignedRole,
       fullName: authenticatedUser.fullName || (isOfficer ? 'District Secretariat Officer' : 'Rotaract Officer'),
       clubName: authenticatedUser.clubName || (isOfficer ? 'District Secretariat 3011' : 'Rotaract Club of Delhi Heights'),
       post: authenticatedUser.post || authenticatedUser.designation || (isOfficer ? 'District Secretariat Member' : 'Club President / Secretary'),

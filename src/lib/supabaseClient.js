@@ -257,18 +257,7 @@ export const dbService = {
           }
 
           const rawRole = (data.role || '').toLowerCase().trim();
-          const isOfficer = 
-            rawRole === 'officer' || 
-            rawRole === 'admin' ||
-            String(data.rotary_id || '').toLowerCase().includes('admin') ||
-            String(data.email || '').toLowerCase().includes('secretariat') ||
-            String(data.club_name || '').toLowerCase().includes('secretariat') ||
-            String(data.post || '').toLowerCase().includes('district') ||
-            String(data.post || '').toLowerCase().includes('secretariat') ||
-            String(data.post || '').toLowerCase().includes('drr') ||
-            String(data.post || '').toLowerCase().includes('dac');
-
-          const role = isOfficer ? 'officer' : 'president';
+          const role = rawRole === 'officer' ? 'officer' : 'president';
 
           return {
             success: true,
