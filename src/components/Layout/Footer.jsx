@@ -29,7 +29,7 @@ export default function Footer({ onNavigatePage, isFullScreen = false }) {
               <DistrictLogo size="small" />
             </div>
             <p style={{ color: '#A1A1AA', fontSize: '0.9rem', lineHeight: '1.7', marginBottom: '20px' }}>
-              Rotaract District Organization 3011 encompasses over 40+ clubs across Delhi & NCR, uniting young leaders for impact, service, and global fellowship.
+              Rotaract District Organization 3011 encompasses over 70+ clubs across Delhi & NCR, uniting young leaders for impact, service, and global fellowship.
             </p>
             <span className="pill-gold" style={{ fontSize: '0.8rem' }}>
               Service Above Self • RY 2026-27
@@ -70,6 +70,18 @@ export default function Footer({ onNavigatePage, isFullScreen = false }) {
                 >
                   District Portal Access
                 </button>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/rotaractdistrict.3011/"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: '#A1A1AA', fontSize: '0.9rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: 'color 0.2s' }}
+                  onMouseEnter={(e) => e.target.style.color = '#D81B60'}
+                  onMouseLeave={(e) => e.target.style.color = '#A1A1AA'}
+                >
+                  Official Instagram <ExternalLink size={14} />
+                </a>
               </li>
               <li>
                 <a

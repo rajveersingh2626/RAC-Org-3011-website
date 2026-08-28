@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShieldCheck, Lock, User, Mail, CheckCircle2, KeyRound, ShieldAlert, Smartphone, Clock, RefreshCw, QrCode, Copy } from 'lucide-react';
+import { X, ShieldCheck, Lock, User, Mail, CheckCircle2, KeyRound, ShieldAlert, Smartphone, Clock, RefreshCw, QrCode, Copy, Eye, EyeOff } from 'lucide-react';
 import { dbService } from '../../lib/supabaseClient';
 import { getSecretForRotaryId, verifyTOTP, generateRandomBase32Secret } from '../../lib/totp';
+import { sendPasswordResetEmail } from '../../lib/emailService';
 
 export default function LoginModal({ onClose, onLoginSuccess }) {
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState('login'); // 'login' | 'google2fa' | 'forgotPassword' | 'enterResetCode'
   
   const [rotaryId, setRotaryId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   const [authenticatedUser, setAuthenticatedUser] = useState(null);
   const [totpSecret, setTotpSecret] = useState('');
@@ -16,7 +18,14 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
   
   const [otpCode, setOtpCode] = useState('');
   
+  // Forgot Password / Reset State
   const [forgotInput, setForgotInput] = useState('');
+  const [resetTargetEmail, setResetTargetEmail] = useState('');
+  const [resetCodeInput, setResetCodeInput] = useState('');
+  const [newPasswordInput, setNewPasswordInput] = useState('');
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  
   const [resetAttempts, setResetAttempts] = useState(0);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [resetSuccessMsg, setResetSuccessMsg] = useState('');
@@ -97,8 +106,6 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     }
 
     const assignedRole = rawRole;
-    const isOfficer = assignedRole === 'officer';
-
     const FIVE_HOURS_MS = 5 * 60 * 60 * 1000;
     onLoginSuccess({
       rotaryId: authenticatedUser.rotaryId,
@@ -115,12 +122,14 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     onClose();
   };
 
-  const handleForgotPasswordSubmit = (e) => {
+  // Step 1: Request Password Reset Code
+  const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
     setResetSuccessMsg('');
 
-    if (!forgotInput) {
+    const cleanInput = (forgotInput || '').trim();
+    if (!cleanInput) {
       setErrorMessage('Please enter your registered Rotary ID or Email address.');
       return;
     }
@@ -136,13 +145,71 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     }
 
     setIsVerifying(true);
-    setTimeout(() => {
+    const res = await dbService.requestPasswordReset(cleanInput);
+
+    if (!res.success) {
       setIsVerifying(false);
-      const newAttempts = resetAttempts + 1;
-      setResetAttempts(newAttempts);
-      setCooldownSeconds(60);
-      setResetSuccessMsg(`Password reset instructions have been sent to the email associated with ${forgotInput}. (Request ${newAttempts}/3 today)`);
-    }, 900);
+      setErrorMessage(res.error || 'No registered officer found with that Rotary ID or Email.');
+      return;
+    }
+
+    // Dispatch branded email with 6-digit passcode
+    const emailRes = await sendPasswordResetEmail({
+      name: res.fullName,
+      rotaryId: res.rotaryId,
+      recipientEmail: res.email,
+      resetCode: res.resetCode
+    });
+
+    setIsVerifying(false);
+
+    const newAttempts = resetAttempts + 1;
+    setResetAttempts(newAttempts);
+    setCooldownSeconds(60);
+
+    const maskedEmail = res.email.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => `${a}${'*'.repeat(Math.max(b.length, 3))}${c}`);
+    setResetTargetEmail(maskedEmail);
+    setResetSuccessMsg(`A 6-digit password reset passcode has been sent to ${maskedEmail}.`);
+    setMode('enterResetCode');
+  };
+
+  // Step 2: Verify Code and Set New Password
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    if (!resetCodeInput || resetCodeInput.trim().length !== 6) {
+      setErrorMessage('Please enter the 6-digit reset code received in your email.');
+      return;
+    }
+
+    if (!newPasswordInput || newPasswordInput.length < 6) {
+      setErrorMessage('New password must be at least 6 characters long.');
+      return;
+    }
+
+    if (newPasswordInput !== confirmPasswordInput) {
+      setErrorMessage('Passwords do not match. Please re-enter your new password.');
+      return;
+    }
+
+    setIsVerifying(true);
+    const res = await dbService.resetPassword(forgotInput, resetCodeInput, newPasswordInput);
+    setIsVerifying(false);
+
+    if (!res.success) {
+      setErrorMessage(res.error || 'Failed to update password. Please verify the 6-digit code or request a new one.');
+      return;
+    }
+
+    // Success!
+    setResetSuccessMsg('Password updated successfully! You can now log in with your new password.');
+    setRotaryId(forgotInput);
+    setPassword('');
+    setResetCodeInput('');
+    setNewPasswordInput('');
+    setConfirmPasswordInput('');
+    setMode('login');
   };
 
   return (
@@ -198,10 +265,10 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
             <div className="biometric-scan-ring" style={{ marginBottom: '16px', margin: '0 auto 16px auto' }} />
             <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--rotaract-pink)', marginBottom: '4px' }}>
-              Authenticating Credentials...
+              Processing Request...
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-              Verifying Rotary ID with District 3011 Security Vault...
+              Communicating with District 3011 Security Vault...
             </p>
           </div>
         )}
@@ -234,11 +301,13 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                 {mode === 'login' && 'Officer Login'}
                 {mode === 'google2fa' && 'Google Authenticator 2FA'}
                 {mode === 'forgotPassword' && 'Reset Password'}
+                {mode === 'enterResetCode' && 'Set New Password'}
               </h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>
                 {mode === 'login' && 'Enter your official Rotary ID and portal password to log in.'}
                 {mode === 'google2fa' && 'Enter the 6-digit code generated in your Google Authenticator App.'}
-                {mode === 'forgotPassword' && 'Enter your Rotary ID or registered Email to receive a password reset link.'}
+                {mode === 'forgotPassword' && 'Enter your Rotary ID or registered Email to receive a 6-digit reset passcode.'}
+                {mode === 'enterResetCode' && `Enter the 6-digit passcode sent to ${resetTargetEmail || 'your email'} and choose a new password.`}
               </p>
             </div>
 
@@ -256,16 +325,17 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
               </div>
             )}
 
+            {/* TAB 1: LOGIN FORM */}
             {mode === 'login' && (
               <form onSubmit={handleCredentialsSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                    Official Rotary ID *
+                    Official Rotary ID or Email *
                   </label>
                   <div style={{ position: 'relative' }}>
                     <input
                       type="text"
-                      placeholder="Enter ID/email"
+                      placeholder="Enter Rotary ID or Email"
                       required
                       value={rotaryId}
                       onChange={(e) => setRotaryId(e.target.value)}
@@ -292,6 +362,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                       onClick={() => {
                         setMode('forgotPassword');
                         setErrorMessage('');
+                        setResetSuccessMsg('');
                       }} 
                       style={{ background: 'none', border: 'none', color: 'var(--rotaract-pink)', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer' }}
                     >
@@ -300,14 +371,14 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                   </div>
                   <div style={{ position: 'relative' }}>
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       placeholder="Enter portal password"
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       style={{
                         width: '100%',
-                        padding: '12px 16px 12px 40px',
+                        padding: '12px 42px 12px 40px',
                         borderRadius: '12px',
                         border: '1px solid rgba(216, 27, 96, 0.25)',
                         fontSize: '0.92rem',
@@ -315,6 +386,13 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                       }}
                     />
                     <Lock size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--rotaract-pink)' }} />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
 
@@ -324,6 +402,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
               </form>
             )}
 
+            {/* TAB 2: GOOGLE 2FA */}
             {mode === 'google2fa' && (
               <form onSubmit={handleOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ background: '#FDF5F8', padding: '16px 14px', borderRadius: '14px', border: '1px solid rgba(216,27,96,0.15)', textAlign: 'center' }}>
@@ -426,11 +505,12 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
               </form>
             )}
 
+            {/* TAB 3: STEP 1 - FORGOT PASSWORD REQUEST */}
             {mode === 'forgotPassword' && (
               <form onSubmit={handleForgotPasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ background: '#FFFDF0', border: '1px solid #FDE68A', padding: '12px 14px', borderRadius: '12px', fontSize: '0.78rem', color: '#92400E', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Clock size={16} style={{ flexShrink: 0 }} />
-                  Rate-Limited Protection: Max 3 reset emails allowed per 24 hours per user.
+                  Rate-Limited Protection: Max 3 reset requests per 24 hours.
                 </div>
 
                 <div>
@@ -484,8 +564,121 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                     {cooldownSeconds > 0 ? (
                       <>Wait {cooldownSeconds}s <RefreshCw size={16} className="spin" /></>
                     ) : (
-                      'Send Reset Email'
+                      'Send Reset Passcode'
                     )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* TAB 4: STEP 2 - ENTER 6-DIGIT PASSCODE & SET NEW PASSWORD */}
+            {mode === 'enterResetCode' && (
+              <form onSubmit={handleResetPasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '12px 14px', borderRadius: '12px', fontSize: '0.8rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Mail size={16} style={{ flexShrink: 0 }} />
+                  Check your inbox for the 6-digit passcode sent to <strong>{resetTargetEmail}</strong>.
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)', textAlign: 'center' }}>
+                    Enter 6-Digit Email Passcode *
+                  </label>
+                  <input
+                    type="text"
+                    maxLength="6"
+                    placeholder="123456"
+                    autoFocus
+                    required
+                    value={resetCodeInput}
+                    onChange={(e) => setResetCodeInput(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '12px',
+                      border: '2px solid var(--rotaract-pink)',
+                      fontSize: '1.5rem',
+                      fontWeight: 900,
+                      letterSpacing: '8px',
+                      textAlign: 'center',
+                      color: 'var(--rotaract-pink)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
+                    New Portal Password *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      placeholder="Enter new password (min. 6 characters)"
+                      required
+                      value={newPasswordInput}
+                      onChange={(e) => setNewPasswordInput(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 42px 12px 40px',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(216, 27, 96, 0.25)',
+                        fontSize: '0.92rem',
+                        outline: 'none'
+                      }}
+                    />
+                    <Lock size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--rotaract-pink)' }} />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                    >
+                      {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
+                    Confirm New Password *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      placeholder="Confirm new password"
+                      required
+                      value={confirmPasswordInput}
+                      onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px 12px 40px',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(216, 27, 96, 0.25)',
+                        fontSize: '0.92rem',
+                        outline: 'none'
+                      }}
+                    />
+                    <CheckCircle2 size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--rotaract-pink)' }} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setMode('forgotPassword');
+                      setErrorMessage('');
+                    }} 
+                    className="btn-rotaract-outline" 
+                    style={{ flex: 1, justifyContent: 'center', padding: '12px' }}
+                  >
+                    Back
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-rotaract" 
+                    style={{ flex: 2, justifyContent: 'center', padding: '12px' }}
+                  >
+                    Update Password <KeyRound size={16} />
                   </button>
                 </div>
               </form>
@@ -497,3 +690,4 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     </div>
   );
 }
+

@@ -67,3 +67,15 @@ export async function sendReportingReminderEmail({ clubName, month, recipientEma
     recipientEmail
   });
 }
+
+/**
+ * 4. Dispatch Password Reset Passcode Email
+ */
+export async function sendPasswordResetEmail({ name, rotaryId, recipientEmail, resetCode }) {
+  return await callEmailApi('password_reset', {
+    name,
+    rotaryId,
+    recipientEmail,
+    resetCode
+  });
+}

@@ -62,7 +62,7 @@ export const ROTARY_FOCUS_AREAS = [
 
 export const IMPACT_METRICS = [
   { label: "Lives Impacted", value: "55,000+", suffix: "Lives", change: "+22% this year", color: "#D81B60" },
-  { label: "Active Clubs", value: "49 Clubs", suffix: "Clubs", change: "RY 2026-27 Roster", color: "#123499" },
+  { label: "Active Clubs", value: "70+ Clubs", suffix: "Clubs", change: "RY 2026-27 Roster", color: "#123499" },
   { label: "Funds Mobilized", value: "₹1.5 Cr", suffix: "Capital", change: "100% Transparency", color: "#D81B60" },
   { label: "High-Impact Projects", value: "500+", suffix: "Executed", change: "RY 2026-27", color: "#880E4F" },
   { label: "Blood Units Donated", value: "15,000+", suffix: "Units", change: "Save 45k Lives", color: "#D81B60" }

@@ -414,6 +414,90 @@ export const dbService = {
       }
     }
     return { data: [], error: new Error('Supabase not configured') };
+  },
+
+  // Request a password reset passcode via RPC
+  requestPasswordReset: async (identity) => {
+    const cleanId = (identity || '').trim();
+    if (!cleanId) {
+      return { success: false, error: 'Please enter your registered Rotary ID or Email.' };
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.rpc('request_password_reset', {
+          p_identity: cleanId
+        });
+
+        if (error) {
+          console.warn('requestPasswordReset RPC error:', error);
+          return { success: false, error: error.message || 'Failed to initiate password reset.' };
+        }
+
+        if (data && data.length > 0) {
+          const res = data[0];
+          if (!res.success) {
+            return { success: false, error: res.error || 'No registered account found with that identity.' };
+          }
+
+          return {
+            success: true,
+            email: res.email,
+            fullName: res.full_name,
+            rotaryId: res.rotary_id,
+            resetCode: res.reset_code
+          };
+        }
+      } catch (err) {
+        console.warn('requestPasswordReset error:', err);
+        return { success: false, error: err.message };
+      }
+    }
+
+    return { success: false, error: 'Database service is currently unreachable. Please try again later.' };
+  },
+
+  // Verify passcode and set new password in Supabase via RPC
+  resetPassword: async (identity, resetCode, newPassword) => {
+    const cleanId = (identity || '').trim();
+    const cleanCode = (resetCode || '').trim();
+    const cleanPass = (newPassword || '').trim();
+
+    if (!cleanId || !cleanCode || !cleanPass) {
+      return { success: false, error: 'Missing required reset fields.' };
+    }
+
+    if (cleanPass.length < 6) {
+      return { success: false, error: 'Password must be at least 6 characters long.' };
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.rpc('reset_user_password', {
+          p_identity: cleanId,
+          p_code: cleanCode,
+          p_new_password: cleanPass
+        });
+
+        if (error) {
+          console.warn('resetPassword RPC error:', error);
+          return { success: false, error: error.message || 'Failed to update password.' };
+        }
+
+        if (data && data.length > 0) {
+          const res = data[0];
+          if (!res.success) {
+            return { success: false, error: res.error || 'Invalid reset code or expired session.' };
+          }
+          return { success: true };
+        }
+      } catch (err) {
+        console.warn('resetPassword error:', err);
+        return { success: false, error: err.message };
+      }
+    }
+
+    return { success: false, error: 'Database service is currently unreachable.' };
   }
 };
 

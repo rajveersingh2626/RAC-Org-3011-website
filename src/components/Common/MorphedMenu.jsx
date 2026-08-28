@@ -146,7 +146,7 @@ export default function MorphedMenu({
   const footerLinks = [
     { title: 'Interactive Map', action: () => { setActivePage('district'); setActiveDistrictTab('map-clubs'); setIsOpen(false); } },
     { title: 'Rotaract Global', url: 'https://www.rotary.org/en/get-involved/rotaract-clubs' },
-    { title: 'Official Instagram', url: 'https://www.instagram.com/p/DaLf_9YS28S/' }
+    { title: 'Official Instagram', url: 'https://www.instagram.com/rotaractdistrict.3011/' }
   ];
 
   return (
