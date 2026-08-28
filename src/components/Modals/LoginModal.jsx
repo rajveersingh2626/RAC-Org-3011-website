@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ShieldCheck, Lock, User, Mail, CheckCircle2, KeyRound, ShieldAlert, Smartphone, Clock, RefreshCw, QrCode, Copy, Eye, EyeOff } from 'lucide-react';
 import { dbService } from '../../lib/supabaseClient';
 import { getSecretForRotaryId, verifyTOTP, generateRandomBase32Secret } from '../../lib/totp';
-import { sendPasswordResetEmail } from '../../lib/emailService';
+import { requestSecurePasswordReset } from '../../lib/emailService';
 
 export default function LoginModal({ onClose, onLoginSuccess }) {
   const [mode, setMode] = useState('login'); // 'login' | 'google2fa' | 'forgotPassword' | 'enterResetCode'
@@ -122,7 +122,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     onClose();
   };
 
-  // Step 1: Request Password Reset Code
+  // Step 1: Request Password Reset Code (Zero Exposure)
   const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -145,31 +145,21 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     }
 
     setIsVerifying(true);
-    const res = await dbService.requestPasswordReset(cleanInput);
+    const res = await requestSecurePasswordReset(cleanInput);
+    setIsVerifying(false);
 
     if (!res.success) {
-      setIsVerifying(false);
-      setErrorMessage(res.error || 'No registered officer found with that Rotary ID or Email.');
+      setErrorMessage(res.error || 'No registered officer found with that Rotary ID or Email. Please check your spelling or contact the District Secretariat.');
       return;
     }
-
-    // Dispatch branded email with 6-digit passcode
-    const emailRes = await sendPasswordResetEmail({
-      name: res.fullName,
-      rotaryId: res.rotaryId,
-      recipientEmail: res.email,
-      resetCode: res.resetCode
-    });
-
-    setIsVerifying(false);
 
     const newAttempts = resetAttempts + 1;
     setResetAttempts(newAttempts);
     setCooldownSeconds(60);
 
-    const maskedEmail = res.email.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => `${a}${'*'.repeat(Math.max(b.length, 3))}${c}`);
-    setResetTargetEmail(maskedEmail);
-    setResetSuccessMsg(`A 6-digit password reset passcode has been sent to ${maskedEmail}.`);
+    const masked = res.maskedEmail || 'your registered email';
+    setResetTargetEmail(masked);
+    setResetSuccessMsg(`A 6-digit password reset passcode has been sent to ${masked}.`);
     setMode('enterResetCode');
   };
 

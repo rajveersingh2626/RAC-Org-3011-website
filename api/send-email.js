@@ -7,10 +7,11 @@
  */
 
 const FROM_ADDRESS = 'District 3011 Portal <portal@rotaract3011.org>';
+const FALLBACK_FROM = 'District 3011 Portal <onboarding@resend.dev>';
 const RESEND_API = 'https://api.resend.com/emails';
 
 async function sendViaResend({ to, subject, html, text }) {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY;
   if (!apiKey) {
     return { success: false, error: 'RESEND_API_KEY environment variable not set on server.' };
   }
@@ -18,7 +19,7 @@ async function sendViaResend({ to, subject, html, text }) {
   const recipients = Array.isArray(to) ? to : [to];
 
   try {
-    const res = await fetch(RESEND_API, {
+    let res = await fetch(RESEND_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,7 +34,27 @@ async function sendViaResend({ to, subject, html, text }) {
       })
     });
 
-    const data = await res.json();
+    let data = await res.json();
+
+    // If custom domain fails or is not verified on Resend, retry with onboarding@resend.dev
+    if (!res.ok) {
+      console.warn('[send-email] Retrying with fallback sender onboarding@resend.dev due to notice:', data);
+      res = await fetch(RESEND_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          from: FALLBACK_FROM,
+          to: recipients,
+          subject,
+          html,
+          text
+        })
+      });
+      data = await res.json();
+    }
 
     if (!res.ok) {
       console.error('[send-email] Resend API error:', data);
@@ -152,6 +173,9 @@ function buildReminderEmail({ clubName, month }) {
       </div>
     </div>`;
   const text = `Reporting Reminder for ${clubName}\nYour Monthly Project Report for ${month} is pending. Please submit: https://rotaract3011.org/portal`;
+  return { subject, html, text };
+}
+
 function buildPasswordResetEmail({ name, rotaryId, resetCode }) {
   const subject = `[District 3011 Security] Password Reset Passcode`;
   const html = `
@@ -241,6 +265,70 @@ export default async function handler(req, res) {
         emailContent = buildReminderEmail({ clubName, month });
         recipients = [recipientEmail || 'techrid3011@gmail.com'];
         break;
+      }
+
+      case 'request_password_reset': {
+        const identity = (payload?.identity || '').trim();
+        if (!identity) {
+          return res.status(400).json({ success: false, error: 'Rotary ID or Email is required.' });
+        }
+
+        const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+        const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseKey) {
+          return res.status(500).json({ success: false, error: 'Database environment variables not configured.' });
+        }
+
+        // Call Supabase RPC initiate_server_password_reset directly on server
+        const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/initiate_server_password_reset`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          },
+          body: JSON.stringify({ p_identity: identity })
+        });
+
+        const rpcData = await rpcRes.json();
+        if (!rpcRes.ok || !rpcData || rpcData.length === 0) {
+          return res.status(400).json({ success: false, error: 'No registered officer found with that Rotary ID or Email.' });
+        }
+
+        const userRecord = rpcData[0];
+        if (!userRecord.success) {
+          return res.status(400).json({ success: false, error: userRecord.error || 'No account found.' });
+        }
+
+        // Build email server-side
+        const resetCode = userRecord.reset_code;
+        const recipientEmail = userRecord.email;
+        const name = userRecord.full_name || 'Officer';
+        const rotaryId = userRecord.rotary_id || '';
+
+        emailContent = buildPasswordResetEmail({ name, rotaryId, resetCode });
+        recipients = [recipientEmail];
+
+        const sendResult = await sendViaResend({
+          to: recipients,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text
+        });
+
+        if (!sendResult.success) {
+          return res.status(500).json({ success: false, error: sendResult.error || 'Failed to dispatch email.' });
+        }
+
+        // Mask email for privacy (e.g. j***@gmail.com)
+        const maskedEmail = recipientEmail.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => `${a}${'*'.repeat(Math.max(b.length, 3))}${c}`);
+
+        // Return ONLY success & masked email — ZERO passcode exposure to browser DevTools
+        return res.status(200).json({
+          success: true,
+          maskedEmail
+        });
       }
 
       case 'password_reset': {
