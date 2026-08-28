@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShieldCheck, Lock, User, Mail, CheckCircle2, KeyRound, ShieldAlert, Smartphone, Clock, RefreshCw, QrCode, Copy } from 'lucide-react';
 import { dbService } from '../../lib/supabaseClient';
-import { getSecretForRotaryId, verifyTOTP } from '../../lib/totp';
+import { getSecretForRotaryId, verifyTOTP, generateRandomBase32Secret } from '../../lib/totp';
 
 export default function LoginModal({ onClose, onLoginSuccess }) {
   const [mode, setMode] = useState('login');
@@ -53,7 +53,15 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     const user = authResult.user;
     setAuthenticatedUser(user);
 
-    const secret = user.totpSecret || await getSecretForRotaryId(user.rotaryId || user.email);
+    let secret = user.totpSecret;
+    if (!secret) {
+      // Auto-provision a cryptographically random Base32 secret for this user and save it to Supabase
+      secret = generateRandomBase32Secret();
+      if (user.id) {
+        await dbService.saveUserTotpSecret(user.id, secret);
+      }
+      setShowKeyDetails(true); // Automatically expand setup key box for first-time 2FA setup
+    }
     setTotpSecret(secret);
 
     setMode('google2fa');

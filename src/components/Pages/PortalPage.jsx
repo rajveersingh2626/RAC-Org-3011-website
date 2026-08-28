@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { dbService, mockStore, REPORT_SECTIONS } from '../../lib/supabaseClient';
 import { sendReportFlaggedEmail, sendAnnouncementBroadcastEmail, sendReportingReminderEmail } from '../../lib/emailService';
 import { INITIAL_CLUBS } from '../../data/districtData';
@@ -95,11 +95,13 @@ export default function PortalPage({
 
   useEffect(() => {
     async function loadCloudData() {
-      const subs = await dbService.fetchSubmissions();
-      const annos = await dbService.fetchAnnouncements();
-      setSubmissions(subs);
-      setAnnouncements(annos);
-      if (subs.length > 0) {
+      const [subs, annos] = await Promise.all([
+        dbService.fetchSubmissions(),
+        dbService.fetchAnnouncements()
+      ]);
+      setSubmissions(subs || []);
+      setAnnouncements(annos || []);
+      if (subs && subs.length > 0) {
         setExpandedReportId(subs[0].id);
       }
     }
@@ -236,7 +238,7 @@ export default function PortalPage({
     const activePost = userSession.post || 'Officer';
 
     const reportPayload = {
-      id: editingReportId || `report-${activeEmail.replace(/[^a-zA-Z0-9]/g, '')}-${selectedMonth.replace(/\s+/g, '')}`,
+      id: editingReportId || null,
       month: selectedMonth,
       clubName: activeClubName,
       clubEmail: activeEmail,
@@ -248,8 +250,14 @@ export default function PortalPage({
     };
 
     const updatedSubmissions = await dbService.insertSubmission(reportPayload);
-    setSubmissions(updatedSubmissions);
-    setExpandedReportId(reportPayload.id);
+    setSubmissions(updatedSubmissions || []);
+    
+    if (updatedSubmissions && updatedSubmissions.length > 0) {
+      const match = updatedSubmissions.find(s => s.month === selectedMonth && (s.clubEmail === activeEmail || s.clubName === activeClubName));
+      if (match) {
+        setExpandedReportId(match.id);
+      }
+    }
 
     setIsReportModalOpen(false);
     setEditingReportId(null);
@@ -306,7 +314,8 @@ export default function PortalPage({
     setAnnouncements(updated);
 
     // Fetch target emails dynamically based on selected audience group
-    const TEST_GROUP_EMAILS = [
+    // TEST_GROUP_EMAILS is defined at the top of the announcements render block (line ~1257) — reuse here
+    const TEST_GROUP_EMAILS_BROADCAST = [
       'itsdrrarchit@gmail.com',
       'sarthakmanchanda2@gmail.com',
       'rtrshefali2004@gmail.com',
@@ -320,23 +329,16 @@ export default function PortalPage({
     let recipientEmails = ['techrid3011@gmail.com'];
 
     if (announcementTargetAudience === 'test_group') {
-      recipientEmails = TEST_GROUP_EMAILS;
-    } else {
+      recipientEmails = TEST_GROUP_EMAILS_BROADCAST;
+    } else if (announcementTargetAudience !== 'all') {
+      // Fetch audience emails via secure RPC (avoids direct user_profiles table access)
       try {
-        let query = supabase.from('user_profiles').select('email, role, post');
-        if (announcementTargetAudience === 'presidents') {
-          query = query.eq('post', 'Club President');
-        } else if (announcementTargetAudience === 'secretaries') {
-          query = query.eq('post', 'Club Secretary');
-        } else if (announcementTargetAudience === 'dac') {
-          query = query.or('role.eq.officer,role.eq.dac_member');
-        }
-        const { data: profileList } = await query;
-        if (profileList && profileList.length > 0) {
-          recipientEmails = Array.from(new Set(profileList.map(p => p.email).filter(Boolean)));
+        const { data: emailList, error: emailErr } = await dbService.fetchAudienceEmails(announcementTargetAudience);
+        if (!emailErr && emailList && emailList.length > 0) {
+          recipientEmails = emailList;
         }
       } catch (err) {
-        console.warn('Audience email query notice:', err);
+        console.warn('Audience email fetch notice:', err);
       }
     }
 
@@ -372,7 +374,36 @@ export default function PortalPage({
     setTimeout(() => setCopiedReminderClubId(null), 3000);
   };
 
+  // State for sending live email reminders
+  const [sendingReminderClub, setSendingReminderClub] = useState(null);
+  const [reminderEmailStatus, setReminderEmailStatus] = useState({});
+
+  // Direct automated email reminder dispatch via Serverless API
+  const handleSendReminderEmail = async (club) => {
+    setSendingReminderClub(club.name);
+    const targetEmail = club.email || club.secretaryEmail || 'techrid3011@gmail.com';
+    const emailRes = await sendReportingReminderEmail({
+      clubName: club.name,
+      month: complianceMonth,
+      recipientEmail: targetEmail
+    });
+    setSendingReminderClub(null);
+    if (emailRes && emailRes.success) {
+      setReminderEmailStatus(prev => ({ ...prev, [club.name]: 'sent' }));
+    } else {
+      setReminderEmailStatus(prev => ({ ...prev, [club.name]: 'failed' }));
+    }
+    setTimeout(() => {
+      setReminderEmailStatus(prev => {
+        const next = { ...prev };
+        delete next[club.name];
+        return next;
+      });
+    }, 4000);
+  };
+
   const userClubName = (userSession?.clubName || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+  const userEmail = (userSession?.email || '').toLowerCase();
 
   const clubSubmissions = isDistrictOfficer 
     ? submissions 
@@ -380,9 +411,8 @@ export default function PortalPage({
         if (!s) return false;
         const subClubName = (s.clubName || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
         const subEmail = (s.clubEmail || '').toLowerCase();
-        const uEmail = (userEmail || '').toLowerCase();
         return (
-          subEmail === uEmail || 
+          subEmail === userEmail || 
           (userClubName.length > 3 && subClubName.includes(userClubName)) || 
           (subClubName.length > 3 && userClubName.includes(subClubName))
         );
@@ -392,10 +422,20 @@ export default function PortalPage({
   const clubComplianceList = allDistrictClubs.map(c => {
     const matchingReport = submissions.find(s => {
       if (s.month !== complianceMonth) return false;
-      const subName = (s.clubName || '').toLowerCase();
-      const clubFull = (c.name || '').toLowerCase();
-      const clubShort = (c.shortName || '').toLowerCase();
-      return subName.includes(clubShort) || clubFull.includes(subName) || s.clubEmail === c.email;
+      const subName = (s.clubName || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+      const clubFull = (c.name || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+      const clubShort = (c.shortName || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+      const subEmail = (s.clubEmail || '').toLowerCase();
+      const clubEmail = (c.email || '').toLowerCase();
+      const secEmail = (c.secretaryEmail || '').toLowerCase();
+
+      return (
+        (subEmail && clubEmail && subEmail === clubEmail) ||
+        (subEmail && secEmail && subEmail === secEmail) ||
+        (subName && clubFull && subName === clubFull) ||
+        (clubShort.length > 3 && subName.includes(clubShort)) ||
+        (subName.length > 3 && clubFull.includes(subName))
+      );
     });
 
     let status = 'pending'; // 'submitted' | 'flagged' | 'pending'
@@ -740,25 +780,27 @@ export default function PortalPage({
                               <Eye size={14} /> {isExpanded ? 'Collapse Report' : 'Inspect Report'}
                             </button>
 
-                            <button
-                              onClick={() => handleDeleteReport(report.id)}
-                              style={{
-                                background: '#FFF1F2',
-                                border: '1px solid #FECDD3',
-                                color: '#E11D48',
-                                padding: '6px 14px',
-                                borderRadius: '100px',
-                                fontSize: '0.8rem',
-                                fontWeight: 800,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px'
-                              }}
-                              title="Permanently delete this report submission from Supabase"
-                            >
-                              <Trash2 size={14} /> Delete Report
-                            </button>
+                            {isDistrictOfficer && (
+                              <button
+                                onClick={() => handleDeleteReport(report.id)}
+                                style={{
+                                  background: '#FFF1F2',
+                                  border: '1px solid #FECDD3',
+                                  color: '#E11D48',
+                                  padding: '6px 14px',
+                                  borderRadius: '100px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                                title="Permanently delete this report submission from Supabase"
+                              >
+                                <Trash2 size={14} /> Delete Report
+                              </button>
+                            )}
                           </div>
                         </div>
 
@@ -1102,26 +1144,57 @@ export default function PortalPage({
                           {/* Actions */}
                           <td style={{ padding: '16px 20px', textAlign: 'right' }}>
                             {status === 'pending' ? (
-                              <button
-                                onClick={() => handleCopyReminder(club.name, club.president)}
-                                style={{
-                                  background: isCopied ? '#166534' : '#FFFFFF',
-                                  color: isCopied ? '#FFFFFF' : '#E11D48',
-                                  border: '1px solid #E11D48',
-                                  padding: '6px 14px',
-                                  borderRadius: '100px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 800,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  transition: 'all 0.2s ease'
-                                }}
-                              >
-                                {isCopied ? <Check size={13} /> : <Copy size={13} />}
-                                {isCopied ? 'Reminder Copied!' : 'Copy Reminder Notice'}
-                              </button>
+                              <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                <button
+                                  onClick={() => handleSendReminderEmail(club)}
+                                  disabled={sendingReminderClub === club.name}
+                                  style={{
+                                    background: reminderEmailStatus[club.name] === 'sent' ? '#F0FDF4' : '#FFFFFF',
+                                    color: reminderEmailStatus[club.name] === 'sent' ? '#166534' : 'var(--rotaract-pink)',
+                                    border: `1px solid ${reminderEmailStatus[club.name] === 'sent' ? '#BBF7D0' : 'var(--rotaract-pink)'}`,
+                                    padding: '6px 12px',
+                                    borderRadius: '100px',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 800,
+                                    cursor: sendingReminderClub === club.name ? 'wait' : 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                  title={`Send reminder email to ${club.email}`}
+                                >
+                                  {sendingReminderClub === club.name ? (
+                                    <><RefreshCw size={12} className="spin" /> Sending...</>
+                                  ) : reminderEmailStatus[club.name] === 'sent' ? (
+                                    <><Check size={12} /> Email Sent!</>
+                                  ) : (
+                                    <><Mail size={12} /> Email Reminder</>
+                                  )}
+                                </button>
+
+                                <button
+                                  onClick={() => handleCopyReminder(club.name, club.president)}
+                                  style={{
+                                    background: isCopied ? '#166534' : '#FFFFFF',
+                                    color: isCopied ? '#FFFFFF' : '#E11D48',
+                                    border: '1px solid #E11D48',
+                                    padding: '6px 12px',
+                                    borderRadius: '100px',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                  title="Copy WhatsApp reminder text"
+                                >
+                                  {isCopied ? <Check size={12} /> : <Copy size={12} />}
+                                  {isCopied ? 'Copied!' : 'Copy Notice'}
+                                </button>
+                              </div>
                             ) : (
                               <button
                                 onClick={() => {

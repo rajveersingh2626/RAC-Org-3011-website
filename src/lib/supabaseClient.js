@@ -179,27 +179,31 @@ export const dbService = {
   fetchSubmissions: async () => {
     if (isSupabaseConfigured && supabase) {
       try {
-        // 1. Try fetching from dedicated monthly_reports table first
+        // 1. Fetch from monthly_reports table
         const { data: reportData, error: reportErr } = await supabase
           .from('monthly_reports')
           .select('*')
           .order('submitted_at', { ascending: false });
 
-        if (!reportErr && reportData) {
+        if (!reportErr && reportData && reportData.length > 0) {
           return reportData.map(parseSubFromDB);
         }
 
-        // 2. Fallback to project_submissions table
+        // 2. Fallback to project_submissions table if monthly_reports returned no rows or had error
         const { data: subData, error: subErr } = await supabase
           .from('project_submissions')
           .select('*')
           .order('submitted_at', { ascending: false });
 
-        if (!subErr && subData) {
+        if (!subErr && subData && subData.length > 0) {
           return subData.map(parseSubFromDB);
         }
+
+        if (!reportErr && reportData) {
+          return [];
+        }
       } catch (err) {
-        console.error('Supabase fetch error:', err);
+        console.error('Supabase fetch submissions error:', err);
       }
     }
     return mockStore.getSubmissions();
@@ -212,24 +216,30 @@ export const dbService = {
 
         // 1. Insert/Upsert to dedicated monthly_reports table
         const reportPayload = {
-          id: newReport.id && !newReport.id.startsWith('report-17') ? newReport.id : undefined,
           month: newReport.month,
           club_name: newReport.clubName,
           club_email: newReport.clubEmail,
           submitted_by: newReport.submittedBy,
           status: newReport.status || 'reported',
+          flag_comment: newReport.flagComment || null,
           sections_json: newReport.sections
         };
 
-        const { error: mrErr } = await supabase
+        // Only include ID if it is a valid UUID
+        if (newReport.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(newReport.id)) {
+          reportPayload.id = newReport.id;
+        }
+
+        const { data: mrData, error: mrErr } = await supabase
           .from('monthly_reports')
-          .upsert([reportPayload]);
+          .upsert([reportPayload], { onConflict: 'club_email,month' })
+          .select();
 
         if (!mrErr) {
-          console.log('Successfully upserted report to Supabase monthly_reports table!');
+          console.log('Successfully saved monthly report to Supabase monthly_reports!', mrData);
           return await dbService.fetchSubmissions();
         } else {
-          console.warn('Supabase monthly_reports insert notice:', mrErr.message || mrErr);
+          console.warn('Supabase monthly_reports upsert notice:', mrErr.message || mrErr);
         }
 
         // 2. Fallback insert to project_submissions table
@@ -251,7 +261,7 @@ export const dbService = {
           .insert([subPayload]);
 
         if (!subErr) {
-          console.log('Successfully saved report to Supabase project_submissions table!');
+          console.log('Successfully saved report to Supabase project_submissions fallback table!');
           return await dbService.fetchSubmissions();
         } else {
           console.warn('Supabase project_submissions insert notice:', subErr.message || subErr);
@@ -266,11 +276,13 @@ export const dbService = {
   flagSubmission: async (id, comment) => {
     if (isSupabaseConfigured && supabase) {
       try {
-        // Try updating monthly_reports
-        const { error: mrErr } = await supabase
-          .from('monthly_reports')
-          .update({ status: 'flagged', flag_comment: comment })
-          .eq('id', id);
+        let query = supabase.from('monthly_reports').update({ status: 'flagged', flag_comment: comment });
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+          query = query.eq('id', id);
+        } else {
+          query = query.eq('id', id);
+        }
+        const { error: mrErr } = await query;
 
         if (!mrErr) {
           return await dbService.fetchSubmissions();
@@ -363,6 +375,45 @@ export const dbService = {
       }
     }
     return mockStore.addAnnouncement(announcement);
+  },
+
+  // Save TOTP secret securely to Supabase user_profiles via RPC
+  saveUserTotpSecret: async (userId, secret) => {
+    if (isSupabaseConfigured && supabase && userId && secret) {
+      try {
+        const { error } = await supabase.rpc('set_user_totp_secret', {
+          p_user_id: userId,
+          p_secret: secret
+        });
+        if (error) {
+          console.warn('saveUserTotpSecret RPC notice:', error.message || error);
+          return false;
+        }
+        return true;
+      } catch (err) {
+        console.warn('saveUserTotpSecret exception:', err);
+        return false;
+      }
+    }
+    return false;
+  },
+
+  // Fetch audience emails securely via RPC (never queries user_profiles directly from client)
+  fetchAudienceEmails: async (audience) => {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .rpc('get_audience_emails', { p_audience: audience });
+        if (!error && data) {
+          const emails = data.map(r => r.email).filter(Boolean);
+          return { data: Array.from(new Set(emails)), error: null };
+        }
+        return { data: [], error };
+      } catch (err) {
+        return { data: [], error: err };
+      }
+    }
+    return { data: [], error: new Error('Supabase not configured') };
   }
 };
 
