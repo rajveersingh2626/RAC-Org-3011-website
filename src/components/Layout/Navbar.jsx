@@ -17,6 +17,10 @@ export default function Navbar({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredSubTab, setHoveredSubTab] = useState(null);
   const hoverTimeoutRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(() => window.innerWidth >= 768 && window.innerWidth < 1024);
+
+
 
   const handleMouseEnter = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -70,7 +74,19 @@ export default function Navbar({
     };
   }, [activePage]);
 
-  const shouldShowNavbar = isHovered || isScrolled || isMenuOpen;
+  useEffect(() => {
+    const handleResize = () => {
+      const w = window.innerWidth;
+      setIsMobile(w < 768);
+      setIsTablet(w >= 768 && w < 1024);
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+
+  // On mobile: always show the navbar (no hover on touch devices)
+  const shouldShowNavbar = isMobile || isHovered || isScrolled || isMenuOpen;
 
   return (
     <div
@@ -118,8 +134,9 @@ export default function Navbar({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '36px',
-            height: '36px',
+            /* 44×44px touch target on mobile, 36×36px on desktop */
+            width: isMobile ? '44px' : '36px',
+            height: isMobile ? '44px' : '36px',
             borderRadius: '50%',
             border: 'none',
             backgroundColor: 'transparent',
@@ -128,7 +145,8 @@ export default function Navbar({
             opacity: isMenuOpen ? 0 : 1,
             pointerEvents: isMenuOpen ? 'none' : 'auto',
             transition: 'opacity 0.25s ease, color 0.2s ease',
-            outline: 'none'
+            outline: 'none',
+            flexShrink: 0
           }}
           onMouseEnter={(e) => {
             if (!isMenuOpen) e.currentTarget.style.color = '#123499';
@@ -137,7 +155,7 @@ export default function Navbar({
             if (!isMenuOpen) e.currentTarget.style.color = '#FFFFFF';
           }}
         >
-          <Home size={20} />
+          <Home size={isMobile ? 22 : 20} />
         </button>
 
         <div 
@@ -151,13 +169,14 @@ export default function Navbar({
           }} 
         />
 
-        {activePage === 'district' && (
+        {/* District sub-tabs: hidden on mobile (use MorphedMenu instead), shown on tablet+ */}
+        {activePage === 'district' && !isMobile && (
           <>
             <div 
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '4px',
+                gap: isTablet ? '2px' : '4px',
                 opacity: isMenuOpen ? 0 : 1,
                 pointerEvents: isMenuOpen ? 'none' : 'auto',
                 transition: 'opacity 0.25s ease'
@@ -166,7 +185,8 @@ export default function Navbar({
               {districtSubTabs.map((tab) => {
                 const isTabActive = activePage === 'district' && activeDistrictTab === tab.id;
                 const isTabHovered = hoveredSubTab === tab.id;
-                const isExpanded = isTabHovered || isTabActive;
+                // On tablet: only expand active tab labels to save space
+                const isExpanded = isTablet ? isTabActive : (isTabHovered || isTabActive);
 
                 return (
                   <button
@@ -186,7 +206,7 @@ export default function Navbar({
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
-                      padding: isExpanded ? '6px 12px' : '6px 8px',
+                      padding: isExpanded ? '6px 10px' : '6px 8px',
                       borderRadius: '16px',
                       border: 'none',
                       backgroundColor: isTabActive 
@@ -197,20 +217,21 @@ export default function Navbar({
                       color: isTabHovered ? '#FFFFFF' : 'rgba(255, 255, 255, 0.85)',
                       cursor: 'pointer',
                       transition: 'all 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
-                      outline: 'none'
+                      outline: 'none',
+                      minHeight: '36px'
                     }}
                   >
-                    <span style={{ display: 'flex', alignItems: 'center', color: isTabActive ? '#123499' : 'inherit' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', color: isTabActive ? '#123499' : 'inherit', flexShrink: 0 }}>
                       {tab.icon}
                     </span>
 
                     <span
                       style={{
-                        maxWidth: isExpanded ? '120px' : '0px',
+                        maxWidth: isExpanded ? '100px' : '0px',
                         opacity: isExpanded ? 1 : 0,
                         overflow: 'hidden',
                         whiteSpace: 'nowrap',
-                        fontSize: '0.8rem',
+                        fontSize: isTablet ? '0.72rem' : '0.8rem',
                         fontWeight: 700,
                         color: '#FFFFFF',
                         transition: 'all 0.28s cubic-bezier(0.16, 1, 0.3, 1)'

@@ -117,8 +117,28 @@ function BigRotaryWheel({ containerRef }) {
   const ambientRotationRef = useRef(0);
   const currentScaleRef = useRef(1);
   const currentLeftRef = useRef(92);
+  const [screenSize, setScreenSize] = useState(() => {
+    const w = window.innerWidth;
+    if (w < 768) return 'mobile';
+    if (w < 1024) return 'tablet';
+    return 'desktop';
+  });
 
   useEffect(() => {
+    const handleResize = () => {
+      const w = window.innerWidth;
+      if (w < 768) setScreenSize('mobile');
+      else if (w < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    // Skip heavy animation on mobile — wheel is hidden
+    if (screenSize === 'mobile') return;
+
     let animFrameId;
 
     const handleScroll = () => {
@@ -139,8 +159,9 @@ function BigRotaryWheel({ containerRef }) {
       const scrollY = scrollYRef.current;
       const scrollProgress = Math.min(1, Math.max(0, scrollY / 450));
 
+      const baseLeft = screenSize === 'tablet' ? 95 : 92;
       const targetScale = 1.0 - scrollProgress * 0.28;
-      const targetLeft = 92 + scrollProgress * 6;
+      const targetLeft = baseLeft + scrollProgress * 4;
 
       currentScaleRef.current += (targetScale - currentScaleRef.current) * 0.08;
       currentLeftRef.current += (targetLeft - currentLeftRef.current) * 0.08;
@@ -168,7 +189,12 @@ function BigRotaryWheel({ containerRef }) {
         containerEl.removeEventListener('scroll', handleScroll);
       }
     };
-  }, [containerRef]);
+  }, [containerRef, screenSize]);
+
+  // Hide wheel entirely on mobile (approved in plan)
+  if (screenSize === 'mobile') return null;
+
+  const wheelSize = screenSize === 'tablet' ? '700px' : '1100px';
 
   return (
     <div
@@ -176,10 +202,10 @@ function BigRotaryWheel({ containerRef }) {
       style={{
         position: 'fixed',
         top: '50%',
-        left: '92%',
+        left: screenSize === 'tablet' ? '95%' : '92%',
         transform: 'translate(-50%, -50%) scale(1) rotate(0deg)',
-        width: '1100px',
-        height: '1100px',
+        width: wheelSize,
+        height: wheelSize,
         maxWidth: '95vw',
         maxHeight: '95vw',
         pointerEvents: 'none',
@@ -216,9 +242,14 @@ const BASE_PROJECTS = [
 function ExpandingCarousel() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      const w = window.innerWidth;
+      setIsMobile(w < 768);
+      setIsTablet(w >= 768 && w < 1024);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -231,9 +262,10 @@ function ExpandingCarousel() {
         width: '100%',
         maxWidth: '1350px',
         margin: '0 auto',
-        gap: '16px',
-        height: isMobile ? 'auto' : '650px',
-        padding: '0 20px',
+        gap: isMobile ? '10px' : '16px',
+        /* Tablet: reduce height from 650px to 500px */
+        height: isMobile ? 'auto' : isTablet ? '500px' : '650px',
+        padding: isMobile ? '0 12px' : '0 20px',
         zIndex: 5,
         position: 'relative'
       }}
@@ -381,6 +413,13 @@ export default function PublicHome({ onNavigateDistrict, onOpenLoginModal }) {
   const isScrolling = useRef(false);
   const currentSectionRef = useRef(0);
   const lastScrollTime = useRef(0);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -559,6 +598,8 @@ export default function PublicHome({ onNavigateDistrict, onOpenLoginModal }) {
           justifyContent: 'center',
           alignItems: 'flex-start',
           overflow: 'hidden',
+          /* On mobile the section padding is handled by CSS media query;
+             keep desktop padding here */
           padding: '0 4vw'
         }}
       >
@@ -672,7 +713,8 @@ export default function PublicHome({ onNavigateDistrict, onOpenLoginModal }) {
           <div
             style={{
               background: '#FFFFFF',
-              padding: '28px 36px',
+              /* Reduce padding on mobile from 28px/36px to 16px */
+              padding: 'clamp(16px, 3vw, 36px)',
               borderRadius: '24px',
               border: '2px solid rgba(216, 27, 96, 0.15)',
               boxShadow: '0 10px 35px rgba(216, 27, 96, 0.06)',
@@ -999,7 +1041,8 @@ export default function PublicHome({ onNavigateDistrict, onOpenLoginModal }) {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  {/* Email and Phone: single column on mobile, two columns on desktop */}
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '4px' }}>
                         Email *

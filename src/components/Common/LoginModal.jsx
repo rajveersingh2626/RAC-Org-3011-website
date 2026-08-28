@@ -6,6 +6,7 @@ import { getSecretForRotaryId, verifyTOTP } from '../../lib/totp';
 export default function LoginModal({ onClose, onLoginSuccess }) {
   // Mode: 'login' | 'google2fa' | 'forgotPassword'
   const [mode, setMode] = useState('login');
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   
   // Credentials (Rotary ID & Password)
   const [rotaryId, setRotaryId] = useState('');
@@ -41,6 +42,12 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
       if (timer) clearInterval(timer);
     };
   }, [cooldownSeconds]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Step 1: Submit Credentials (Rotary ID & Password)
   const handleCredentialsSubmit = async (e) => {
@@ -155,45 +162,49 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
         backdropFilter: 'blur(8px)',
         zIndex: 2000,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: isMobile ? 'flex-end' : 'center',
         justifyContent: 'center',
-        padding: '20px'
+        /* On mobile: slide up from bottom like a sheet for easier thumb reach */
+        padding: isMobile ? '0' : '20px'
       }}
     >
       <div 
         className="rotaract-card"
         style={{
           width: '100%',
-          maxWidth: '480px',
-          padding: '36px',
+          maxWidth: isMobile ? '100%' : '480px',
+          padding: isMobile ? '24px 20px 32px 20px' : '36px',
           position: 'relative',
           border: '2px solid var(--rotaract-pink)',
           animation: 'fadeInUp 0.3s ease-out forwards',
           boxShadow: '0 20px 60px rgba(216, 27, 96, 0.25)',
           backgroundColor: '#FFFFFF',
-          borderRadius: '24px'
+          borderRadius: isMobile ? '24px 24px 0 0' : '24px',
+          maxHeight: isMobile ? '92svh' : 'none',
+          overflowY: isMobile ? 'auto' : 'visible'
         }}
       >
-        {/* Close Button */}
+        {/* Close Button — 44×44px touch target on mobile */}
         <button
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '20px',
-            right: '20px',
+            top: isMobile ? '16px' : '20px',
+            right: isMobile ? '16px' : '20px',
             background: '#FDF0F5',
             border: 'none',
             color: 'var(--rotaract-pink)',
-            width: '34px',
-            height: '34px',
+            width: isMobile ? '44px' : '34px',
+            height: isMobile ? '44px' : '34px',
             borderRadius: '50%',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            flexShrink: 0
           }}
         >
-          <X size={18} />
+          <X size={isMobile ? 20 : 18} />
         </button>
 
         {/* VERIFYING MICRO-INTERACTION */}

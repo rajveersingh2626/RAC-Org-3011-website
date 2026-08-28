@@ -23,6 +23,7 @@ export default function MorphedMenu({
   const [hoveredSubNav, setHoveredSubNav] = useState(null);
   const [hoveredFooter, setHoveredFooter] = useState(null);
   const [districtExpanded, setDistrictExpanded] = useState(true);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -45,6 +46,12 @@ export default function MorphedMenu({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const mainLinks = [
@@ -540,8 +547,9 @@ export default function MorphedMenu({
           aria-label={isOpen ? "Close menu" : "Open menu"}
           style={{
             position: 'relative',
-            height: '36px',
-            padding: '0 8px',
+            height: isMobile ? '44px' : '36px',
+            minWidth: isMobile ? '64px' : 'auto',
+            padding: isMobile ? '0 14px' : '0 8px',
             borderRadius: '18px',
             overflow: 'hidden',
             border: 'none',

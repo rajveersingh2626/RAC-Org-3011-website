@@ -799,4 +799,165 @@ button,
   .desktop-nav-links {
     display: none !important;
   }
-}
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN — MOBILE & TABLET BREAKPOINTS
+   ========================================================================== */
+
+/* ---- TABLET (768px – 1024px) ---- */
+@media (max-width: 1024px) {
+  /* Snap sections: allow content to breathe on tablet */
+  .snap-section {
+    padding: 24px 20px;
+  }
+
+  /* Frosted slideout panel: narrower on tablet */
+  .frosted-slideout-panel {
+    max-width: 480px;
+  }
+
+  /* Accordion slices: reduce height on tablet */
+  .accordion-slices-wrapper {
+    height: 380px;
+    gap: 10px;
+  }
+
+  /* Glass loading card: slightly reduced padding */
+  .glass-loading-card {
+    padding: 28px 36px;
+  }
+
+  /* Rotary scroll gear: hide on tablet (too large) */
+  .rotary-scroll-gear {
+    display: none;
+  }
+}
+
+/* ---- MOBILE (< 768px) ---- */
+@media (max-width: 767px) {
+  /* CRITICAL: Disable mandatory snap-scroll on mobile.
+     Mobile browser chrome (address bar) dynamically changes vh,
+     causing content to be trapped or clipped behind it. */
+  html, body {
+    height: auto !important;
+    overflow: hidden !important; /* Keep outer body locked */
+  }
+
+  .snap-container {
+    scroll-snap-type: none !important; /* Disable mandatory snapping on mobile */
+    height: 100dvh; /* Use dynamic viewport height to avoid browser chrome issues */
+    overflow-y: auto !important;
+  }
+
+  .snap-section {
+    scroll-snap-align: none !important;
+    scroll-snap-stop: unset !important;
+    height: auto !important;
+    min-height: 100svh; /* Small viewport height — excludes browser chrome */
+    max-height: none !important;
+    padding: 80px 16px 40px 16px; /* Top padding accounts for navbar */
+    overflow: visible !important; /* Let content breathe */
+  }
+
+  .snap-section-footer {
+    scroll-snap-align: none !important;
+  }
+
+  /* Section content: full width on mobile */
+  .section-content-animate {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  /* Frosted slideout panel: full width on mobile */
+  .frosted-slideout-panel {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Glass loading card: compact on mobile */
+  .glass-loading-card {
+    padding: 24px 20px;
+    border-radius: 16px;
+    width: calc(100% - 32px);
+  }
+
+  /* Accordion image slices: stack vertically on mobile */
+  .accordion-slices-wrapper {
+    flex-direction: column;
+    height: auto;
+    gap: 10px;
+  }
+
+  .accordion-slice {
+    flex: none !important;
+    height: 200px;
+    border-radius: 14px;
+  }
+
+  .accordion-slice:hover {
+    flex: none !important;
+  }
+
+  /* All buttons: ensure minimum 44px touch targets on mobile */
+  button {
+    min-height: 44px;
+  }
+
+  /* Pill badges: slightly larger on mobile for readability */
+  .pill-pink,
+  .pill-gold {
+    font-size: 0.75rem;
+    padding: 5px 12px;
+  }
+
+  /* Primary buttons: full width usability */
+  .btn-rotaract,
+  .btn-rotaract-outline,
+  .btn-gold {
+    padding: 13px 20px;
+    font-size: 0.92rem;
+    min-height: 44px;
+  }
+
+  /* Rotary scroll gear: hide on mobile */
+  .rotary-scroll-gear {
+    display: none !important;
+  }
+
+  /* Custom cursor: disable on touch devices */
+  .custom-cursor-dot,
+  .custom-cursor-follower {
+    display: none !important;
+  }
+
+  /* Glass hover tooltip: not useful on touch */
+  .glass-hover-tooltip {
+    display: none !important;
+  }
+
+  /* Neon marker labels: smaller on mobile */
+  .neon-marker-label {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    max-width: 110px;
+  }
+
+  /* Reduce rotary gear from interfering */
+  .rotary-scroll-gear {
+    display: none !important;
+  }
+}
+
+/* ---- VERY SMALL MOBILE (< 400px) ---- */
+@media (max-width: 399px) {
+  .snap-section {
+    padding: 72px 12px 32px 12px;
+  }
+
+  .glass-loading-card {
+    padding: 20px 14px;
+  }
+}
+

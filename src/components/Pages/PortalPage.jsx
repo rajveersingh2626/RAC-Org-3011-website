@@ -51,6 +51,13 @@ export default function PortalPage({
   clubs = INITIAL_CLUBS
 }) {
   const [activePortalTab, setActivePortalTab] = useState('management');
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const [submissions, setSubmissions] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
@@ -472,12 +479,26 @@ export default function PortalPage({
   });
 
   return (
-    <div style={{ backgroundColor: '#FDF8FA', minHeight: '100vh', padding: '36px 24px 80px 24px', position: 'relative' }}>
+    <div style={{
+      backgroundColor: '#FDF8FA',
+      minHeight: '100vh',
+      /* Mobile: reduce side padding and add top padding for fixed navbar */
+      padding: isMobile ? '80px 12px 60px 12px' : '36px 24px 80px 24px',
+      position: 'relative'
+    }}>
       <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
         
         {/* UNAUTHENTICATED LOCK SCREEN */}
         {!isLoggedIn && !userSession && (
-          <div style={{ backgroundColor: '#FFFFFF', border: '2px solid var(--rotaract-pink)', borderRadius: '24px', padding: '40px 32px', textAlign: 'center', marginBottom: '32px', boxShadow: '0 14px 40px rgba(216, 27, 96, 0.12)' }}>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            border: '2px solid var(--rotaract-pink)',
+            borderRadius: isMobile ? '18px' : '24px',
+            padding: isMobile ? '28px 16px' : '40px 32px',
+            textAlign: 'center',
+            marginBottom: '32px',
+            boxShadow: '0 14px 40px rgba(216, 27, 96, 0.12)'
+          }}>
             <Lock size={44} style={{ color: 'var(--rotaract-pink)', marginBottom: '14px' }} />
             <h3 style={{ fontSize: '1.7rem', fontWeight: 900, color: 'var(--text-primary)', marginBottom: '8px' }}>
               District 3011 Portal Login Required
@@ -572,22 +593,36 @@ export default function PortalPage({
           </div>
         </div>
 
-        {/* PORTAL TABS */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '28px', borderBottom: '2px solid rgba(216, 27, 96, 0.1)', paddingBottom: '12px', overflowX: 'auto' }}>
+        {/* PORTAL TABS — horizontal scrollable on mobile */}
+        <div style={{
+          display: 'flex',
+          gap: isMobile ? '8px' : '12px',
+          marginBottom: '28px',
+          borderBottom: '2px solid rgba(216, 27, 96, 0.1)',
+          paddingBottom: '12px',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          /* Hide scrollbar visually but keep it functional */
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
           <button
             onClick={() => setActivePortalTab('management')}
             style={{
               background: activePortalTab === 'management' ? 'var(--rotaract-pink)' : 'transparent',
               color: activePortalTab === 'management' ? '#FFFFFF' : 'var(--text-secondary)',
               border: 'none',
-              padding: '10px 22px',
+              padding: isMobile ? '10px 14px' : '10px 22px',
               borderRadius: '100px',
               fontWeight: 800,
-              fontSize: '0.9rem',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '6px',
+              whiteSpace: 'nowrap',
+              minHeight: '44px',
+              flexShrink: 0
             }}
           >
             <FileText size={18} />
@@ -601,14 +636,17 @@ export default function PortalPage({
                 background: activePortalTab === 'compliance' ? 'var(--rotaract-pink)' : 'transparent',
                 color: activePortalTab === 'compliance' ? '#FFFFFF' : 'var(--text-secondary)',
                 border: 'none',
-                padding: '10px 22px',
+                padding: isMobile ? '10px 14px' : '10px 22px',
                 borderRadius: '100px',
                 fontWeight: 800,
-                fontSize: '0.9rem',
+                fontSize: isMobile ? '0.8rem' : '0.9rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '6px',
+                whiteSpace: 'nowrap',
+                minHeight: '44px',
+                flexShrink: 0
               }}
             >
               <BarChart3 size={18} />
@@ -622,14 +660,17 @@ export default function PortalPage({
               background: activePortalTab === 'announcements' ? 'var(--rotaract-pink)' : 'transparent',
               color: activePortalTab === 'announcements' ? '#FFFFFF' : 'var(--text-secondary)',
               border: 'none',
-              padding: '10px 22px',
+              padding: isMobile ? '10px 14px' : '10px 22px',
               borderRadius: '100px',
               fontWeight: 800,
-              fontSize: '0.9rem',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '6px',
+              whiteSpace: 'nowrap',
+              minHeight: '44px',
+              flexShrink: 0
             }}
           >
             <Bell size={18} />
