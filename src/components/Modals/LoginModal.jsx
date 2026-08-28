@@ -77,7 +77,18 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     }
 
     const rawRole = (authenticatedUser.role || '').toLowerCase().trim();
-    const assignedRole = rawRole === 'officer' ? 'officer' : 'president';
+
+    if (rawRole === 'dac_member') {
+      setErrorMessage('Access Denied: DAC Members do not have access to District or Club Portals.');
+      return;
+    }
+
+    if (rawRole !== 'officer' && rawRole !== 'president') {
+      setErrorMessage('Access Denied: Account role unauthorized for portal access.');
+      return;
+    }
+
+    const assignedRole = rawRole;
     const isOfficer = assignedRole === 'officer';
 
     onLoginSuccess({

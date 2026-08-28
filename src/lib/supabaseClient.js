@@ -257,7 +257,16 @@ export const dbService = {
           }
 
           const rawRole = (data.role || '').toLowerCase().trim();
-          const role = rawRole === 'officer' ? 'officer' : 'president';
+          
+          if (rawRole === 'dac_member') {
+            return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
+          }
+
+          if (rawRole !== 'officer' && rawRole !== 'president') {
+            return { success: false, error: `Access Denied: Role '${data.role}' is not authorized for portal access.` };
+          }
+
+          const role = rawRole;
 
           return {
             success: true,
@@ -266,9 +275,9 @@ export const dbService = {
               rotaryId: data.rotary_id || data.rotaryId || cleanId,
               email: data.email || cleanId,
               role: role,
-              fullName: data.full_name || data.fullName || data.name || 'Rotaract Officer',
-              clubName: data.club_name || data.clubName || 'Rotaract Club',
-              post: data.post || data.designation || (role === 'officer' ? 'District Secretariat Officer' : 'Club President'),
+              fullName: data.full_name || data.fullName || data.name || (role === 'officer' ? 'District Secretariat Officer' : 'Club Officer'),
+              clubName: data.club_name || data.clubName || (role === 'officer' ? 'District Secretariat 3011' : 'Rotaract Club'),
+              post: data.post || data.designation || (role === 'officer' ? 'District Secretariat Officer' : 'Club President / Secretary'),
               totpSecret: data.totp_secret || data.totpSecret || null
             }
           };
@@ -278,9 +287,11 @@ export const dbService = {
       }
     }
 
-    // Standalone / Network Failure Fallback (cloned from working commit d157939b & 59950c6)
+    // Standalone / Network Failure Fallback (only used if network is disconnected)
     if (cleanId && cleanPass && (cleanPass === 'adminpassword' || cleanPass === 'rotarypassword' || cleanPass.length >= 4)) {
-      const isOfficer = cleanId.toLowerCase().includes('admin') || cleanId.toLowerCase().includes('officer') || cleanId.toLowerCase().includes('secretariat');
+      const isOfficer = cleanId.toLowerCase().includes('admin') || 
+                        cleanId.toLowerCase().includes('officer') || 
+                        cleanId.toLowerCase().includes('secretariat');
       return {
         success: true,
         user: {
