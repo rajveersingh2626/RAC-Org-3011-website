@@ -123,9 +123,9 @@ export const dbService = {
                 rotaryId: row.rotary_id || cleanId,
                 email: row.email || cleanId,
                 role: rawRole,
-                fullName: row.full_name || (rawRole === 'officer' ? 'District Secretariat Officer' : 'Club Officer'),
-                clubName: row.club_name || (rawRole === 'officer' ? 'District Secretariat 3011' : 'Rotaract Club'),
-                post: row.post || (rawRole === 'officer' ? 'District Secretariat Officer' : 'Club President / Secretary'),
+                fullName: row.full_name || row.fullName || null,
+                clubName: row.club_name || row.clubName || null,
+                post: row.post || row.designation || null,
                 totpSecret: row.totp_secret || null
               }
             };
@@ -148,12 +148,17 @@ export const dbService = {
                 .eq('id', authData.user.id)
                 .maybeSingle();
               
-              const rawRole = (profData?.role || authData.user.user_metadata?.role || 'president').toLowerCase().trim();
+              const dbRole = profData?.role || authData.user.user_metadata?.role;
+              if (!dbRole) {
+                return { success: false, error: 'Access Denied: Account role is missing in Supabase database.' };
+              }
+
+              const rawRole = String(dbRole).toLowerCase().trim();
               if (rawRole === 'dac_member') {
                 return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
               }
               if (rawRole !== 'officer' && rawRole !== 'president') {
-                return { success: false, error: 'Access Denied: Account role unauthorized for portal access.' };
+                return { success: false, error: `Access Denied: Role '${dbRole}' is unauthorized for portal access.` };
               }
 
               return {
@@ -163,9 +168,9 @@ export const dbService = {
                   rotaryId: profData?.rotary_id || profData?.rotaryId || authData.user.user_metadata?.rotary_id || cleanId,
                   email: authData.user.email || cleanId,
                   role: rawRole,
-                  fullName: profData?.full_name || profData?.fullName || authData.user.user_metadata?.full_name || (rawRole === 'officer' ? 'District Secretariat Officer' : 'Club Officer'),
-                  clubName: profData?.club_name || profData?.clubName || authData.user.user_metadata?.club_name || (rawRole === 'officer' ? 'District Secretariat 3011' : 'Rotaract Club'),
-                  post: profData?.post || profData?.designation || authData.user.user_metadata?.post || (rawRole === 'officer' ? 'District Secretariat Officer' : 'Club President / Secretary'),
+                  fullName: profData?.full_name || profData?.fullName || authData.user.user_metadata?.full_name || null,
+                  clubName: profData?.club_name || profData?.clubName || authData.user.user_metadata?.club_name || null,
+                  post: profData?.post || profData?.designation || authData.user.user_metadata?.post || null,
                   totpSecret: profData?.totp_secret || profData?.totpSecret || null
                 }
               };
@@ -178,7 +183,7 @@ export const dbService = {
         // 2. Safe & Robust Supabase user_profiles table queries
         let data = null;
 
-        // Query A: Exact match on rotary_id using .eq (Works for both string and integer/bigint columns in Postgres)
+        // Query A: Exact match on rotary_id using .eq
         try {
           const { data: eqRes, error: eqErr } = await supabase
             .from('user_profiles')
@@ -224,7 +229,7 @@ export const dbService = {
           }
         }
 
-        // Query D: Try case-insensitive ilike on rotary_id (in case rotary_id is a text column)
+        // Query D: Try case-insensitive ilike on rotary_id
         if (!data) {
           try {
             const { data: ilikeRes, error: ilikeErr } = await supabase
@@ -276,26 +281,6 @@ export const dbService = {
           }
         }
 
-        // Query G: Fallback check on 'profiles' table name if 'user_profiles' table wasn't used
-        if (!data) {
-          try {
-            const { data: altProfiles, error: altErr } = await supabase
-              .from('profiles')
-              .select('*')
-              .limit(200);
-            if (!altErr && altProfiles && altProfiles.length > 0) {
-              data = altProfiles.find(p => {
-                const pId = String(p.rotary_id || p.rotaryId || '').trim();
-                const pEmail = String(p.email || '').trim().toLowerCase();
-                const cId = cleanId.toLowerCase();
-                return pId === cleanId || pId.toLowerCase() === cId || pEmail === cId;
-              }) || null;
-            }
-          } catch (e) {
-            console.warn('Profiles table fallback notice:', e);
-          }
-        }
-
         if (data) {
           // Strictly verify password stored in Supabase user_profiles table
           const dbPassword = (data.password || '').trim();
@@ -303,7 +288,11 @@ export const dbService = {
             return { success: false, error: 'Incorrect portal password.' };
           }
 
-          const rawRole = (data.role || '').toLowerCase().trim();
+          if (!data.role) {
+            return { success: false, error: 'Access Denied: Role is missing in Supabase user_profiles table.' };
+          }
+
+          const rawRole = String(data.role).toLowerCase().trim();
           
           if (rawRole === 'dac_member') {
             return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
@@ -322,9 +311,9 @@ export const dbService = {
               rotaryId: data.rotary_id || data.rotaryId || cleanId,
               email: data.email || cleanId,
               role: role,
-              fullName: data.full_name || data.fullName || data.name || (role === 'officer' ? 'District Secretariat Officer' : 'Club Officer'),
-              clubName: data.club_name || data.clubName || (role === 'officer' ? 'District Secretariat 3011' : 'Rotaract Club'),
-              post: data.post || data.designation || (role === 'officer' ? 'District Secretariat Officer' : 'Club President / Secretary'),
+              fullName: data.full_name || data.fullName || data.name || null,
+              clubName: data.club_name || data.clubName || null,
+              post: data.post || data.designation || null,
               totpSecret: data.totp_secret || data.totpSecret || null
             }
           };

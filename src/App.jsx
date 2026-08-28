@@ -170,7 +170,7 @@ export default function App() {
     }
   });
   const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(userSession));
-  const [userRole, setUserRole] = useState(() => userSession?.role || 'president');
+  const [userRole, setUserRole] = useState(() => userSession?.role || null);
 
   // Modals
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -370,7 +370,7 @@ export default function App() {
           onLoginSuccess={(session) => {
             setIsLoggedIn(true);
             setUserSession(session);
-            setUserRole(session.role || 'president');
+            setUserRole(session.role || null);
             try { localStorage.setItem('district3011_session_v1', JSON.stringify(session)); } catch (e) {}
             handlePageChange('portal');
           }}

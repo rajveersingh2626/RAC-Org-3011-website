@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 export default function PortalPage({
-  userRole = 'president',
+  userRole = null,
   setUserRole,
   userSession
 }) {

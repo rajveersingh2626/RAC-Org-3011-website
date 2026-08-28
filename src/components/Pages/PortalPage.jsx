@@ -43,7 +43,7 @@ const getWordCount = (text) => {
 
 export default function PortalPage({
   isLoggedIn = false,
-  userRole = 'president',
+  userRole = null,
   setUserRole,
   userSession,
   onLogout,
