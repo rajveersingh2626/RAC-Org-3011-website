@@ -13,7 +13,7 @@ export default function ClubInitiativesList({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedZone, setSelectedZone] = useState('All');
 
-  const zones = ['All', 'Zone 1 - Central Delhi', 'Zone 2 - South Delhi', 'Zone 3 - West Delhi', 'Zone 4 - Gurugram & NCR', 'Zone 5 - Faridabad & Noida'];
+  const zones = ['All', 'Zone Prithvi', 'Zone Agni', 'Zone Vayu', 'Zone Akash'];
 
   const filteredClubs = clubs.filter((club) => {
     const matchesSearch =
@@ -21,7 +21,7 @@ export default function ClubInitiativesList({
       club.president.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (club.initiatives && club.initiatives.some(i => i.title.toLowerCase().includes(searchTerm.toLowerCase())));
 
-    const matchesZone = selectedZone === 'All' || club.zone === selectedZone;
+    const matchesZone = selectedZone === 'All' || club.zone === selectedZone || (club.zone && club.zone.includes(selectedZone));
 
     return matchesSearch && matchesZone;
   });

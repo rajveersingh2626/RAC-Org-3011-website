@@ -17,54 +17,92 @@ import {
 } from 'lucide-react';
 import { parseExcelClubs, getParsedClubsFromExcel } from '../../data/excelReader';
 
-const REGIONAL_ZONES = [
+export const REGIONAL_ZONES = [
   {
-    id: 'zone-south',
-    name: 'South & Central Delhi',
-    color: '#ff2a5f',
-    fillColor: '#ff2a5f',
-    polygon: [
-      [28.6400, 77.1800],
-      [28.6400, 77.2800],
-      [28.5000, 77.2900],
-      [28.4900, 77.1600],
-      [28.5800, 77.1600]
-    ]
-  },
-  {
-    id: 'zone-west',
-    name: 'West & North Delhi',
-    color: '#00b0ff',
-    fillColor: '#00b0ff',
-    polygon: [
-      [28.7300, 77.0000],
-      [28.7300, 77.1600],
-      [28.5800, 77.1600],
-      [28.5700, 77.0100]
-    ]
-  },
-  {
-    id: 'zone-gurugram',
-    name: 'Gurugram & Cybercity',
-    color: '#e6a100',
-    fillColor: '#e6a100',
-    polygon: [
-      [28.5200, 76.9200],
-      [28.5200, 77.1100],
-      [28.3400, 77.1100],
-      [28.3400, 76.9200]
-    ]
-  },
-  {
-    id: 'zone-faridabad',
-    name: 'Faridabad & Noida',
+    id: 'zone-prithvi',
+    name: 'Zone Prithvi',
+    hindiName: 'पृथ्वी',
+    zoneNumber: 'Zone 1',
+    adrr: 'Rtr. Ayush Rai',
+    zrr: 'Rtn. Rtr. Kanav Sachdeva',
+    zrs: 'Rtr. Hitaishi Chawla',
     color: '#10b981',
     fillColor: '#10b981',
+    clubsCount: 18,
+    center: [28.5350, 77.2350],
     polygon: [
-      [28.6400, 77.2800],
-      [28.6400, 77.5300],
-      [28.3500, 77.5300],
-      [28.3500, 77.2800]
+      [28.6000, 77.1600],
+      [28.6000, 77.3800],
+      [28.2500, 77.3800],
+      [28.2500, 77.0500],
+      [28.4500, 77.0500],
+      [28.5000, 77.1600]
+    ]
+  },
+  {
+    id: 'zone-agni',
+    name: 'Zone Agni',
+    hindiName: 'अग्नि',
+    zoneNumber: 'Zone 2',
+    adrr: 'Rtr. Ayush Rai',
+    zrr: 'Rtr. Dhruv Kumar Jha',
+    zrs: 'Rtr. Kartik Kumar',
+    color: '#D81B60',
+    fillColor: '#D81B60',
+    clubsCount: 19,
+    center: [28.6250, 77.2150],
+    polygon: [
+      [28.7200, 77.1500],
+      [28.7200, 77.3400],
+      [28.5800, 77.3400],
+      [28.5800, 77.2200],
+      [28.3200, 77.3500],
+      [28.3200, 77.1500],
+      [28.5500, 77.1500]
+    ]
+  },
+  {
+    id: 'zone-vayu',
+    name: 'Zone Vayu',
+    hindiName: 'वायु',
+    zoneNumber: 'Zone 3',
+    adrr: 'Rtr. Radhika Bansal',
+    zrr: 'Rtr. Tanishaa Sonker',
+    zrs: 'Rtr. Pratham Girdhar',
+    color: '#0284c7',
+    fillColor: '#0284c7',
+    clubsCount: 19,
+    center: [28.6850, 77.1650],
+    polygon: [
+      [28.7800, 77.0000],
+      [28.7800, 77.2000],
+      [28.6200, 77.2000],
+      [28.5800, 77.0500],
+      [28.4200, 77.0500],
+      [28.4200, 76.9500],
+      [28.6500, 76.9500]
+    ]
+  },
+  {
+    id: 'zone-akash',
+    name: 'Zone Akash',
+    hindiName: 'आकाश',
+    zoneNumber: 'Zone 4',
+    adrr: 'Rtr. Radhika Bansal',
+    zrr: 'Rtr. Palak Jain',
+    zrs: 'Rtr. Arjun Pratap Singh',
+    color: '#123499',
+    fillColor: '#123499',
+    clubsCount: 19,
+    center: [28.6150, 77.0850],
+    polygon: [
+      [28.7200, 76.9000],
+      [28.7200, 77.1200],
+      [28.5800, 77.1200],
+      [28.5200, 76.9800],
+      [28.3000, 76.9800],
+      [28.3000, 76.8500],
+      [28.5500, 76.8500]
     ]
   }
 ];
@@ -210,10 +248,10 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
     const filtered = clubsList.filter(c => {
       const matchesSearch = !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.president?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesZone = !activeZoneId || (
-        (activeZoneId === 'zone-south' && c.zone?.toLowerCase().includes('south')) ||
-        (activeZoneId === 'zone-west' && c.zone?.toLowerCase().includes('west')) ||
-        (activeZoneId === 'zone-gurugram' && c.zone?.toLowerCase().includes('gurugram')) ||
-        (activeZoneId === 'zone-faridabad' && (c.zone?.toLowerCase().includes('faridabad') || c.zone?.toLowerCase().includes('noida')))
+        (activeZoneId === 'zone-prithvi' && (c.zone?.toLowerCase().includes('prithvi') || c.zone?.toLowerCase().includes('south'))) ||
+        (activeZoneId === 'zone-agni' && (c.zone?.toLowerCase().includes('agni') || c.zone?.toLowerCase().includes('central') || c.zone?.toLowerCase().includes('faridabad'))) ||
+        (activeZoneId === 'zone-vayu' && (c.zone?.toLowerCase().includes('vayu') || c.zone?.toLowerCase().includes('north') || c.zone?.toLowerCase().includes('gurugram'))) ||
+        (activeZoneId === 'zone-akash' && (c.zone?.toLowerCase().includes('akash') || c.zone?.toLowerCase().includes('west')))
       );
       return matchesSearch && matchesZone;
     });
@@ -237,10 +275,10 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
         coordCounts[key] = 1;
       }
 
-      let neonColor = '#D81B60';
-      if (club.zone?.toLowerCase().includes('west')) neonColor = '#0088cc';
-      if (club.zone?.toLowerCase().includes('gurugram')) neonColor = '#d97706';
-      if (club.zone?.toLowerCase().includes('faridabad') || club.zone?.toLowerCase().includes('noida')) neonColor = '#10b981';
+      let neonColor = '#10b981'; // Prithvi
+      if (club.zone?.toLowerCase().includes('agni')) neonColor = '#D81B60';
+      if (club.zone?.toLowerCase().includes('vayu')) neonColor = '#0284c7';
+      if (club.zone?.toLowerCase().includes('akash')) neonColor = '#123499';
 
       const displayName = (club.shortName || club.name).replace(/^RAC\s+/i, '');
 
@@ -273,10 +311,29 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
 
   const getClubNeonColor = (c) => {
     if (!c) return '#D81B60';
-    if (c.zone?.toLowerCase().includes('west')) return '#0088cc';
-    if (c.zone?.toLowerCase().includes('gurugram')) return '#d97706';
+    if (c.zone?.toLowerCase().includes('prithvi')) return '#10b981';
+    if (c.zone?.toLowerCase().includes('agni')) return '#D81B60';
+    if (c.zone?.toLowerCase().includes('vayu')) return '#0284c7';
+    if (c.zone?.toLowerCase().includes('akash')) return '#123499';
     return '#D81B60';
   };
+
+  const handleZoneSelect = (zoneId) => {
+    if (activeZoneId === zoneId) {
+      setActiveZoneId(null);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.flyTo([28.5800, 77.1025], 11, { duration: 1.2 });
+      }
+    } else {
+      setActiveZoneId(zoneId);
+      const zoneObj = REGIONAL_ZONES.find(z => z.id === zoneId);
+      if (zoneObj && mapInstanceRef.current) {
+        mapInstanceRef.current.flyTo(zoneObj.center, 12, { duration: 1.2 });
+      }
+    }
+  };
+
+  const activeZoneObj = REGIONAL_ZONES.find(z => z.id === activeZoneId);
 
   return (
     <div 
@@ -302,6 +359,76 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
         style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 1 }}
       />
 
+      {/* FLOATING ZONE LEADERSHIP OVERLAY CARD */}
+      {activeZoneObj && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            zIndex: 1000,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: `2px solid ${activeZoneObj.color}40`,
+            borderRadius: '16px',
+            padding: '16px 20px',
+            maxWidth: '360px',
+            boxShadow: `0 12px 32px ${activeZoneObj.color}25`,
+            animation: 'fadeInUp 0.3s ease'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span
+                style={{
+                  background: activeZoneObj.color,
+                  color: '#FFFFFF',
+                  padding: '3px 10px',
+                  borderRadius: '100px',
+                  fontSize: '0.74rem',
+                  fontWeight: 900,
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {activeZoneObj.zoneNumber}
+              </span>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#1E1E24' }}>
+                {activeZoneObj.name} <span style={{ color: activeZoneObj.color, fontFamily: 'serif' }}>({activeZoneObj.hindiName})</span>
+              </h3>
+            </div>
+            <button
+              onClick={() => handleZoneSelect(activeZoneId)}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748B', display: 'flex' }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '6px', fontSize: '0.78rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#F8FAFC', padding: '6px 10px', borderRadius: '8px' }}>
+              <span style={{ color: '#64748B', fontWeight: 700 }}>ADRR:</span>
+              <strong style={{ color: '#0F172A' }}>{activeZoneObj.adrr}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#F8FAFC', padding: '6px 10px', borderRadius: '8px' }}>
+              <span style={{ color: '#64748B', fontWeight: 700 }}>ZRR:</span>
+              <strong style={{ color: activeZoneObj.color }}>{activeZoneObj.zrr}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#F8FAFC', padding: '6px 10px', borderRadius: '8px' }}>
+              <span style={{ color: '#64748B', fontWeight: 700 }}>ZRS:</span>
+              <strong style={{ color: '#0F172A' }}>{activeZoneObj.zrs}</strong>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#64748B' }}>
+            <span>Active Clubs in Zone:</span>
+            <span style={{ fontWeight: 800, color: activeZoneObj.color, fontSize: '0.82rem' }}>
+              {activeZoneObj.clubsCount} Clubs
+            </span>
+          </div>
+        </div>
+      )}
+
       <div 
         style={{
           position: 'absolute',
@@ -309,7 +436,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
           left: '20px',
           right: '20px',
           display: 'flex',
-          justify: 'space-between',
+          justifyContent: 'space-between',
           alignItems: 'center',
           gap: '16px',
           zIndex: 1000,
@@ -353,7 +480,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
               )}
             </div>
             <div style={{ fontSize: '0.74rem', color: '#4A4A5A', fontWeight: 600 }}>
-              ESRI High-Res Satellite • 3 Regional Zones • {activeClubs.length} Active Clubs
+              ESRI High-Res Satellite • 4 Elemental Zones (Prithvi, Agni, Vayu, Akash) • {activeClubs.length} Active Clubs
             </div>
           </div>
         </div>
@@ -394,9 +521,9 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             <button
-              onClick={() => setActiveZoneId(null)}
+              onClick={() => handleZoneSelect(null)}
               style={{
                 background: !activeZoneId ? '#FFFFFF' : '#0E0E0E',
                 backdropFilter: 'blur(12px)',
@@ -411,27 +538,27 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                 boxShadow: !activeZoneId ? '0 4px 14px rgba(0,0,0,0.18)' : 'none'
               }}
             >
-              All Zones
+              All Zones ({activeClubs.length})
             </button>
             {REGIONAL_ZONES.map(z => (
               <button
                 key={z.id}
-                onClick={() => setActiveZoneId(activeZoneId === z.id ? null : z.id)}
+                onClick={() => handleZoneSelect(z.id)}
                 style={{
-                  background: activeZoneId === z.id ? 'rgba(255, 255, 255, 0.96)' : '#123499',
+                  background: activeZoneId === z.id ? 'rgba(255, 255, 255, 0.96)' : z.color,
                   backdropFilter: 'blur(12px)',
                   color: activeZoneId === z.id ? z.color : '#FFFFFF',
-                  border: activeZoneId === z.id ? `2px solid ${z.color}` : '1px solid #123499',
+                  border: activeZoneId === z.id ? `2px solid ${z.color}` : `1px solid ${z.color}`,
                   padding: '7px 14px',
                   borderRadius: '8px',
                   fontSize: '0.78rem',
                   fontWeight: 800,
                   cursor: 'pointer',
                   transition: 'all 0.25s ease',
-                  boxShadow: activeZoneId === z.id ? `0 4px 14px ${z.color}35` : 'none'
+                  boxShadow: activeZoneId === z.id ? `0 4px 14px ${z.color}45` : '0 2px 8px rgba(0,0,0,0.12)'
                 }}
               >
-                {z.name}
+                {z.name} <span style={{ opacity: 0.85, fontSize: '0.72rem' }}>({z.hindiName})</span>
               </button>
             ))}
           </div>

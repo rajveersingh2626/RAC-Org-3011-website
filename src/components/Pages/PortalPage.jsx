@@ -79,6 +79,7 @@ export default function PortalPage({
   const [complianceMonth, setComplianceMonth] = useState('August 2026');
   const [complianceSearch, setComplianceSearch] = useState('');
   const [complianceFilter, setComplianceFilter] = useState('all'); // 'all' | 'submitted' | 'pending' | 'flagged'
+  const [complianceZoneFilter, setComplianceZoneFilter] = useState('all'); // 'all' | 'Zone Prithvi' | 'Zone Agni' | 'Zone Vayu' | 'Zone Akash'
   const [copiedReminderClubId, setCopiedReminderClubId] = useState(null);
 
   // Sections project array state
@@ -468,11 +469,20 @@ export default function PortalPage({
   const flaggedClubsCount = clubComplianceList.filter(item => item.status === 'flagged').length;
   const complianceRate = totalClubsCount > 0 ? Math.round((submittedClubsCount / totalClubsCount) * 100) : 0;
 
-  // Filter compliance list by search & status
+  const getZoneBadgeStyle = (zoneName) => {
+    const z = (zoneName || '').toLowerCase();
+    if (z.includes('prithvi')) return { bg: '#ECFDF5', border: '#A7F3D0', text: '#065F46', dot: '#10B981', hindi: 'पृथ्वी' };
+    if (z.includes('agni')) return { bg: '#FFF1F2', border: '#FECDD3', text: '#9F1239', dot: '#D81B60', hindi: 'अग्नि' };
+    if (z.includes('vayu')) return { bg: '#F0F9FF', border: '#BAE6FD', text: '#0369A1', dot: '#0284C7', hindi: 'वायु' };
+    if (z.includes('akash')) return { bg: '#EEF2FF', border: '#C7D2FE', text: '#3730A3', dot: '#123499', hindi: 'आकाश' };
+    return { bg: '#F8FAFC', border: '#E2E8F0', text: '#475569', dot: '#94A3B8', hindi: '' };
+  };
+
+  // Filter compliance list by search, status & elemental zone
   const filteredComplianceList = clubComplianceList.filter(item => {
     const matchesSearch = !complianceSearch || 
       item.club.name.toLowerCase().includes(complianceSearch.toLowerCase()) || 
-      item.club.zone.toLowerCase().includes(complianceSearch.toLowerCase()) ||
+      (item.club.zone && item.club.zone.toLowerCase().includes(complianceSearch.toLowerCase())) ||
       (item.club.president && item.club.president.toLowerCase().includes(complianceSearch.toLowerCase()));
 
     const matchesStatus = complianceFilter === 'all' || 
@@ -480,7 +490,10 @@ export default function PortalPage({
       (complianceFilter === 'pending' && item.status === 'pending') ||
       (complianceFilter === 'flagged' && item.status === 'flagged');
 
-    return matchesSearch && matchesStatus;
+    const matchesZone = complianceZoneFilter === 'all' || 
+      (item.club.zone && item.club.zone.toLowerCase().includes(complianceZoneFilter.toLowerCase()));
+
+    return matchesSearch && matchesStatus && matchesZone;
   });
 
   return (
@@ -1071,95 +1084,147 @@ export default function PortalPage({
               padding: isMobile ? '16px 14px' : '20px 24px',
               marginBottom: '20px',
               display: 'flex',
-              flexDirection: isMobile ? 'column' : 'row',
-              alignItems: isMobile ? 'stretch' : 'center',
-              justifyContent: 'space-between',
+              flexDirection: 'column',
               gap: '14px'
             }}>
-              <div style={{ position: 'relative', width: isMobile ? '100%' : '320px', maxWidth: '100%' }}>
-                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input
-                  type="text"
-                  placeholder="Search club name, zone, president..."
-                  value={complianceSearch}
-                  onChange={(e) => setComplianceSearch(e.target.value)}
-                  style={{ width: '100%', padding: '10px 14px 10px 38px', borderRadius: '100px', border: '1px solid rgba(216,27,96,0.25)', fontSize: '0.86rem', outline: 'none' }}
-                />
+              {/* Row 1: Search & Status Filters */}
+              <div style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: isMobile ? 'stretch' : 'center',
+                justifyContent: 'space-between',
+                gap: '12px'
+              }}>
+                <div style={{ position: 'relative', width: isMobile ? '100%' : '320px', maxWidth: '100%' }}>
+                  <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input
+                    type="text"
+                    placeholder="Search club, zone, president..."
+                    value={complianceSearch}
+                    onChange={(e) => setComplianceSearch(e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px 10px 38px', borderRadius: '100px', border: '1px solid rgba(216,27,96,0.25)', fontSize: '0.86rem', outline: 'none' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
+                  <button
+                    onClick={() => setComplianceFilter('all')}
+                    style={{
+                      background: complianceFilter === 'all' ? 'var(--rotaract-pink)' : '#F1F5F9',
+                      color: complianceFilter === 'all' ? '#FFFFFF' : '#475569',
+                      border: 'none',
+                      padding: '8px 14px',
+                      borderRadius: '100px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      flex: isMobile ? '1 1 calc(50% - 6px)' : 'none',
+                      textAlign: 'center',
+                      minHeight: '36px'
+                    }}
+                  >
+                    All Status ({totalClubsCount})
+                  </button>
+                  <button
+                    onClick={() => setComplianceFilter('submitted')}
+                    style={{
+                      background: complianceFilter === 'submitted' ? '#166534' : '#F0FDF4',
+                      color: complianceFilter === 'submitted' ? '#FFFFFF' : '#166534',
+                      border: 'none',
+                      padding: '8px 14px',
+                      borderRadius: '100px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      flex: isMobile ? '1 1 calc(50% - 6px)' : 'none',
+                      textAlign: 'center',
+                      minHeight: '36px'
+                    }}
+                  >
+                    Submitted ({submittedClubsCount})
+                  </button>
+                  <button
+                    onClick={() => setComplianceFilter('pending')}
+                    style={{
+                      background: complianceFilter === 'pending' ? '#E11D48' : '#FFF1F2',
+                      color: complianceFilter === 'pending' ? '#FFFFFF' : '#E11D48',
+                      border: 'none',
+                      padding: '8px 14px',
+                      borderRadius: '100px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      flex: isMobile ? '1 1 calc(50% - 6px)' : 'none',
+                      textAlign: 'center',
+                      minHeight: '36px'
+                    }}
+                  >
+                    Pending ({pendingClubsCount})
+                  </button>
+                  <button
+                    onClick={() => setComplianceFilter('flagged')}
+                    style={{
+                      background: complianceFilter === 'flagged' ? '#CA8A04' : '#FEFCE8',
+                      color: complianceFilter === 'flagged' ? '#FFFFFF' : '#854D0E',
+                      border: 'none',
+                      padding: '8px 14px',
+                      borderRadius: '100px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      flex: isMobile ? '1 1 calc(50% - 6px)' : 'none',
+                      textAlign: 'center',
+                      minHeight: '36px'
+                    }}
+                  >
+                    Flagged ({flaggedClubsCount})
+                  </button>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
-                <button
-                  onClick={() => setComplianceFilter('all')}
-                  style={{
-                    background: complianceFilter === 'all' ? 'var(--rotaract-pink)' : '#F1F5F9',
-                    color: complianceFilter === 'all' ? '#FFFFFF' : '#475569',
-                    border: 'none',
-                    padding: '8px 14px',
-                    borderRadius: '100px',
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    flex: isMobile ? '1 1 calc(50% - 6px)' : 'none',
-                    textAlign: 'center',
-                    minHeight: '36px'
-                  }}
-                >
-                  All ({totalClubsCount})
-                </button>
-                <button
-                  onClick={() => setComplianceFilter('submitted')}
-                  style={{
-                    background: complianceFilter === 'submitted' ? '#166534' : '#F0FDF4',
-                    color: complianceFilter === 'submitted' ? '#FFFFFF' : '#166534',
-                    border: 'none',
-                    padding: '8px 14px',
-                    borderRadius: '100px',
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    flex: isMobile ? '1 1 calc(50% - 6px)' : 'none',
-                    textAlign: 'center',
-                    minHeight: '36px'
-                  }}
-                >
-                  Submitted ({submittedClubsCount})
-                </button>
-                <button
-                  onClick={() => setComplianceFilter('pending')}
-                  style={{
-                    background: complianceFilter === 'pending' ? '#E11D48' : '#FFF1F2',
-                    color: complianceFilter === 'pending' ? '#FFFFFF' : '#E11D48',
-                    border: 'none',
-                    padding: '8px 14px',
-                    borderRadius: '100px',
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    flex: isMobile ? '1 1 calc(50% - 6px)' : 'none',
-                    textAlign: 'center',
-                    minHeight: '36px'
-                  }}
-                >
-                  Pending ({pendingClubsCount})
-                </button>
-                <button
-                  onClick={() => setComplianceFilter('flagged')}
-                  style={{
-                    background: complianceFilter === 'flagged' ? '#CA8A04' : '#FEFCE8',
-                    color: complianceFilter === 'flagged' ? '#FFFFFF' : '#854D0E',
-                    border: 'none',
-                    padding: '8px 14px',
-                    borderRadius: '100px',
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    flex: isMobile ? '1 1 calc(50% - 6px)' : 'none',
-                    textAlign: 'center',
-                    minHeight: '36px'
-                  }}
-                >
-                  Flagged ({flaggedClubsCount})
-                </button>
+              {/* Row 2: Elemental Zone Filter Pills */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flexWrap: 'wrap',
+                borderTop: '1px solid #F1F5F9',
+                paddingTop: '12px'
+              }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginRight: '4px' }}>
+                  Filter by Zone:
+                </span>
+                {[
+                  { id: 'all', label: 'All Zones', count: totalClubsCount, color: '#0F172A', bg: '#F1F5F9' },
+                  { id: 'Zone Prithvi', label: 'Zone Prithvi (पृथ्वी)', count: 18, color: '#10B981', bg: '#ECFDF5' },
+                  { id: 'Zone Agni', label: 'Zone Agni (अग्नि)', count: 19, color: '#D81B60', bg: '#FFF1F2' },
+                  { id: 'Zone Vayu', label: 'Zone Vayu (वायु)', count: 19, color: '#0284C7', bg: '#F0F9FF' },
+                  { id: 'Zone Akash', label: 'Zone Akash (आकाश)', count: 19, color: '#123499', bg: '#EEF2FF' }
+                ].map(z => {
+                  const isSelected = complianceZoneFilter === z.id;
+                  return (
+                    <button
+                      key={z.id}
+                      onClick={() => setComplianceZoneFilter(z.id)}
+                      style={{
+                        background: isSelected ? z.color : z.bg,
+                        color: isSelected ? '#FFFFFF' : z.color,
+                        border: isSelected ? `2px solid ${z.color}` : `1px solid ${z.color}30`,
+                        padding: '6px 12px',
+                        borderRadius: '100px',
+                        fontSize: '0.74rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      {z.label} <span style={{ opacity: isSelected ? 0.9 : 0.75, fontSize: '0.68rem' }}>({z.count})</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -1180,6 +1245,7 @@ export default function PortalPage({
                   {filteredComplianceList.map(({ club, report, status }, idx) => {
                     const totalProjs = report ? Object.values(report.sections || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0) : 0;
                     const isCopied = copiedReminderClubId === club.name;
+                    const zStyle = getZoneBadgeStyle(club.zone);
 
                     return (
                       <div
@@ -1197,8 +1263,10 @@ export default function PortalPage({
                             <div style={{ fontSize: '0.98rem', fontWeight: 900, color: 'var(--rotaract-pink)' }}>
                               {club.name}
                             </div>
-                            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                              {club.zone || 'District 3011'}
+                            <div style={{ marginTop: '4px' }}>
+                              <span style={{ background: zStyle.bg, color: zStyle.text, border: `1px solid ${zStyle.border}`, padding: '2px 8px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 800 }}>
+                                {club.zone || 'District 3011'} {zStyle.hindi && `(${zStyle.hindi})`}
+                              </span>
                             </div>
                           </div>
 
@@ -1318,7 +1386,7 @@ export default function PortalPage({
                     <thead>
                       <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: 'var(--text-muted)', fontSize: '0.78rem', textTransform: 'uppercase', fontWeight: 800 }}>
                         <th style={{ padding: '14px 20px' }}>Rotaract Club</th>
-                        <th style={{ padding: '14px 20px' }}>Zone</th>
+                        <th style={{ padding: '14px 20px' }}>Elemental Zone</th>
                         <th style={{ padding: '14px 20px' }}>President Contact</th>
                         <th style={{ padding: '14px 20px' }}>{complianceMonth} Status</th>
                         <th style={{ padding: '14px 20px', textAlign: 'right' }}>Actions</th>
@@ -1328,6 +1396,7 @@ export default function PortalPage({
                       {filteredComplianceList.map(({ club, report, status }, idx) => {
                         const totalProjs = report ? Object.values(report.sections || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0) : 0;
                         const isCopied = copiedReminderClubId === club.name;
+                        const zStyle = getZoneBadgeStyle(club.zone);
 
                         return (
                           <tr key={club.id || idx} style={{ borderBottom: '1px solid #F1F5F9', backgroundColor: idx % 2 === 0 ? '#FFFFFF' : '#FDFBFD' }}>
@@ -1338,8 +1407,11 @@ export default function PortalPage({
                             </td>
 
                             {/* Zone */}
-                            <td style={{ padding: '16px 20px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.82rem' }}>
-                              {club.zone || 'District 3011'}
+                            <td style={{ padding: '16px 20px', fontSize: '0.82rem' }}>
+                              <span style={{ background: zStyle.bg, color: zStyle.text, border: `1px solid ${zStyle.border}`, padding: '4px 10px', borderRadius: '100px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: zStyle.dot }} />
+                                {club.zone || 'District 3011'} {zStyle.hindi && `(${zStyle.hindi})`}
+                              </span>
                             </td>
 
                             {/* President Contact */}

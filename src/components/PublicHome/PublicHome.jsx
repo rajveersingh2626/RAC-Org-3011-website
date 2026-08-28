@@ -1074,11 +1074,10 @@ export default function PublicHome({ onNavigateDistrict, onOpenLoginModal }) {
                       onChange={(e) => setJoinZone(e.target.value)}
                       style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #E4E4E7' }}
                     >
-                      <option value="Zone 1 - Central Delhi">Zone 1 - Central Delhi</option>
-                      <option value="Zone 2 - South Delhi">Zone 2 - South Delhi</option>
-                      <option value="Zone 3 - West Delhi">Zone 3 - West Delhi</option>
-                      <option value="Zone 4 - Gurugram & NCR">Zone 4 - Gurugram & NCR</option>
-                      <option value="Zone 5 - Faridabad & Noida">Zone 5 - Faridabad & Noida</option>
+                      <option value="Zone Prithvi">Zone Prithvi (पृथ्वी) - South & East NCR</option>
+                      <option value="Zone Agni">Zone Agni (अग्नि) - Central & Faridabad</option>
+                      <option value="Zone Vayu">Zone Vayu (वायु) - North & Gurugram</option>
+                      <option value="Zone Akash">Zone Akash (आकाश) - West & University</option>
                     </select>
                   </div>
 
