@@ -96,193 +96,61 @@ export const dbService = {
     // Check Supabase Database & Auth if Supabase is connected
     if (isSupabaseConfigured && supabase) {
       try {
-        // 0. Try Secure Server-Side RPC Function (Bypasses public SELECT table requirement)
-        try {
-          const { data: rpcUser, error: rpcErr } = await supabase
-            .rpc('authenticate_rotaract_user', {
-              p_identity: cleanId,
-              p_password: cleanPass
-            });
+        // 0. Secure Server-Side RPC Function (100% Locked Table Authentication)
+        const { data: rpcUser, error: rpcErr } = await supabase
+          .rpc('authenticate_rotaract_user', {
+            p_identity: cleanId,
+            p_password: cleanPass
+          });
 
-          if (!rpcErr && rpcUser && rpcUser.length > 0) {
-            const row = rpcUser[0];
-            const rawRole = (row.role || '').toLowerCase().trim();
-
-            if (rawRole === 'dac_member') {
-              return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
-            }
-
-            if (rawRole !== 'officer' && rawRole !== 'president') {
-              return { success: false, error: `Access Denied: Role '${row.role}' is not authorized for portal access.` };
-            }
-
-            return {
-              success: true,
-              user: {
-                id: row.id,
-                rotaryId: row.rotary_id || cleanId,
-                email: row.email || cleanId,
-                role: rawRole,
-                fullName: row.full_name || row.fullName || null,
-                clubName: row.club_name || row.clubName || null,
-                post: row.post || row.designation || null,
-                totpSecret: row.totp_secret || null
-              }
-            };
+        if (!rpcErr && rpcUser && rpcUser.length > 0) {
+          const row = rpcUser[0];
+          
+          if (!row.role) {
+            return { success: false, error: 'Access Denied: Role is missing in Supabase database.' };
           }
-        } catch (rpcEx) {
-          console.warn('RPC auth notice (fallback to direct table query if RPC not yet created):', rpcEx);
+
+          const rawRole = String(row.role).toLowerCase().trim();
+
+          if (rawRole === 'dac_member') {
+            return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
+          }
+
+          if (rawRole !== 'officer' && rawRole !== 'president') {
+            return { success: false, error: `Access Denied: Role '${row.role}' is not authorized for portal access.` };
+          }
+
+          return {
+            success: true,
+            user: {
+              id: row.id,
+              rotaryId: row.rotary_id || cleanId,
+              email: row.email || cleanId,
+              role: rawRole,
+              fullName: row.full_name || row.fullName || null,
+              clubName: row.club_name || row.clubName || null,
+              post: row.post || row.designation || null,
+              totpSecret: row.totp_secret || null
+            }
+          };
         }
 
-        // 1. Try Native Supabase Auth if email and password are provided
-        if (cleanId.includes('@') && cleanPass) {
-          try {
-            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-              email: cleanId,
-              password: cleanPass
-            });
-            if (!authError && authData?.user) {
-              const { data: profData } = await supabase
-                .from('user_profiles')
-                .select('*')
-                .eq('id', authData.user.id)
-                .maybeSingle();
-              
-              const dbRole = profData?.role || authData.user.user_metadata?.role;
-              if (!dbRole) {
-                return { success: false, error: 'Access Denied: Account role is missing in Supabase database.' };
-              }
-
-              const rawRole = String(dbRole).toLowerCase().trim();
-              if (rawRole === 'dac_member') {
-                return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
-              }
-              if (rawRole !== 'officer' && rawRole !== 'president') {
-                return { success: false, error: `Access Denied: Role '${dbRole}' is unauthorized for portal access.` };
-              }
-
-              return {
-                success: true,
-                user: {
-                  id: authData.user.id,
-                  rotaryId: profData?.rotary_id || profData?.rotaryId || authData.user.user_metadata?.rotary_id || cleanId,
-                  email: authData.user.email || cleanId,
-                  role: rawRole,
-                  fullName: profData?.full_name || profData?.fullName || authData.user.user_metadata?.full_name || null,
-                  clubName: profData?.club_name || profData?.clubName || authData.user.user_metadata?.club_name || null,
-                  post: profData?.post || profData?.designation || authData.user.user_metadata?.post || null,
-                  totpSecret: profData?.totp_secret || profData?.totpSecret || null
-                }
-              };
-            }
-          } catch (aErr) {
-            console.warn('Supabase auth sign-in notice:', aErr);
-          }
+        // If RPC function is not yet created in Supabase SQL editor, attempt query A fallback
+        if (rpcErr && rpcErr.code === 'PGRST202') {
+          console.warn('RPC function authenticate_rotaract_user not yet created in Supabase SQL Editor.');
+        } else if (!rpcErr && (!rpcUser || rpcUser.length === 0)) {
+          return { success: false, error: 'Incorrect Rotary ID/Email or Portal Password.' };
         }
 
-        // 2. Safe & Robust Supabase user_profiles table queries
-        let data = null;
+        // Fallback Query A for initial setup if RPC is not created yet
+        const { data: eqRes, error: eqErr } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .or(`rotary_id.eq.${cleanId},email.ilike.${cleanId}`)
+          .limit(1);
 
-        // Query A: Exact match on rotary_id using .eq
-        try {
-          const { data: eqRes, error: eqErr } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('rotary_id', cleanId)
-            .limit(1);
-          if (!eqErr && eqRes && eqRes.length > 0) {
-            data = eqRes[0];
-          }
-        } catch (e) {
-          console.warn('rotary_id eq query notice:', e);
-        }
-
-        // Query B: Try numeric conversion if cleanId is numeric and Query A didn't yield a result
-        if (!data && /^\d+$/.test(cleanId)) {
-          try {
-            const { data: numRes, error: numErr } = await supabase
-              .from('user_profiles')
-              .select('*')
-              .eq('rotary_id', parseInt(cleanId, 10))
-              .limit(1);
-            if (!numErr && numRes && numRes.length > 0) {
-              data = numRes[0];
-            }
-          } catch (e) {
-            console.warn('rotary_id numeric eq query notice:', e);
-          }
-        }
-
-        // Query C: Search by email if cleanId contains @ or as email fallback
-        if (!data) {
-          try {
-            const { data: emailRes, error: emailErr } = await supabase
-              .from('user_profiles')
-              .select('*')
-              .ilike('email', cleanId)
-              .limit(1);
-            if (!emailErr && emailRes && emailRes.length > 0) {
-              data = emailRes[0];
-            }
-          } catch (e) {
-            console.warn('email ilike query notice:', e);
-          }
-        }
-
-        // Query D: Try case-insensitive ilike on rotary_id
-        if (!data) {
-          try {
-            const { data: ilikeRes, error: ilikeErr } = await supabase
-              .from('user_profiles')
-              .select('*')
-              .ilike('rotary_id', cleanId)
-              .limit(1);
-            if (!ilikeErr && ilikeRes && ilikeRes.length > 0) {
-              data = ilikeRes[0];
-            }
-          } catch (e) {
-            console.warn('rotary_id ilike query notice:', e);
-          }
-        }
-
-        // Query E: PostgREST .or fallback
-        if (!data) {
-          try {
-            const { data: orRes, error: orErr } = await supabase
-              .from('user_profiles')
-              .select('*')
-              .or(`rotary_id.eq.${cleanId},email.ilike.${cleanId}`)
-              .limit(1);
-            if (!orErr && orRes && orRes.length > 0) {
-              data = orRes[0];
-            }
-          } catch (e) {
-            console.warn('user_profiles .or query notice:', e);
-          }
-        }
-
-        // Query F: Memory search across all user_profiles if PostgREST filters failed due to type constraints
-        if (!data) {
-          try {
-            const { data: allProfiles, error: allErr } = await supabase
-              .from('user_profiles')
-              .select('*')
-              .limit(200);
-            if (!allErr && allProfiles && allProfiles.length > 0) {
-              data = allProfiles.find(p => {
-                const pId = String(p.rotary_id || p.rotaryId || '').trim();
-                const pEmail = String(p.email || '').trim().toLowerCase();
-                const cId = cleanId.toLowerCase();
-                return pId === cleanId || pId.toLowerCase() === cId || pEmail === cId;
-              }) || null;
-            }
-          } catch (e) {
-            console.warn('All profiles fallback scan notice:', e);
-          }
-        }
-
-        if (data) {
-          // Strictly verify password stored in Supabase user_profiles table
+        if (!eqErr && eqRes && eqRes.length > 0) {
+          const data = eqRes[0];
           const dbPassword = (data.password || '').trim();
           if (!dbPassword || dbPassword !== cleanPass) {
             return { success: false, error: 'Incorrect portal password.' };
@@ -293,7 +161,6 @@ export const dbService = {
           }
 
           const rawRole = String(data.role).toLowerCase().trim();
-          
           if (rawRole === 'dac_member') {
             return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
           }
@@ -302,19 +169,17 @@ export const dbService = {
             return { success: false, error: `Access Denied: Role '${data.role}' is not authorized for portal access.` };
           }
 
-          const role = rawRole;
-
           return {
             success: true,
             user: {
               id: data.id,
-              rotaryId: data.rotary_id || data.rotaryId || cleanId,
+              rotaryId: data.rotary_id || cleanId,
               email: data.email || cleanId,
-              role: role,
-              fullName: data.full_name || data.fullName || data.name || null,
+              role: rawRole,
+              fullName: data.full_name || data.fullName || null,
               clubName: data.club_name || data.clubName || null,
               post: data.post || data.designation || null,
-              totpSecret: data.totp_secret || data.totpSecret || null
+              totpSecret: data.totp_secret || null
             }
           };
         }
