@@ -163,27 +163,48 @@ export default function MorphedMenu({
   return (
     <div ref={menuRef} style={{ position: 'relative', display: 'inline-block', zIndex: 9999 }}>
 
+        {/* Mobile Backdrop Overlay when Menu is Open */}
+        {isOpen && isMobile && (
+          <div
+            onClick={() => setIsOpen(false)}
+            onTouchStart={() => setIsOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.65)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              zIndex: 10000,
+              transition: 'opacity 0.3s ease'
+            }}
+          />
+        )}
+
         <div
           style={{
-            position: 'absolute',
-            top: '-7px',
-            right: '-18px',
-            width: isOpen ? 'min(420px, 92vw)' : '60px',
-            height: isOpen ? 'min(640px, 90vh)' : '36px',
-            backgroundColor: 'rgba(15, 18, 26, 0.78)',
-            backdropFilter: 'blur(24px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-            backgroundImage: 'radial-gradient(circle at 85% 15%, rgba(216, 27, 96, 0.12) 0%, rgba(197, 160, 89, 0.05) 40%, transparent 75%)',
-            borderRadius: '24px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            position: isMobile && isOpen ? 'fixed' : 'absolute',
+            top: isMobile && isOpen ? '12px' : '-7px',
+            left: isMobile && isOpen ? '50%' : 'auto',
+            right: isMobile && isOpen ? 'auto' : '-18px',
+            transform: isMobile && isOpen ? 'translateX(-50%)' : 'none',
+            width: isOpen ? (isMobile ? 'calc(100vw - 24px)' : 'min(420px, 92vw)') : (isMobile ? '64px' : '60px'),
+            maxWidth: '420px',
+            height: isOpen ? (isMobile ? 'min(640px, calc(100dvh - 24px))' : 'min(640px, 90vh)') : (isMobile ? '44px' : '36px'),
+            backgroundColor: 'rgba(15, 18, 26, 0.88)',
+            backdropFilter: 'blur(28px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+            backgroundImage: 'radial-gradient(circle at 85% 15%, rgba(216, 27, 96, 0.16) 0%, rgba(197, 160, 89, 0.08) 40%, transparent 75%)',
+            borderRadius: isMobile ? '20px' : '24px',
+            border: '1px solid rgba(255, 255, 255, 0.22)',
             boxShadow: isOpen 
-              ? '0 30px 80px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 0, 0, 0.3)' 
+              ? '0 30px 80px rgba(0, 0, 0, 0.8), 0 0 30px rgba(216, 27, 96, 0.25)' 
               : '0 4px 15px rgba(0, 0, 0, 0.2)',
             overflow: 'hidden',
-            transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
             pointerEvents: isOpen ? 'auto' : 'none',
             opacity: isOpen ? 1 : 0,
-            transformOrigin: 'top right'
+            transformOrigin: isMobile ? 'top center' : 'top right',
+            zIndex: 10001
           }}
         >
           <div style={{ height: '3px', background: 'linear-gradient(90deg, #D81B60 0%, #123499 50%, #880E4F 100%)' }} />
@@ -193,8 +214,8 @@ export default function MorphedMenu({
               display: 'flex', 
               flexDirection: 'column', 
               height: 'calc(100% - 3px)', 
-              padding: '24px 26px 20px 26px', 
-              justify: 'space-between',
+              padding: isMobile ? '18px 18px 16px 18px' : '24px 26px 20px 26px', 
+              justifyContent: 'space-between',
               overflowY: 'auto'
             }}
           >

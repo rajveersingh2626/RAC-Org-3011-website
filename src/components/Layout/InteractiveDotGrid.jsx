@@ -84,36 +84,39 @@ export default function InteractiveDotGrid() {
         }
       }
 
-      const offscreen = document.createElement('canvas');
-      const offscreenCtx = offscreen.getContext('2d');
-      offscreen.width = width;
-      offscreen.height = height;
-
-      offscreenCtx.fillStyle = '#000000';
-      offscreenCtx.textAlign = 'left';
-      offscreenCtx.textBaseline = 'top';
-
-      const text = "'Fellowships through service'";
-
       const isMobile = width < 768;
-      const fontSize = isMobile ? Math.max(48, width * 0.09) : Math.min(width * 0.05, 80);
-      offscreenCtx.font = `600 ${fontSize}px 'Dancing Script', 'Satisfy', cursive`;
 
-      const textX = (width * 0.04) + Math.max(10, width * 0.02);
-      const textY = height * 0.85;
+      // Only render 'Fellowships through service' particle text on desktop and tablet viewports
+      if (!isMobile) {
+        const offscreen = document.createElement('canvas');
+        const offscreenCtx = offscreen.getContext('2d');
+        offscreen.width = width;
+        offscreen.height = height;
 
-      offscreenCtx.fillText(text, textX, textY);
+        offscreenCtx.fillStyle = '#000000';
+        offscreenCtx.textAlign = 'left';
+        offscreenCtx.textBaseline = 'top';
 
-      const imgData = offscreenCtx.getImageData(0, 0, width, height);
-      const data = imgData.data;
-      const textSampleSpacing = 3.5;
+        const text = "'Fellowships through service'";
+        const fontSize = Math.min(width * 0.05, 80);
+        offscreenCtx.font = `600 ${fontSize}px 'Dancing Script', 'Satisfy', cursive`;
 
-      for (let y = 0; y < height; y += textSampleSpacing) {
-        for (let x = 0; x < width; x += textSampleSpacing) {
-          const index = (Math.floor(y) * width + Math.floor(x)) * 4;
-          const alpha = data[index + 3];
-          if (alpha > 65) {
-            dots.push(new Dot(x, y, true));
+        const textX = (width * 0.04) + Math.max(10, width * 0.02);
+        const textY = height * 0.85;
+
+        offscreenCtx.fillText(text, textX, textY);
+
+        const imgData = offscreenCtx.getImageData(0, 0, width, height);
+        const data = imgData.data;
+        const textSampleSpacing = 3.5;
+
+        for (let y = 0; y < height; y += textSampleSpacing) {
+          for (let x = 0; x < width; x += textSampleSpacing) {
+            const index = (Math.floor(y) * width + Math.floor(x)) * 4;
+            const alpha = data[index + 3];
+            if (alpha > 65) {
+              dots.push(new Dot(x, y, true));
+            }
           }
         }
       }
