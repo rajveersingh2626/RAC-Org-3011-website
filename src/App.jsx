@@ -106,10 +106,17 @@ export default function App() {
   // Dynamic Clubs Data State
   const [clubs, setClubs] = useState(INITIAL_CLUBS);
 
-  // Authentication & Access Role Tier State
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState('president'); // 'president' | 'officer' | 'member'
-  const [userSession, setUserSession] = useState(null);
+  // Authentication & Access Role Tier State (Persisted in localStorage)
+  const [userSession, setUserSession] = useState(() => {
+    try {
+      const saved = localStorage.getItem('district3011_session_v1');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(userSession));
+  const [userRole, setUserRole] = useState(() => userSession?.role || 'president');
 
   // Modals
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -282,6 +289,7 @@ export default function App() {
         onLogout={() => {
           setIsLoggedIn(false);
           setUserSession(null);
+          try { localStorage.removeItem('district3011_session_v1'); } catch (e) {}
           if (activePage === 'portal') handlePageChange('home');
         }}
       />
@@ -347,6 +355,7 @@ export default function App() {
             setIsLoggedIn(true);
             setUserSession(session);
             setUserRole(session.role || 'president');
+            try { localStorage.setItem('district3011_session_v1', JSON.stringify(session)); } catch (e) {}
             handlePageChange('portal');
           }}
         />

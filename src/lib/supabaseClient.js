@@ -257,16 +257,28 @@ export const dbService = {
           }
 
           const rawRole = (data.role || '').toLowerCase().trim();
+          const postText = (data.post || data.designation || '').toLowerCase();
+          const clubText = (data.club_name || data.clubName || '').toLowerCase();
           
           if (rawRole === 'dac_member') {
             return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
           }
 
-          if (rawRole !== 'officer' && rawRole !== 'president') {
-            return { success: false, error: `Access Denied: Role '${data.role}' is not authorized for portal access.` };
+          let role = rawRole;
+          if (role !== 'officer' && role !== 'president') {
+            if (
+              rawRole === 'officer' ||
+              postText.includes('district rotaract representative') ||
+              postText.includes('district rotaract general secretary') ||
+              postText.includes('district rotaract secretary') ||
+              postText.includes('district chair of technology') ||
+              (clubText.includes('district secretariat') && !postText.includes('dac'))
+            ) {
+              role = 'officer';
+            } else {
+              role = 'president';
+            }
           }
-
-          const role = rawRole;
 
           return {
             success: true,
@@ -289,9 +301,15 @@ export const dbService = {
 
     // Standalone / Network Failure Fallback (only used if network is disconnected)
     if (cleanId && cleanPass && (cleanPass === 'adminpassword' || cleanPass === 'rotarypassword' || cleanPass.length >= 4)) {
-      const isOfficer = cleanId.toLowerCase().includes('admin') || 
-                        cleanId.toLowerCase().includes('officer') || 
-                        cleanId.toLowerCase().includes('secretariat');
+      const cId = cleanId.toLowerCase();
+      const isOfficer = cId === '12670309' || 
+                        cId === 'jasraj2626@gmail.com' ||
+                        cId === '11459935' || cId === 'rtrshefali2004@gmail.com' ||
+                        cId === '11923095' || cId === 'harshitam2636@gmail.com' ||
+                        cId === '10256305' || cId === 'sarthakmanchanda2@gmail.com' ||
+                        cId === '10391101' || cId === 'himanshugulati.rotary@gmail.com' ||
+                        cId === '10915322' || cId === 'itsdrrarchit@gmail.com' ||
+                        cId.includes('admin') || cId.includes('officer') || cId.includes('secretariat');
       return {
         success: true,
         user: {
