@@ -42,7 +42,8 @@ export default function PortalPage({
 
   // User details derived from session or defaults
   const userEmail = userSession?.email || 'techrid3011@gmail.com';
-  const isDistrictOfficer = userRole === 'officer' || userRole === 'admin';
+  const sessionRole = (userSession?.role || userRole || '').toLowerCase().trim();
+  const isDistrictOfficer = sessionRole === 'officer';
 
   // Load initial data from Supabase Cloud or Local Fallback
   useEffect(() => {

@@ -88,8 +88,8 @@ export default function PortalPage({
   const [announcementContent, setAnnouncementContent] = useState('');
   const [announcementSuccessMsg, setAnnouncementSuccessMsg] = useState('');
 
-  const userEmail = userSession?.email || 'techrid3011@gmail.com';
-  const isDistrictOfficer = userRole === 'officer' || userRole === 'admin' || userSession?.role === 'officer' || userSession?.role === 'admin';
+  const sessionRole = (userSession?.role || userRole || '').toLowerCase().trim();
+  const isDistrictOfficer = sessionRole === 'officer';
 
   const allDistrictClubs = clubs && clubs.length > 0 ? clubs : INITIAL_CLUBS;
 
