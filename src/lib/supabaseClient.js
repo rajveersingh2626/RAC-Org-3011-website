@@ -257,28 +257,16 @@ export const dbService = {
           }
 
           const rawRole = (data.role || '').toLowerCase().trim();
-          const postText = (data.post || data.designation || '').toLowerCase();
-          const clubText = (data.club_name || data.clubName || '').toLowerCase();
           
           if (rawRole === 'dac_member') {
             return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
           }
 
-          let role = rawRole;
-          if (role !== 'officer' && role !== 'president') {
-            if (
-              rawRole === 'officer' ||
-              postText.includes('district rotaract representative') ||
-              postText.includes('district rotaract general secretary') ||
-              postText.includes('district rotaract secretary') ||
-              postText.includes('district chair of technology') ||
-              (clubText.includes('district secretariat') && !postText.includes('dac'))
-            ) {
-              role = 'officer';
-            } else {
-              role = 'president';
-            }
+          if (rawRole !== 'officer' && rawRole !== 'president') {
+            return { success: false, error: `Access Denied: Role '${data.role}' is not authorized for portal access.` };
           }
+
+          const role = rawRole;
 
           return {
             success: true,
