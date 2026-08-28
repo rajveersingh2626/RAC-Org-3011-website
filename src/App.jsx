@@ -8,6 +8,7 @@ import LoginModal from './components/Modals/LoginModal';
 import PresidentModal from './components/Modals/PresidentModal';
 import { INITIAL_CLUBS } from './data/districtData';
 import { getParsedClubsFromExcel } from './data/excelReader';
+import { dbService } from './lib/supabaseClient';
 import rotaryLogoImg from '../images.png';
 
 // Spinning Rotary Wheel Logo for Glass Loading Screen
@@ -106,6 +107,52 @@ export default function App() {
   // Dynamic Clubs Data State
   const [clubs, setClubs] = useState(INITIAL_CLUBS);
 
+  // Sync Supabase Database & Excel roster into global clubs state
+  useEffect(() => {
+    async function syncClubsData() {
+      try {
+        // 1. Fetch live clubs from Supabase
+        const spClubs = await dbService.fetchClubs();
+        if (spClubs && spClubs.length > 0) {
+          setClubs(spClubs);
+          return;
+        }
+
+        // 2. Fallback to local Excel roster sync
+        const parsed = await getParsedClubsFromExcel();
+        if (parsed && parsed.length > 0) {
+          setClubs(prev => {
+            return prev.map(c => {
+              const clean = (s) => (s || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+              const matched = parsed.find(ec => 
+                ec.name.toLowerCase().trim() === c.name.toLowerCase().trim() ||
+                ec.name.toLowerCase().includes(c.name.toLowerCase()) || 
+                c.name.toLowerCase().includes(ec.name.toLowerCase()) ||
+                (c.shortName && ec.name.toLowerCase().includes(c.shortName.toLowerCase())) ||
+                clean(ec.name).includes(clean(c.shortName || c.name)) ||
+                clean(c.name).includes(clean(ec.name))
+              );
+              if (matched) {
+                return {
+                  ...c,
+                  president: matched.president || c.president,
+                  isDirector: matched.isDirector || c.isDirector || '',
+                  zone: matched.zone || c.zone,
+                  phone: matched.phone || c.phone,
+                  email: matched.email || c.email
+                };
+              }
+              return c;
+            });
+          });
+        }
+      } catch (err) {
+        console.warn('Clubs sync notice:', err);
+      }
+    }
+    syncClubsData();
+  }, []);
+
   // Authentication & Access Role Tier State (Persisted in localStorage)
   const [userSession, setUserSession] = useState(() => {
     try {
@@ -143,44 +190,6 @@ export default function App() {
       clearTimeout(timer1);
       clearTimeout(timer2);
     };
-  }, []);
-
-  // Sync Excel roster (President Database 2026-27.xlsx) into global clubs state
-  useEffect(() => {
-    async function syncExcelData() {
-      try {
-        const parsed = await getParsedClubsFromExcel();
-        if (parsed && parsed.length > 0) {
-          setClubs(prev => {
-            return prev.map(c => {
-              const clean = (s) => (s || '').toLowerCase().replace(/rotaract|club|of|\s+/g, '');
-              const matched = parsed.find(ec => 
-                ec.name.toLowerCase().trim() === c.name.toLowerCase().trim() ||
-                ec.name.toLowerCase().includes(c.name.toLowerCase()) || 
-                c.name.toLowerCase().includes(ec.name.toLowerCase()) ||
-                (c.shortName && ec.name.toLowerCase().includes(c.shortName.toLowerCase())) ||
-                clean(ec.name).includes(clean(c.shortName || c.name)) ||
-                clean(c.name).includes(clean(ec.name))
-              );
-              if (matched) {
-                return {
-                  ...c,
-                  president: matched.president || c.president,
-                  isDirector: matched.isDirector || c.isDirector || '',
-                  zone: matched.zone || c.zone,
-                  phone: matched.phone || c.phone,
-                  email: matched.email || c.email
-                };
-              }
-              return c;
-            });
-          });
-        }
-      } catch (err) {
-        console.warn('Excel sync notice:', err);
-      }
-    }
-    syncExcelData();
   }, []);
 
   useEffect(() => {

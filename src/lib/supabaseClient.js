@@ -96,6 +96,44 @@ export const dbService = {
     // Check Supabase Database & Auth if Supabase is connected
     if (isSupabaseConfigured && supabase) {
       try {
+        // 0. Try Secure Server-Side RPC Function (Bypasses public SELECT table requirement)
+        try {
+          const { data: rpcUser, error: rpcErr } = await supabase
+            .rpc('authenticate_rotaract_user', {
+              p_identity: cleanId,
+              p_password: cleanPass
+            });
+
+          if (!rpcErr && rpcUser && rpcUser.length > 0) {
+            const row = rpcUser[0];
+            const rawRole = (row.role || '').toLowerCase().trim();
+
+            if (rawRole === 'dac_member') {
+              return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
+            }
+
+            if (rawRole !== 'officer' && rawRole !== 'president') {
+              return { success: false, error: `Access Denied: Role '${row.role}' is not authorized for portal access.` };
+            }
+
+            return {
+              success: true,
+              user: {
+                id: row.id,
+                rotaryId: row.rotary_id || cleanId,
+                email: row.email || cleanId,
+                role: rawRole,
+                fullName: row.full_name || (rawRole === 'officer' ? 'District Secretariat Officer' : 'Club Officer'),
+                clubName: row.club_name || (rawRole === 'officer' ? 'District Secretariat 3011' : 'Rotaract Club'),
+                post: row.post || (rawRole === 'officer' ? 'District Secretariat Officer' : 'Club President / Secretary'),
+                totpSecret: row.totp_secret || null
+              }
+            };
+          }
+        } catch (rpcEx) {
+          console.warn('RPC auth notice (fallback to direct table query if RPC not yet created):', rpcEx);
+        }
+
         // 1. Try Native Supabase Auth if email and password are provided
         if (cleanId.includes('@') && cleanPass) {
           try {
@@ -110,16 +148,24 @@ export const dbService = {
                 .eq('id', authData.user.id)
                 .maybeSingle();
               
+              const rawRole = (profData?.role || authData.user.user_metadata?.role || 'president').toLowerCase().trim();
+              if (rawRole === 'dac_member') {
+                return { success: false, error: 'Access Denied: DAC Members do not have access to District or Club Portals.' };
+              }
+              if (rawRole !== 'officer' && rawRole !== 'president') {
+                return { success: false, error: 'Access Denied: Account role unauthorized for portal access.' };
+              }
+
               return {
                 success: true,
                 user: {
                   id: authData.user.id,
                   rotaryId: profData?.rotary_id || profData?.rotaryId || authData.user.user_metadata?.rotary_id || cleanId,
                   email: authData.user.email || cleanId,
-                  role: profData?.role || authData.user.user_metadata?.role || 'president',
-                  fullName: profData?.full_name || profData?.fullName || authData.user.user_metadata?.full_name || 'Rotaract Officer',
-                  clubName: profData?.club_name || profData?.clubName || authData.user.user_metadata?.club_name || 'Rotaract Club',
-                  post: profData?.post || profData?.designation || authData.user.user_metadata?.post || 'Club President',
+                  role: rawRole,
+                  fullName: profData?.full_name || profData?.fullName || authData.user.user_metadata?.full_name || (rawRole === 'officer' ? 'District Secretariat Officer' : 'Club Officer'),
+                  clubName: profData?.club_name || profData?.clubName || authData.user.user_metadata?.club_name || (rawRole === 'officer' ? 'District Secretariat 3011' : 'Rotaract Club'),
+                  post: profData?.post || profData?.designation || authData.user.user_metadata?.post || (rawRole === 'officer' ? 'District Secretariat Officer' : 'Club President / Secretary'),
                   totpSecret: profData?.totp_secret || profData?.totpSecret || null
                 }
               };
@@ -313,6 +359,89 @@ export const dbService = {
     }
 
     return { success: false, error: 'Account not found in District 3011 database. Please check your Rotary ID or Email.' };
+  },
+
+  fetchClubs: async () => {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        // 1. Try fetching from dedicated 'clubs' table in Supabase if it exists
+        const { data: clubsTableData, error: clubsErr } = await supabase
+          .from('clubs')
+          .select('*');
+
+        if (!clubsErr && clubsTableData && clubsTableData.length > 0) {
+          return clubsTableData.map((c, idx) => ({
+            id: c.id || `sp-club-${idx}`,
+            name: c.name || c.club_name,
+            shortName: (c.name || c.club_name || '').replace(/^(Rotaract\s+(Club\s+of\s+)?|RAC\s+)/i, '').trim(),
+            president: c.president || c.president_name || 'Rtr. President',
+            isDirector: c.is_director || c.isDirector || '',
+            zone: c.zone || 'District 3011',
+            phone: c.phone || '',
+            email: c.email || '',
+            lat: c.lat || 28.6139,
+            lng: c.lng || 77.2090,
+            initiatives: c.initiatives || []
+          }));
+        }
+
+        // 2. Dynamic derivation from user_profiles table where role = 'president'
+        const { data: profileClubs, error: profErr } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('role', 'president');
+
+        if (!profErr && profileClubs && profileClubs.length > 0) {
+          const clubMap = new Map();
+
+          profileClubs.forEach(p => {
+            const rawClubName = (p.club_name || '').trim();
+            if (!rawClubName || rawClubName.toLowerCase().includes('district 3011')) return;
+
+            const cleanKey = rawClubName.toLowerCase().replace(/rotaract|club|of|\s+/g, '');
+            const post = (p.post || '').toLowerCase();
+            const isPresident = post.includes('president');
+
+            if (!clubMap.has(cleanKey)) {
+              clubMap.set(cleanKey, {
+                id: `sp-prof-${p.id}`,
+                name: rawClubName,
+                shortName: rawClubName.replace(/^(Rotaract\s+(Club\s+of\s+)?|RAC\s+)/i, '').trim(),
+                president: isPresident ? (p.full_name || 'Rtr. President') : '',
+                secretary: !isPresident ? (p.full_name || 'Rtr. Secretary') : '',
+                zone: 'District 3011',
+                phone: p.phone || '',
+                email: p.email || '',
+                lat: 28.6139 + (Math.random() - 0.5) * 0.1,
+                lng: 77.2090 + (Math.random() - 0.5) * 0.1,
+                initiatives: []
+              });
+            } else {
+              const existing = clubMap.get(cleanKey);
+              if (isPresident && (!existing.president || existing.president === 'Rtr. President')) {
+                existing.president = p.full_name;
+              } else if (!isPresident && (!existing.secretary || existing.secretary === 'Rtr. Secretary')) {
+                existing.secretary = p.full_name;
+              }
+              if (p.email) existing.email = p.email;
+              if (p.phone) existing.phone = p.phone;
+            }
+          });
+
+          const derivedList = Array.from(clubMap.values()).map(c => ({
+            ...c,
+            president: c.president || c.secretary || 'Rtr. President'
+          }));
+
+          if (derivedList.length > 0) {
+            return derivedList;
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase fetchClubs notice:', err);
+      }
+    }
+    return null;
   },
 
   fetchSubmissions: async () => {
