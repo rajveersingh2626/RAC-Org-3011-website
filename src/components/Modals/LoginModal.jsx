@@ -96,9 +96,9 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
       rotaryId: authenticatedUser.rotaryId,
       email: authenticatedUser.email,
       role: assignedRole,
-      fullName: authenticatedUser.fullName || (isOfficer ? 'District Secretariat Officer' : 'Rotaract Officer'),
-      clubName: authenticatedUser.clubName || (isOfficer ? 'District Secretariat 3011' : 'Rotaract Club'),
-      post: authenticatedUser.post || authenticatedUser.designation || (isOfficer ? 'District Secretariat Member' : 'Club President / Secretary'),
+      fullName: authenticatedUser.fullName || null,
+      clubName: authenticatedUser.clubName || null,
+      post: authenticatedUser.post || authenticatedUser.designation || null,
       mfaVerified: true,
       createdAt: Date.now(),
       expiresAt: Date.now() + FIVE_HOURS_MS,
@@ -327,7 +327,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                     {authenticatedUser?.fullName || authenticatedUser?.name || rotaryId}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '2px' }}>
-                    {authenticatedUser?.post || (authenticatedUser?.role === 'officer' ? 'District Secretariat Officer' : 'Club Officer')}
+                    {authenticatedUser?.post || null}
                   </div>
                 </div>
 
