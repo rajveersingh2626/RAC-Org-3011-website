@@ -207,24 +207,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
       opacity: 0.9
     }).addTo(map);
 
-    REGIONAL_ZONES.forEach(zone => {
-      L.polygon(zone.polygon, {
-        color: zone.color,
-        weight: 6,
-        opacity: 0.4,
-        fillColor: zone.fillColor,
-        fillOpacity: 0.1
-      }).addTo(map);
-
-      L.polygon(zone.polygon, {
-        color: zone.color,
-        weight: 3,
-        opacity: 0.95,
-        fillColor: zone.fillColor,
-        fillOpacity: 0.1
-      }).addTo(map);
-    });
-
     renderLeafletMarkers(L, map, activeClubs);
 
     return () => {
@@ -281,14 +263,17 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
       if (club.zone?.toLowerCase().includes('akash')) neonColor = '#123499';
 
       const displayName = (club.shortName || club.name).replace(/^RAC\s+/i, '');
+      const isActive = selectedClubId === club.id || activeSlideoutClub?.id === club.id;
 
       const customIcon = L.divIcon({
-        className: 'leaflet-neon-marker',
+        className: `leaflet-neon-marker ${isActive ? 'active-marker' : ''}`,
         html: `
           <div class="neon-marker-container">
-            <div class="neon-marker-core" style="background-color: ${neonColor}; box-shadow: 0 0 16px ${neonColor};"></div>
+            <div class="neon-marker-core" style="background-color: ${neonColor}; box-shadow: 0 0 14px ${neonColor};"></div>
             <div class="neon-marker-pulse" style="border: 2px solid ${neonColor};"></div>
-            <div class="neon-marker-label" style="border-color: ${neonColor}88; background: rgba(255,255,255,0.96); color: #1E1E24; font-weight: 800;">RAC ${displayName}</div>
+            <div class="neon-marker-label" style="border: 1.5px solid ${neonColor}; background: #FFFFFF; color: #0F172A; font-weight: 800;">
+              ${displayName}
+            </div>
           </div>
         `,
         iconSize: [30, 30],
@@ -364,17 +349,17 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
         <div
           style={{
             position: 'absolute',
-            top: '20px',
+            top: '76px',
             left: '20px',
-            zIndex: 1000,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: `2px solid ${activeZoneObj.color}40`,
+            zIndex: 1010,
+            background: 'rgba(255, 255, 255, 0.96)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: `2px solid ${activeZoneObj.color}`,
             borderRadius: '16px',
             padding: '16px 20px',
             maxWidth: '360px',
-            boxShadow: `0 12px 32px ${activeZoneObj.color}25`,
+            boxShadow: `0 16px 40px rgba(0,0,0,0.18), 0 0 20px ${activeZoneObj.color}35`,
             animation: 'fadeInUp 0.3s ease'
           }}
         >
@@ -711,7 +696,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                   padding: '16px 20px',
                   marginBottom: '22px',
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
                   gap: '12px'
                 }}
               >
@@ -722,6 +707,14 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                   <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1E1E24', marginTop: '3px' }}>
                     {currentSlideoutClub.president || '-'}
                   </div>
+                  {currentSlideoutClub.email && (
+                    <a
+                      href={`mailto:${currentSlideoutClub.email}`}
+                      style={{ fontSize: '0.76rem', color: '#D81B60', fontWeight: 700, textDecoration: 'none', display: 'block', marginTop: '3px', wordBreak: 'break-all' }}
+                    >
+                      {currentSlideoutClub.email}
+                    </a>
+                  )}
                 </div>
 
                 <div>
@@ -824,7 +817,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
 
             <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
               <a
-                href={`mailto:${currentSlideoutClub.email || 'techrid3011@gmail.com'}`}
+                href={`mailto:${currentSlideoutClub.email || currentSlideoutClub.presidentEmail || 'techrid3011@gmail.com'}?subject=${encodeURIComponent(`Connecting with ${currentSlideoutClub.name} (RY 2026-27)`)}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -883,20 +876,20 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#D81B60', boxShadow: '0 0 8px #D81B60' }} />
-            South & Central Delhi
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0088cc', boxShadow: '0 0 8px #0088cc' }} />
-            West & North Delhi
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#d97706', boxShadow: '0 0 8px #d97706' }} />
-            Gurugram NCR
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }} />
-            Faridabad & Noida
+            Zone Prithvi (पृथ्वी)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#D81B60', boxShadow: '0 0 8px #D81B60' }} />
+            Zone Agni (अग्नि)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0284c7', boxShadow: '0 0 8px #0284c7' }} />
+            Zone Vayu (वायु)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#123499', boxShadow: '0 0 8px #123499' }} />
+            Zone Akash (आकाश)
           </div>
         </div>
 

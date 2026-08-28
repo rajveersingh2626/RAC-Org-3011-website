@@ -17,55 +17,92 @@ import {
 } from 'lucide-react';
 import { parseExcelClubs, getParsedClubsFromExcel } from '../../data/excelReader';
 
-// Regional Zones Coordinates in Delhi NCR
-const REGIONAL_ZONES = [
+export const REGIONAL_ZONES = [
   {
-    id: 'zone-south',
-    name: 'South & Central Delhi',
-    color: '#ff2a5f', // Neon Pink
-    fillColor: '#ff2a5f',
-    polygon: [
-      [28.6400, 77.1800],
-      [28.6400, 77.2800],
-      [28.5000, 77.2900],
-      [28.4900, 77.1600],
-      [28.5800, 77.1600]
-    ]
-  },
-  {
-    id: 'zone-west',
-    name: 'West & North Delhi',
-    color: '#00b0ff', // Neon Blue
-    fillColor: '#00b0ff',
-    polygon: [
-      [28.7300, 77.0000],
-      [28.7300, 77.1600],
-      [28.5800, 77.1600],
-      [28.5700, 77.0100]
-    ]
-  },
-  {
-    id: 'zone-gurugram',
-    name: 'Gurugram & Cybercity',
-    color: '#e6a100', // Neon Amber
-    fillColor: '#e6a100',
-    polygon: [
-      [28.5200, 76.9200],
-      [28.5200, 77.1100],
-      [28.3400, 77.1100],
-      [28.3400, 76.9200]
-    ]
-  },
-  {
-    id: 'zone-faridabad',
-    name: 'Faridabad & Noida',
-    color: '#10b981', // Neon Emerald
+    id: 'zone-prithvi',
+    name: 'Zone Prithvi',
+    hindiName: 'पृथ्वी',
+    zoneNumber: 'Zone 1',
+    adrr: 'Rtr. Ayush Rai',
+    zrr: 'Rtn. Rtr. Kanav Sachdeva',
+    zrs: 'Rtr. Hitaishi Chawla',
+    color: '#10b981',
     fillColor: '#10b981',
+    clubsCount: 18,
+    center: [28.5350, 77.2350],
     polygon: [
-      [28.6400, 77.2800],
-      [28.6400, 77.5300],
-      [28.3500, 77.5300],
-      [28.3500, 77.2800]
+      [28.6000, 77.1600],
+      [28.6000, 77.3800],
+      [28.2500, 77.3800],
+      [28.2500, 77.0500],
+      [28.4500, 77.0500],
+      [28.5000, 77.1600]
+    ]
+  },
+  {
+    id: 'zone-agni',
+    name: 'Zone Agni',
+    hindiName: 'अग्नि',
+    zoneNumber: 'Zone 2',
+    adrr: 'Rtr. Ayush Rai',
+    zrr: 'Rtr. Dhruv Kumar Jha',
+    zrs: 'Rtr. Kartik Kumar',
+    color: '#D81B60',
+    fillColor: '#D81B60',
+    clubsCount: 19,
+    center: [28.6250, 77.2150],
+    polygon: [
+      [28.7200, 77.1500],
+      [28.7200, 77.3400],
+      [28.5800, 77.3400],
+      [28.5800, 77.2200],
+      [28.3200, 77.3500],
+      [28.3200, 77.1500],
+      [28.5500, 77.1500]
+    ]
+  },
+  {
+    id: 'zone-vayu',
+    name: 'Zone Vayu',
+    hindiName: 'वायु',
+    zoneNumber: 'Zone 3',
+    adrr: 'Rtr. Radhika Bansal',
+    zrr: 'Rtr. Tanishaa Sonker',
+    zrs: 'Rtr. Pratham Girdhar',
+    color: '#0284c7',
+    fillColor: '#0284c7',
+    clubsCount: 19,
+    center: [28.6850, 77.1650],
+    polygon: [
+      [28.7800, 77.0000],
+      [28.7800, 77.2000],
+      [28.6200, 77.2000],
+      [28.5800, 77.0500],
+      [28.4200, 77.0500],
+      [28.4200, 76.9500],
+      [28.6500, 76.9500]
+    ]
+  },
+  {
+    id: 'zone-akash',
+    name: 'Zone Akash',
+    hindiName: 'आकाश',
+    zoneNumber: 'Zone 4',
+    adrr: 'Rtr. Radhika Bansal',
+    zrr: 'Rtr. Palak Jain',
+    zrs: 'Rtr. Arjun Pratap Singh',
+    color: '#123499',
+    fillColor: '#123499',
+    clubsCount: 19,
+    center: [28.6150, 77.0850],
+    polygon: [
+      [28.7200, 76.9000],
+      [28.7200, 77.1200],
+      [28.5800, 77.1200],
+      [28.5200, 76.9800],
+      [28.3000, 76.9800],
+      [28.3000, 76.8500],
+      [28.5500, 76.8500]
     ]
   }
 ];
@@ -75,11 +112,9 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
 
-  // Active Clubs Data State
   const [activeClubs, setActiveClubs] = useState(clubs);
   const [excelLoaded, setExcelLoaded] = useState(false);
 
-  // UI Interactive States
   const [hoveredClub, setHoveredClub] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [activeSlideoutClub, setActiveSlideoutClub] = useState(null);
@@ -87,11 +122,9 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
   const [searchQuery, setSearchQuery] = useState('');
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // Load and parse RY 2026-27.xlsx data to sync correct president names & IS Directors
   useEffect(() => {
     let isMounted = true;
     
-    // First set from prop clubs
     setActiveClubs(clubs);
 
     async function loadExcelRoster() {
@@ -130,7 +163,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
     return () => { isMounted = false; };
   }, [clubs]);
 
-  // Sync selected club from outside
   useEffect(() => {
     if (selectedClubId) {
       const found = activeClubs.find(c => c.id === selectedClubId);
@@ -140,12 +172,10 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
     }
   }, [selectedClubId, activeClubs]);
 
-  // Mouse move listener for hover tooltip
   const handleMouseMove = (e) => {
     setTooltipPos({ x: e.clientX, y: e.clientY });
   };
 
-  // Initialize High-Resolution Satellite Map (Leaflet + ESRI World Imagery)
   useEffect(() => {
     if (!mapContainerRef.current) return;
     const L = window.L;
@@ -159,7 +189,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
     const map = L.map(mapContainerRef.current, {
       center: [28.5800, 77.1025],
       zoom: 11,
-      scrollWheelZoom: false, // Page scrolls smoothly
+      scrollWheelZoom: false,
       zoomControl: false
     });
 
@@ -167,36 +197,15 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // High-Resolution ESRI World Imagery Satellite Layer
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 18,
       attribution: 'Esri, Maxar, Earthstar Geographics'
     }).addTo(map);
 
-    // CartoDB Labels Overlay for streets
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
       maxZoom: 18,
       opacity: 0.9
     }).addTo(map);
-
-    // 3 Regional Zones Overlays
-    REGIONAL_ZONES.forEach(zone => {
-      L.polygon(zone.polygon, {
-        color: zone.color,
-        weight: 6,
-        opacity: 0.4,
-        fillColor: zone.fillColor,
-        fillOpacity: 0.1
-      }).addTo(map);
-
-      L.polygon(zone.polygon, {
-        color: zone.color,
-        weight: 3,
-        opacity: 0.95,
-        fillColor: zone.fillColor,
-        fillOpacity: 0.1
-      }).addTo(map);
-    });
 
     renderLeafletMarkers(L, map, activeClubs);
 
@@ -221,10 +230,10 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
     const filtered = clubsList.filter(c => {
       const matchesSearch = !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.president?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesZone = !activeZoneId || (
-        (activeZoneId === 'zone-south' && c.zone?.toLowerCase().includes('south')) ||
-        (activeZoneId === 'zone-west' && c.zone?.toLowerCase().includes('west')) ||
-        (activeZoneId === 'zone-gurugram' && c.zone?.toLowerCase().includes('gurugram')) ||
-        (activeZoneId === 'zone-faridabad' && (c.zone?.toLowerCase().includes('faridabad') || c.zone?.toLowerCase().includes('noida')))
+        (activeZoneId === 'zone-prithvi' && (c.zone?.toLowerCase().includes('prithvi') || c.zone?.toLowerCase().includes('south'))) ||
+        (activeZoneId === 'zone-agni' && (c.zone?.toLowerCase().includes('agni') || c.zone?.toLowerCase().includes('central') || c.zone?.toLowerCase().includes('faridabad'))) ||
+        (activeZoneId === 'zone-vayu' && (c.zone?.toLowerCase().includes('vayu') || c.zone?.toLowerCase().includes('north') || c.zone?.toLowerCase().includes('gurugram'))) ||
+        (activeZoneId === 'zone-akash' && (c.zone?.toLowerCase().includes('akash') || c.zone?.toLowerCase().includes('west')))
       );
       return matchesSearch && matchesZone;
     });
@@ -248,21 +257,23 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
         coordCounts[key] = 1;
       }
 
-      let neonColor = '#D81B60'; // Rotaract Pink default
-      if (club.zone?.toLowerCase().includes('west')) neonColor = '#0088cc';
-      if (club.zone?.toLowerCase().includes('gurugram')) neonColor = '#d97706';
-      if (club.zone?.toLowerCase().includes('faridabad') || club.zone?.toLowerCase().includes('noida')) neonColor = '#10b981';
+      let neonColor = '#10b981'; // Prithvi
+      if (club.zone?.toLowerCase().includes('agni')) neonColor = '#D81B60';
+      if (club.zone?.toLowerCase().includes('vayu')) neonColor = '#0284c7';
+      if (club.zone?.toLowerCase().includes('akash')) neonColor = '#123499';
 
       const displayName = (club.shortName || club.name).replace(/^RAC\s+/i, '');
+      const isActive = selectedClubId === club.id || activeSlideoutClub?.id === club.id;
 
-      // Custom Leaflet Icon with shortName
       const customIcon = L.divIcon({
-        className: 'leaflet-neon-marker',
+        className: `leaflet-neon-marker ${isActive ? 'active-marker' : ''}`,
         html: `
           <div class="neon-marker-container">
-            <div class="neon-marker-core" style="background-color: ${neonColor}; box-shadow: 0 0 16px ${neonColor};"></div>
+            <div class="neon-marker-core" style="background-color: ${neonColor}; box-shadow: 0 0 14px ${neonColor};"></div>
             <div class="neon-marker-pulse" style="border: 2px solid ${neonColor};"></div>
-            <div class="neon-marker-label" style="border-color: ${neonColor}88; background: rgba(255,255,255,0.96); color: #1E1E24; font-weight: 800;">RAC ${displayName}</div>
+            <div class="neon-marker-label" style="border: 1.5px solid ${neonColor}; background: #FFFFFF; color: #0F172A; font-weight: 800;">
+              ${displayName}
+            </div>
           </div>
         `,
         iconSize: [30, 30],
@@ -276,7 +287,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
       marker.on('click', () => {
         setActiveSlideoutClub(club);
         if (onSelectClub) onSelectClub(club.id);
-        map.flyTo([lat, lng], 13, { duration: 1.2 });
+        map.flyTo([lat, lng], 13.5, { duration: 1.2 });
       });
 
       markersRef.current.push(marker);
@@ -285,10 +296,29 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
 
   const getClubNeonColor = (c) => {
     if (!c) return '#D81B60';
-    if (c.zone?.toLowerCase().includes('west')) return '#0088cc';
-    if (c.zone?.toLowerCase().includes('gurugram')) return '#d97706';
+    if (c.zone?.toLowerCase().includes('prithvi')) return '#10b981';
+    if (c.zone?.toLowerCase().includes('agni')) return '#D81B60';
+    if (c.zone?.toLowerCase().includes('vayu')) return '#0284c7';
+    if (c.zone?.toLowerCase().includes('akash')) return '#123499';
     return '#D81B60';
   };
+
+  const handleZoneSelect = (zoneId) => {
+    if (activeZoneId === zoneId) {
+      setActiveZoneId(null);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.flyTo([28.5800, 77.1025], 11, { duration: 1.2 });
+      }
+    } else {
+      setActiveZoneId(zoneId);
+      const zoneObj = REGIONAL_ZONES.find(z => z.id === zoneId);
+      if (zoneObj && mapInstanceRef.current) {
+        mapInstanceRef.current.flyTo(zoneObj.center, 12, { duration: 1.2 });
+      }
+    }
+  };
+
+  const activeZoneObj = REGIONAL_ZONES.find(z => z.id === activeZoneId);
 
   return (
     <div 
@@ -309,13 +339,81 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
         transition: 'all 0.3s ease'
       }}
     >
-      {/* 1. SATELLITE MAP CANVAS CONTAINER */}
       <div 
         ref={mapContainerRef} 
         style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 1 }}
       />
 
-      {/* FLOATING BOTTOM CONTROL TOOLBAR */}
+      {/* FLOATING ZONE LEADERSHIP OVERLAY CARD */}
+      {activeZoneObj && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '76px',
+            left: '20px',
+            zIndex: 1010,
+            background: 'rgba(255, 255, 255, 0.96)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: `2px solid ${activeZoneObj.color}`,
+            borderRadius: '16px',
+            padding: '16px 20px',
+            maxWidth: '360px',
+            boxShadow: `0 16px 40px rgba(0,0,0,0.18), 0 0 20px ${activeZoneObj.color}35`,
+            animation: 'fadeInUp 0.3s ease'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span
+                style={{
+                  background: activeZoneObj.color,
+                  color: '#FFFFFF',
+                  padding: '3px 10px',
+                  borderRadius: '100px',
+                  fontSize: '0.74rem',
+                  fontWeight: 900,
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {activeZoneObj.zoneNumber}
+              </span>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#1E1E24' }}>
+                {activeZoneObj.name} <span style={{ color: activeZoneObj.color, fontFamily: 'serif' }}>({activeZoneObj.hindiName})</span>
+              </h3>
+            </div>
+            <button
+              onClick={() => handleZoneSelect(activeZoneId)}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748B', display: 'flex' }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '6px', fontSize: '0.78rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#F8FAFC', padding: '6px 10px', borderRadius: '8px' }}>
+              <span style={{ color: '#64748B', fontWeight: 700 }}>ADRR:</span>
+              <strong style={{ color: '#0F172A' }}>{activeZoneObj.adrr}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#F8FAFC', padding: '6px 10px', borderRadius: '8px' }}>
+              <span style={{ color: '#64748B', fontWeight: 700 }}>ZRR:</span>
+              <strong style={{ color: activeZoneObj.color }}>{activeZoneObj.zrr}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#F8FAFC', padding: '6px 10px', borderRadius: '8px' }}>
+              <span style={{ color: '#64748B', fontWeight: 700 }}>ZRS:</span>
+              <strong style={{ color: '#0F172A' }}>{activeZoneObj.zrs}</strong>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#64748B' }}>
+            <span>Active Clubs in Zone:</span>
+            <span style={{ fontWeight: 800, color: activeZoneObj.color, fontSize: '0.82rem' }}>
+              {activeZoneObj.clubsCount} Clubs
+            </span>
+          </div>
+        </div>
+      )}
+
       <div 
         style={{
           position: 'absolute',
@@ -323,7 +421,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
           left: '20px',
           right: '20px',
           display: 'flex',
-          justify: 'space-between',
+          justifyContent: 'space-between',
           alignItems: 'center',
           gap: '16px',
           zIndex: 1000,
@@ -331,7 +429,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
           flexWrap: 'wrap'
         }}
       >
-        {/* Title Badge */}
         <div 
           style={{
             background: 'rgba(255, 255, 255, 0.94)',
@@ -368,14 +465,12 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
               )}
             </div>
             <div style={{ fontSize: '0.74rem', color: '#4A4A5A', fontWeight: 600 }}>
-              ESRI High-Res Satellite • 3 Regional Zones • {activeClubs.length} Active Clubs
+              ESRI High-Res Satellite • 4 Elemental Zones (Prithvi, Agni, Vayu, Akash) • {activeClubs.length} Active Clubs
             </div>
           </div>
         </div>
 
-        {/* Toolbar Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', pointerEvents: 'auto', flexWrap: 'wrap' }}>
-          {/* Search Box */}
           <div 
             style={{
               position: 'relative',
@@ -411,10 +506,9 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
             )}
           </div>
 
-          {/* Zone Chips */}
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             <button
-              onClick={() => setActiveZoneId(null)}
+              onClick={() => handleZoneSelect(null)}
               style={{
                 background: !activeZoneId ? '#FFFFFF' : '#0E0E0E',
                 backdropFilter: 'blur(12px)',
@@ -429,32 +523,31 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                 boxShadow: !activeZoneId ? '0 4px 14px rgba(0,0,0,0.18)' : 'none'
               }}
             >
-              All Zones
+              All Zones ({activeClubs.length})
             </button>
             {REGIONAL_ZONES.map(z => (
               <button
                 key={z.id}
-                onClick={() => setActiveZoneId(activeZoneId === z.id ? null : z.id)}
+                onClick={() => handleZoneSelect(z.id)}
                 style={{
-                  background: activeZoneId === z.id ? 'rgba(255, 255, 255, 0.96)' : '#123499',
+                  background: activeZoneId === z.id ? 'rgba(255, 255, 255, 0.96)' : z.color,
                   backdropFilter: 'blur(12px)',
                   color: activeZoneId === z.id ? z.color : '#FFFFFF',
-                  border: activeZoneId === z.id ? `2px solid ${z.color}` : '1px solid #123499',
+                  border: activeZoneId === z.id ? `2px solid ${z.color}` : `1px solid ${z.color}`,
                   padding: '7px 14px',
                   borderRadius: '8px',
                   fontSize: '0.78rem',
                   fontWeight: 800,
                   cursor: 'pointer',
                   transition: 'all 0.25s ease',
-                  boxShadow: activeZoneId === z.id ? `0 4px 14px ${z.color}35` : 'none'
+                  boxShadow: activeZoneId === z.id ? `0 4px 14px ${z.color}45` : '0 2px 8px rgba(0,0,0,0.12)'
                 }}
               >
-                {z.name}
+                {z.name} <span style={{ opacity: 0.85, fontSize: '0.72rem' }}>({z.hindiName})</span>
               </button>
             ))}
           </div>
 
-          {/* Full Screen Toggle */}
           <button
             onClick={() => setIsFullScreen(!isFullScreen)}
             style={{
@@ -478,7 +571,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
         </div>
       </div>
 
-      {/* LIGHT THEME HOVER TOOLTIP */}
       {hoveredClub && (
         <div 
           className="glass-hover-tooltip"
@@ -522,7 +614,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
         </div>
       )}
 
-      {/* CLICK SLIDE-OUT LIGHT THEME SIDEBAR */}
       {(() => {
         const currentSlideoutClub = activeSlideoutClub 
           ? (activeClubs.find(c => c.id === activeSlideoutClub.id) || activeSlideoutClub)
@@ -543,10 +634,8 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
               {currentSlideoutClub && (
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '85px 30px 40px 30px', boxSizing: 'border-box' }}>
                   
-                  {/* Scrollable upper content area */}
                   <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
                     
-                    {/* Top Close Bar */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                       <div style={{ flex: 1, paddingRight: '12px' }}>
                         <span 
@@ -567,13 +656,11 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                           {currentSlideoutClub.zone || 'District 3011'}
                         </span>
                         
-                        {/* Official Full Club Name */}
                         <h2 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#1E1E24', lineHeight: 1.2, margin: 0 }}>
                           {currentSlideoutClub.name}
                         </h2>
                       </div>
 
-                {/* Clean Close Button */}
                 <button
                   onClick={() => {
                     setActiveSlideoutClub(null);
@@ -601,7 +688,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                 </button>
               </div>
 
-              {/* Club Leadership Quick Meta: President + International Services Director + Charter Year */}
               <div 
                 style={{
                   background: '#FFF8FA',
@@ -610,7 +696,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                   padding: '16px 20px',
                   marginBottom: '22px',
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
                   gap: '12px'
                 }}
               >
@@ -621,6 +707,14 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                   <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1E1E24', marginTop: '3px' }}>
                     {currentSlideoutClub.president || '-'}
                   </div>
+                  {currentSlideoutClub.email && (
+                    <a
+                      href={`mailto:${currentSlideoutClub.email}`}
+                      style={{ fontSize: '0.76rem', color: '#D81B60', fontWeight: 700, textDecoration: 'none', display: 'block', marginTop: '3px', wordBreak: 'break-all' }}
+                    >
+                      {currentSlideoutClub.email}
+                    </a>
+                  )}
                 </div>
 
                 <div>
@@ -642,7 +736,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                 </div>
               </div>
 
-              {/* FEATURED PROJECTS / PROJECT SPOTLIGHT SECTION (Always Visible) */}
               <div style={{ marginBottom: '24px' }}>
                 <div 
                   style={{
@@ -669,7 +762,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                   </span>
                 </div>
 
-                {/* List of Featured Projects or Empty State */}
                 {(currentSlideoutClub.initiatives && currentSlideoutClub.initiatives.length > 0) ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     {(currentSlideoutClub.initiatives || []).map((init, idx) => (
@@ -716,17 +808,16 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                       fontWeight: 500
                     }}
                   >
-                    No initiatives uploaded yet for this club.
+                    No monthly report KPIs uploaded yet for this club.
                   </div>
                 )}
               </div>
 
             </div>
 
-            {/* Bottom-Aligned "Connect with..." Action Button (Hex #123499, White Text) */}
             <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
               <a
-                href={`mailto:${currentSlideoutClub.email || 'contact@rotaract3011.org'}`}
+                href={`mailto:${currentSlideoutClub.email || currentSlideoutClub.presidentEmail || 'techrid3011@gmail.com'}?subject=${encodeURIComponent(`Connecting with ${currentSlideoutClub.name} (RY 2026-27)`)}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -737,18 +828,14 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
                   borderRadius: '10px',
                   fontWeight: 800,
                   fontSize: '0.95rem',
-                  textDecoration: 'none',
-                  whiteSpace: 'normal',
-                  textAlign: 'center',
-                  backgroundColor: '#123499',
                   color: '#FFFFFF',
-                  boxShadow: '0 6px 22px rgba(18, 52, 153, 0.28)',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                  boxSizing: 'border-box'
+                  background: 'linear-gradient(135deg, #D81B60 0%, #AD1457 100%)',
+                  textDecoration: 'none',
+                  boxShadow: '0 8px 24px rgba(216, 27, 96, 0.25)',
+                  transition: 'transform 0.2s ease'
                 }}
               >
-                Connect with {currentSlideoutClub.name}
+                Connect via Email <ChevronRight size={18} />
               </a>
             </div>
 
@@ -759,8 +846,6 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
   );
 })()}
 
-
-      {/* TOP LEGEND & HINT BAR */}
       <div 
         style={{
           position: 'absolute',
@@ -791,20 +876,20 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#D81B60', boxShadow: '0 0 8px #D81B60' }} />
-            South & Central Delhi
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0088cc', boxShadow: '0 0 8px #0088cc' }} />
-            West & North Delhi
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#d97706', boxShadow: '0 0 8px #d97706' }} />
-            Gurugram NCR
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }} />
-            Faridabad & Noida
+            Zone Prithvi (पृथ्वी)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#D81B60', boxShadow: '0 0 8px #D81B60' }} />
+            Zone Agni (अग्नि)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#0284c7', boxShadow: '0 0 8px #0284c7' }} />
+            Zone Vayu (वायु)
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#1E1E24', fontWeight: 700 }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#123499', boxShadow: '0 0 8px #123499' }} />
+            Zone Akash (आकाश)
           </div>
         </div>
 
@@ -822,7 +907,7 @@ export default function DistrictMap({ clubs = [], selectedClubId, onSelectClub }
             boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
           }}
         >
-          Click pin to view Club Overview & Club KPIs
+          Click pin to view Club Overview & Project Spotlight
         </div>
       </div>
 

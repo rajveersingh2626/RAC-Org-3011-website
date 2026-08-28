@@ -651,6 +651,7 @@ body {
   border: 2px solid #FFFFFF;
   position: relative;
   z-index: 2;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .neon-marker-pulse {
@@ -667,35 +668,44 @@ body {
 
 .neon-marker-label {
   position: absolute;
-  top: -26px;
+  top: -24px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 3px 10px;
-  border-radius: 20px;
-  border: 1px solid;
-  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.70rem;
   font-weight: 800;
+  letter-spacing: -0.1px;
   white-space: nowrap;
   max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #FFFFFF !important;
+  color: #1E1E24 !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 10;
   pointer-events: auto;
+  opacity: 0.98;
+  visibility: visible;
 }
 
-.leaflet-neon-marker:hover {
+.leaflet-neon-marker:hover,
+.leaflet-neon-marker.active-marker {
   z-index: 99999 !important;
 }
 
-.leaflet-neon-marker:hover .neon-marker-label {
-  max-width: 320px;
+.leaflet-neon-marker:hover .neon-marker-core,
+.leaflet-neon-marker.active-marker .neon-marker-core {
+  transform: scale(1.35);
+}
+
+.leaflet-neon-marker:hover .neon-marker-label,
+.leaflet-neon-marker.active-marker .neon-marker-label {
+  opacity: 1;
+  max-width: 280px;
   transform: translateX(-50%) scale(1.1);
-  background: #FFFFFF !important;
-  color: var(--rotaract-pink) !important;
-  border-color: var(--rotaract-pink) !important;
-  box-shadow: 0 8px 25px rgba(216, 27, 96, 0.35) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
   z-index: 99999;
 }
 
