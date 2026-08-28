@@ -478,8 +478,9 @@ export const dbService = {
       try {
         const totalProjs = Object.values(newReport.sections || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
 
-        // 1. Insert to dedicated monthly_reports table
+        // 1. Insert/Upsert to dedicated monthly_reports table
         const reportPayload = {
+          id: newReport.id && !newReport.id.startsWith('report-17') ? newReport.id : undefined,
           month: newReport.month,
           club_name: newReport.clubName,
           club_email: newReport.clubEmail,
@@ -490,10 +491,10 @@ export const dbService = {
 
         const { error: mrErr } = await supabase
           .from('monthly_reports')
-          .insert([reportPayload]);
+          .upsert([reportPayload]);
 
         if (!mrErr) {
-          console.log('Successfully saved report to Supabase monthly_reports table!');
+          console.log('Successfully upserted report to Supabase monthly_reports table!');
           return await dbService.fetchSubmissions();
         } else {
           console.warn('Supabase monthly_reports insert notice:', mrErr.message || mrErr);

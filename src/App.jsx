@@ -153,11 +153,18 @@ export default function App() {
     syncClubsData();
   }, []);
 
-  // Authentication & Access Role Tier State (Persisted in localStorage)
+  // Authentication & Access Role Tier State (Persisted in localStorage for 5 Hours)
   const [userSession, setUserSession] = useState(() => {
     try {
       const saved = localStorage.getItem('district3011_session_v1');
-      return saved ? JSON.parse(saved) : null;
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      // Verify session expiry (5 hours minimum logged in period)
+      if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+        localStorage.removeItem('district3011_session_v1');
+        return null;
+      }
+      return parsed;
     } catch {
       return null;
     }

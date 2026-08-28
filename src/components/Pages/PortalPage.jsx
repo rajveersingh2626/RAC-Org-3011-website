@@ -133,18 +133,39 @@ export default function PortalPage({
     driveLink: ''
   });
 
-  // Open modal to submit new report
+  // Open modal to submit new report or resume active draft
   const handleOpenNewReport = () => {
-    setEditingReportId(null);
-    setSelectedMonth('August 2026');
-    setSectionsData({
-      clubMeetings: [createEmptyProject()],
-      clubServices: [],
-      communityServices: [],
-      internationalServices: [],
-      vocationalServices: [],
-      districtProjects: []
-    });
+    const existingDraft = submissions.find(s => 
+      s.status === 'draft' && 
+      s.month === selectedMonth &&
+      (
+        (userSession?.email && s.clubEmail === userSession.email) ||
+        (userSession?.clubName && s.clubName === userSession.clubName)
+      )
+    );
+
+    if (existingDraft) {
+      setEditingReportId(existingDraft.id);
+      setSectionsData(existingDraft.sections || {
+        clubMeetings: [createEmptyProject()],
+        clubServices: [],
+        communityServices: [],
+        internationalServices: [],
+        vocationalServices: [],
+        districtProjects: []
+      });
+    } else {
+      setEditingReportId(null);
+      setSelectedMonth('August 2026');
+      setSectionsData({
+        clubMeetings: [createEmptyProject()],
+        clubServices: [],
+        communityServices: [],
+        internationalServices: [],
+        vocationalServices: [],
+        districtProjects: []
+      });
+    }
     setActiveFormSection('clubMeetings');
     setIsReportModalOpen(true);
   };
@@ -194,26 +215,34 @@ export default function PortalPage({
     }));
   };
 
-  // Submit full Monthly Report
-  const handleSubmitMonthlyReport = async (e) => {
-    e.preventDefault();
+  // Submit or Save Draft Monthly Report (100% Dynamic from userSession)
+  const handleSubmitMonthlyReport = async (e, targetStatus = 'reported') => {
+    if (e && e.preventDefault) e.preventDefault();
 
-    const totalProjs = Object.values(sectionsData).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
-    if (totalProjs === 0) {
-      alert('Please add at least 1 project in any section to submit your monthly report.');
+    if (!userSession || !userSession.email) {
+      alert('Session error: Unable to verify logged-in user profile. Please log in again.');
       return;
     }
 
+    const totalProjs = Object.values(sectionsData).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
+    if (totalProjs === 0) {
+      alert('Please add at least 1 project in any section to save or submit your monthly report.');
+      return;
+    }
+
+    const activeEmail = userSession.email;
+    const activeClubName = userSession.clubName || '';
+    const activeFullName = userSession.fullName || '';
+    const activePost = userSession.post || 'Officer';
+
     const reportPayload = {
-      id: editingReportId || `report-${Date.now()}`,
+      id: editingReportId || `report-${activeEmail.replace(/[^a-zA-Z0-9]/g, '')}-${selectedMonth.replace(/\s+/g, '')}`,
       month: selectedMonth,
-      clubName: userEmail.includes('galgotia') 
-        ? 'Rotaract Club of Galgotia University' 
-        : 'Rotaract Club of Delhi Heights',
-      clubEmail: userEmail,
-      submittedBy: `Officer (${userEmail.split('@')[0]})`,
+      clubName: activeClubName,
+      clubEmail: activeEmail,
+      submittedBy: activeFullName ? `${activeFullName} (${activePost})` : activePost,
       submittedAt: new Date().toISOString().split('T')[0],
-      status: 'reported',
+      status: targetStatus, // 'draft' | 'reported' | 'flagged'
       flagComment: null,
       sections: sectionsData
     };
@@ -1662,12 +1691,36 @@ export default function PortalPage({
                 );
               })()}
 
-              {/* Submit Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #E2E8F0', paddingTop: '20px' }}>
-                <button type="button" onClick={() => setIsReportModalOpen(false)} className="btn-rotaract-outline" style={{ padding: '12px 24px' }}>
+              {/* Submit & Draft Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #E2E8F0', paddingTop: '20px', flexWrap: 'wrap' }}>
+                <button type="button" onClick={() => setIsReportModalOpen(false)} className="btn-rotaract-outline" style={{ padding: '12px 20px' }}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-rotaract" style={{ padding: '12px 32px', fontSize: '0.95rem' }}>
+                <button 
+                  type="button" 
+                  onClick={(e) => handleSubmitMonthlyReport(e, 'draft')}
+                  style={{
+                    background: '#F1F5F9',
+                    border: '1.5px solid #CBD5E1',
+                    color: '#334155',
+                    padding: '12px 22px',
+                    borderRadius: '100px',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <FileText size={18} /> Save as Draft
+                </button>
+                <button 
+                  type="button" 
+                  onClick={(e) => handleSubmitMonthlyReport(e, 'reported')}
+                  className="btn-rotaract" 
+                  style={{ padding: '12px 28px', fontSize: '0.95rem' }}
+                >
                   Submit Monthly Report to District <Send size={18} />
                 </button>
               </div>

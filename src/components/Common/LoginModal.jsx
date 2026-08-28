@@ -99,14 +99,17 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     const assignedRole = rawRole;
     const isOfficer = assignedRole === 'officer';
 
+    const FIVE_HOURS_MS = 5 * 60 * 60 * 1000;
     onLoginSuccess({
       rotaryId: authenticatedUser.rotaryId,
       email: authenticatedUser.email,
       role: assignedRole,
       fullName: authenticatedUser.fullName || (isOfficer ? 'District Secretariat Officer' : 'Rotaract Officer'),
-      clubName: authenticatedUser.clubName || (isOfficer ? 'District Secretariat 3011' : 'Rotaract Club of Delhi Heights'),
+      clubName: authenticatedUser.clubName || (isOfficer ? 'District Secretariat 3011' : 'Rotaract Club'),
       post: authenticatedUser.post || authenticatedUser.designation || (isOfficer ? 'District Secretariat Member' : 'Club President / Secretary'),
       mfaVerified: true,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + FIVE_HOURS_MS,
       sessionToken: `sec_jwt_${Math.random().toString(36).substring(2)}`
     });
     onClose();
