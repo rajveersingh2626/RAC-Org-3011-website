@@ -10,6 +10,7 @@ import { INITIAL_CLUBS } from './data/districtData';
 import { getParsedClubsFromExcel } from './data/excelReader';
 import { dbService } from './lib/supabaseClient';
 import rotaryLogoImg from '../images.png';
+import { Analytics } from '@vercel/analytics/react';
 
 // Spinning Rotary Wheel Logo for Glass Loading Screen
 function RotaryLoaderLogo({ size = 96 }) {
@@ -389,6 +390,9 @@ export default function App() {
           preselectedClub={preselectedClubForModal}
         />
       )}
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
 
     </div>
   );
