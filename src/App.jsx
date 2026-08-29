@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 import PublicHome from './components/Pages/PublicHome';
@@ -389,6 +390,9 @@ export default function App() {
           preselectedClub={preselectedClubForModal}
         />
       )}
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
 
     </div>
   );
