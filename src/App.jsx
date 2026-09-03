@@ -156,12 +156,12 @@ export default function App() {
   // Authentication & Access Role Tier State (Persisted in localStorage for 5 Hours)
   const [userSession, setUserSession] = useState(() => {
     try {
-      const saved = localStorage.getItem('district3011_session_v1');
+      const saved = sessionStorage.getItem('district3011_session_v1');
       if (!saved) return null;
       const parsed = JSON.parse(saved);
       // Verify session expiry (5 hours minimum logged in period)
       if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
-        localStorage.removeItem('district3011_session_v1');
+        sessionStorage.removeItem('district3011_session_v1');
         return null;
       }
       return parsed;
@@ -305,7 +305,7 @@ export default function App() {
         onLogout={() => {
           setIsLoggedIn(false);
           setUserSession(null);
-          try { localStorage.removeItem('district3011_session_v1'); } catch (e) {}
+          try { sessionStorage.removeItem('district3011_session_v1'); } catch (e) {}
           if (activePage === 'portal') handlePageChange('home');
         }}
       />
@@ -381,7 +381,7 @@ export default function App() {
             setIsLoggedIn(true);
             setUserSession(session);
             setUserRole(session.role || null);
-            try { localStorage.setItem('district3011_session_v1', JSON.stringify(session)); } catch (e) {}
+            try { sessionStorage.setItem('district3011_session_v1', JSON.stringify(session)); } catch (e) {}
             handlePageChange('portal');
           }}
         />

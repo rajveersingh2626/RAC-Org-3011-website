@@ -146,6 +146,7 @@ export const dbService = {
               fullName: row.full_name || row.fullName || null,
               clubName: row.club_name || row.clubName || null,
               post: row.post || row.designation || null,
+              hasTotpConfigured: Boolean(row.totp_secret),
               totpSecret: row.totp_secret || null
             }
           };
@@ -165,10 +166,10 @@ export const dbService = {
   fetchClubs: async () => {
     if (isSupabaseConfigured && supabase) {
       try {
-        // Fetch from dedicated 'clubs' table in Supabase if it exists
+        // Fetch from dedicated 'clubs' table in Supabase with explicit column selection
         const { data: clubsTableData, error: clubsErr } = await supabase
           .from('clubs')
-          .select('*');
+          .select('id, name, club_name, president, president_name, is_director, isDirector, zone, phone, email, lat, lng, initiatives');
 
         if (!clubsErr && clubsTableData && clubsTableData.length > 0) {
           return clubsTableData.map((c, idx) => ({
@@ -195,20 +196,20 @@ export const dbService = {
   fetchSubmissions: async () => {
     if (isSupabaseConfigured && supabase) {
       try {
-        // 1. Fetch from monthly_reports table
+        // 1. Fetch from monthly_reports table with explicit column projection
         const { data: reportData, error: reportErr } = await supabase
           .from('monthly_reports')
-          .select('*')
+          .select('id, month, club_name, club_email, submitted_by, submitted_at, status, flag_comment, flag_reason, flagged_by, flagged_at, section_flags, sections_json')
           .order('submitted_at', { ascending: false });
 
         if (!reportErr && reportData && reportData.length > 0) {
           return reportData.map(parseSubFromDB);
         }
 
-        // 2. Fallback to project_submissions table if monthly_reports returned no rows or had error
+        // 2. Fallback to project_submissions table with explicit projection
         const { data: subData, error: subErr } = await supabase
           .from('project_submissions')
-          .select('*')
+          .select('id, club_name, club_email, submitted_by, submitted_at, status, flag_comment, title, category, description, narrative, proof_url, beneficiaries')
           .order('submitted_at', { ascending: false });
 
         if (!subErr && subData && subData.length > 0) {
@@ -226,20 +227,24 @@ export const dbService = {
   },
 
   insertSubmission: async (newReport) => {
+    if (!newReport || !newReport.month || !newReport.clubName) {
+      throw new Error('Month and club name are required for report submission.');
+    }
+
     if (isSupabaseConfigured && supabase) {
       try {
         const totalProjs = Object.values(newReport.sections || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
 
-        // 1. Prepare clean payload for monthly_reports
+        // 1. Prepare clean sanitized payload for monthly_reports
         const reportPayload = {
-          month: newReport.month,
-          club_name: newReport.clubName,
-          club_email: newReport.clubEmail,
-          submitted_by: newReport.submittedBy,
+          month: String(newReport.month).trim().slice(0, 50),
+          club_name: String(newReport.clubName).trim().slice(0, 150),
+          club_email: String(newReport.clubEmail || '').trim().slice(0, 150),
+          submitted_by: String(newReport.submittedBy || 'Rotaract Officer').trim().slice(0, 100),
           status: newReport.status || 'reported',
-          flag_comment: newReport.flagComment || null,
-          flag_reason: newReport.flagReason || null,
-          flagged_by: newReport.flaggedBy || null,
+          flag_comment: newReport.flagComment ? String(newReport.flagComment).slice(0, 2000) : null,
+          flag_reason: newReport.flagReason ? String(newReport.flagReason).slice(0, 200) : null,
+          flagged_by: newReport.flaggedBy ? String(newReport.flaggedBy).slice(0, 100) : null,
           flagged_at: newReport.flaggedAt || null,
           section_flags: newReport.sectionFlags ? (typeof newReport.sectionFlags === 'string' ? newReport.sectionFlags : JSON.stringify(newReport.sectionFlags)) : null,
           sections_json: newReport.sections
@@ -270,7 +275,6 @@ export const dbService = {
             .eq('id', existingMrId);
 
           if (!updateErr) {
-            console.log('Updated existing monthly report in Supabase!');
             return await dbService.fetchSubmissions();
           }
         } else {
@@ -279,7 +283,6 @@ export const dbService = {
             .insert([reportPayload]);
 
           if (!insertErr) {
-            console.log('Inserted new monthly report to Supabase monthly_reports!');
             return await dbService.fetchSubmissions();
           }
         }
@@ -312,7 +315,6 @@ export const dbService = {
           .insert([subPayload]);
 
         if (!subErr) {
-          console.log('Saved report to Supabase project_submissions fallback table!');
           return await dbService.fetchSubmissions();
         }
       } catch (err) {
@@ -323,9 +325,10 @@ export const dbService = {
   },
 
   flagSubmission: async (id, flagPayload) => {
-    const comment = typeof flagPayload === 'string' ? flagPayload : flagPayload?.comment || '';
-    const reason = typeof flagPayload === 'object' ? flagPayload?.reason || 'Audit Feedback' : 'Audit Feedback';
-    const flaggedBy = typeof flagPayload === 'object' ? flagPayload?.flaggedBy || 'District Secretariat' : 'District Secretariat';
+    const rawComment = typeof flagPayload === 'string' ? flagPayload : flagPayload?.comment || '';
+    const comment = String(rawComment).trim().slice(0, 2000);
+    const reason = typeof flagPayload === 'object' ? String(flagPayload?.reason || 'Audit Feedback').slice(0, 200) : 'Audit Feedback';
+    const flaggedBy = typeof flagPayload === 'object' ? String(flagPayload?.flaggedBy || 'District Secretariat').slice(0, 100) : 'District Secretariat';
     const sectionFlags = typeof flagPayload === 'object' ? flagPayload?.sectionFlags || {} : {};
     const flaggedAt = new Date().toISOString().split('T')[0];
 
@@ -377,7 +380,6 @@ export const dbService = {
           .eq('id', id);
 
         if (!mrErr && !subErr) {
-          console.log(`Successfully deleted report ${id} from Supabase!`);
           return await dbService.fetchSubmissions();
         }
       } catch (err) {
@@ -392,7 +394,7 @@ export const dbService = {
       try {
         const { data, error } = await supabase
           .from('announcements')
-          .select('*')
+          .select('id, title, category, target_audience, content, author_name, sent_via_email, created_at')
           .order('created_at', { ascending: false });
 
         if (!error && Array.isArray(data)) {
@@ -415,16 +417,26 @@ export const dbService = {
   },
 
   insertAnnouncement: async (announcement) => {
+    if (!announcement || !announcement.title || !announcement.content) {
+      throw new Error('Title and content are required.');
+    }
+
+    const safeTitle = String(announcement.title).trim().slice(0, 300);
+    const safeContent = String(announcement.content).trim().slice(0, 10000);
+    const safeCategory = String(announcement.category || 'District Event').trim().slice(0, 100);
+    const safeAuthor = String(announcement.author || 'District Secretariat').trim().slice(0, 100);
+    const safeAudience = ['all', 'presidents', 'secretaries', 'dac'].includes(announcement.targetAudience) ? announcement.targetAudience : 'all';
+
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase
           .from('announcements')
           .insert([{
-            title: announcement.title,
-            category: announcement.category || 'District Event',
-            target_audience: announcement.targetAudience || 'all',
-            content: announcement.content,
-            author_name: announcement.author || 'District Secretariat',
+            title: safeTitle,
+            category: safeCategory,
+            target_audience: safeAudience,
+            content: safeContent,
+            author_name: safeAuthor,
             sent_via_email: Boolean(announcement.sentViaEmail)
           }]);
 
@@ -479,6 +491,22 @@ export const dbService = {
       }
     }
     return false;
+  },
+
+  // Verify TOTP code — attempts server RPC verify_user_totp if available, returns null if RPC unavailable
+  verifyUserTotp: async (userId, inputCode) => {
+    if (isSupabaseConfigured && supabase && userId) {
+      try {
+        const { data, error } = await supabase.rpc('verify_user_totp', {
+          p_user_id: userId,
+          p_code: inputCode
+        });
+        if (!error && typeof data === 'boolean') {
+          return data;
+        }
+      } catch (_) {}
+    }
+    return null;
   },
 
   // Fetch audience emails securely via RPC (never queries user_profiles directly from client)
@@ -550,8 +578,8 @@ export const dbService = {
       return { success: false, error: 'Missing required reset fields.' };
     }
 
-    if (cleanPass.length < 6) {
-      return { success: false, error: 'Password must be at least 6 characters long.' };
+    if (cleanPass.length < 8) {
+      return { success: false, error: 'Password must be at least 8 characters long.' };
     }
 
     if (isSupabaseConfigured && supabase) {

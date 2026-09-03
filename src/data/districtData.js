@@ -133,12 +133,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.23503122460636,
     "president": "Rtr. Jubin Sabu",
     "isDirector": "",
-    "phone": "9910938515",
-    "email": "jubinsabu25@gmail.com",
-    "rotaryId": "12651882",
-    "secretary": "Rtr. Mohd Arham",
-    "secretaryEmail": "mdarham0672@gmail.com",
-    "secretaryPhone": "7905580623",
     "initiatives": []
   },
   {
@@ -150,12 +144,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.23727089047544,
     "president": "Rtr. Kushagra Yadav",
     "isDirector": "",
-    "phone": "9389422030",
-    "email": "rtrkushagrayadav@gmail.com",
-    "rotaryId": "12254264",
-    "secretary": "Rtr. Jahanvi Panwar",
-    "secretaryEmail": "rtrjahanvipanwar@gmail.com",
-    "secretaryPhone": "9557277689",
     "initiatives": []
   },
   {
@@ -167,12 +155,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.21871136011616,
     "president": "Rtr. Meher Kapoor",
     "isDirector": "",
-    "phone": "9319747479",
-    "email": "Kapoormeher32@gmail.com",
-    "rotaryId": "12401789",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
     "initiatives": []
   },
   {
@@ -184,13 +166,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.2525,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.delhiehsaas@district3011.org",
-    "rotaryId": "12700199",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.delhiehsaas@district3011.org"
   },
   {
     "id": "c5",
@@ -201,12 +178,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.24170431923022,
     "president": "Rtr. Gunpreet Singh",
     "isDirector": "",
-    "phone": "7042854616",
-    "email": "singhgunpreet90@gmail.com",
-    "rotaryId": "11952661",
-    "secretary": "Rtr. Aryan Sanjeev",
-    "secretaryEmail": "rtrarynsnjv@gmail.com",
-    "secretaryPhone": "8826880497",
     "initiatives": []
   },
   {
@@ -218,12 +189,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.27234364998104,
     "president": "Rtr. Jagruti Dhoundiyal",
     "isDirector": "",
-    "phone": "8527493269",
-    "email": "Dhoundiyaljagruti.22@gmail.com",
-    "rotaryId": "12512205",
-    "secretary": "Rtr. Anaye Bhalla",
-    "secretaryEmail": "anayebhalla@gmail.com",
-    "secretaryPhone": "8882337318",
     "initiatives": []
   },
   {
@@ -235,12 +200,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.18601508841597,
     "president": "Rtr. Srishty Goyal",
     "isDirector": "",
-    "phone": "8572858798",
-    "email": "srishtygoyal611@gmail.com",
-    "rotaryId": "12157688",
-    "secretary": "Rtr. Divyanjali Rai",
-    "secretaryEmail": "divyanjalirai74@gmail.com",
-    "secretaryPhone": "8840101762",
     "initiatives": []
   },
   {
@@ -252,12 +211,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.2743752997881,
     "president": "Rtr. Tamanna Goyal",
     "isDirector": "",
-    "phone": "9728743666",
-    "email": "tamanna17goyal@gmail.com",
-    "rotaryId": "11934107",
-    "secretary": "Rtr. Tarika Gupta",
-    "secretaryEmail": "tarikagupta268@gmail.com",
-    "secretaryPhone": "9812320308",
     "initiatives": []
   },
   {
@@ -269,12 +222,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.2316211644374,
     "president": "Rtr. Yashika Kapoor",
     "isDirector": "",
-    "phone": "9220611229",
-    "email": "rtr.yashikakapoor12@gmail.com",
-    "rotaryId": "12428490",
-    "secretary": "Rtr. Srishti Kekti",
-    "secretaryEmail": "rtr.srishtikekti@gmail.com",
-    "secretaryPhone": "7982214512",
     "initiatives": []
   },
   {
@@ -286,12 +233,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.28264627388441,
     "president": "Rtr. Amritesh Pandey",
     "isDirector": "",
-    "phone": "8004599667",
-    "email": "rtramriteshpandey@gmail.com",
-    "rotaryId": "N/A",
-    "secretary": "Rtr. Happy Kumar",
-    "secretaryEmail": "ph07rtrhappykumar@gmail.com",
-    "secretaryPhone": "9470792148",
     "initiatives": []
   },
   {
@@ -303,12 +244,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.23690381619949,
     "president": "Rtr. Manav Bhardwaj",
     "isDirector": "",
-    "phone": "8076752358",
-    "email": "bhardwajmanav24@gmail.com",
-    "rotaryId": "N/A",
-    "secretary": "Rtr. Aryan Verma",
-    "secretaryEmail": "Aryanchoudharyc17@gmail.com",
-    "secretaryPhone": "9411238785",
     "initiatives": []
   },
   {
@@ -320,12 +255,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.27500963486325,
     "president": "Rtr. Mansi Mishra",
     "isDirector": "",
-    "phone": "9918280973",
-    "email": "rtrmansimishra@gmail.com",
-    "rotaryId": "12141826",
-    "secretary": "Rtr. Sai Dhinesh S",
-    "secretaryEmail": "saidhinesh342@gmail.com",
-    "secretaryPhone": "9360201763",
     "initiatives": []
   },
   {
@@ -337,13 +266,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.2175,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.jagannathinstituteofmanagementsciences@district3011.org",
-    "rotaryId": "12654850",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.jagannathinstituteofmanagementsciences@district3011.org"
   },
   {
     "id": "c14",
@@ -354,13 +278,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.22631759111665,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.ladyshriramcollege@district3011.org",
-    "rotaryId": "12530018",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.ladyshriramcollege@district3011.org"
   },
   {
     "id": "c15",
@@ -371,13 +290,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.24628713154836,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.ramanujancollege@district3011.org",
-    "rotaryId": "12438358",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.ramanujancollege@district3011.org"
   },
   {
     "id": "c16",
@@ -388,12 +302,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.25708370838063,
     "president": "Rtr. Aditi Singhal",
     "isDirector": "",
-    "phone": "9166997903",
-    "email": "aditisinghal5010@gmail.com",
-    "rotaryId": "12397071",
-    "secretary": "Rtr. Shreshth Kaushik",
-    "secretaryEmail": "shresthsk171412@gmail.com",
-    "secretaryPhone": "9810909751",
     "initiatives": []
   },
   {
@@ -405,12 +313,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.21784844597903,
     "president": "Rtr. Janav Panjwani",
     "isDirector": "",
-    "phone": "9319080104",
-    "email": "janavpanjwani@gmail.com",
-    "rotaryId": "12653224",
-    "secretary": "Rtr. Anoushka Nayyar",
-    "secretaryEmail": "anoushka.rotaractclubsggscc@gmail.com",
-    "secretaryPhone": "9910471058",
     "initiatives": []
   },
   {
@@ -422,13 +324,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.29608002035108,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.youngvisionaries@district3011.org",
-    "rotaryId": "12619518",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.youngvisionaries@district3011.org"
   },
   {
     "id": "c19",
@@ -439,12 +336,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.15491722957039,
     "president": "Rtr. Arnav Jain",
     "isDirector": "",
-    "phone": "9992983266",
-    "email": "arnavjain0050@gmail.com",
-    "rotaryId": "12645228",
-    "secretary": "Rtr. Ananya Gupta",
-    "secretaryEmail": "guptananya.7.3.5@gmail.com",
-    "secretaryPhone": "9991931860",
     "initiatives": []
   },
   {
@@ -456,12 +347,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.28339803907336,
     "president": "Rtr. Tanya Khanna",
     "isDirector": "",
-    "phone": "8800614956",
-    "email": "rtrtanyakhanna03@gmail.com",
-    "rotaryId": "11932177",
-    "secretary": "Rtr. Kamakshi Aggarwal",
-    "secretaryEmail": "Rtr.kamakshiaggarwal05@gmail.com",
-    "secretaryPhone": "9667425304",
     "initiatives": []
   },
   {
@@ -473,12 +358,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.17613870435638,
     "president": "Rtr. Kinjal Goyal",
     "isDirector": "",
-    "phone": "7425830573",
-    "email": "rtrkinjalgoyal@gmail.com",
-    "rotaryId": "12133160",
-    "secretary": "Rtr. Christie Grover",
-    "secretaryEmail": "christiegrover1@gmail.com",
-    "secretaryPhone": "9899252626",
     "initiatives": []
   },
   {
@@ -490,12 +369,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.15914168228497,
     "president": "Rtr. Deeta Chandhok",
     "isDirector": "",
-    "phone": "8745937208",
-    "email": "deetachandhok18@gmail.com",
-    "rotaryId": "12670852",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
     "initiatives": []
   },
   {
@@ -507,12 +380,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.28310048236902,
     "president": "Rtr. Yash Satija",
     "isDirector": "",
-    "phone": "9711504506",
-    "email": "Rtryashsatija@gmail.com",
-    "rotaryId": "11638250",
-    "secretary": "Rtr. Anshita Jain",
-    "secretaryEmail": "rtranshitajain@gmail.com",
-    "secretaryPhone": "9311073812",
     "initiatives": []
   },
   {
@@ -524,13 +391,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.2096323425443,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.delhipankh@district3011.org",
-    "rotaryId": "12853325",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.delhipankh@district3011.org"
   },
   {
     "id": "c25",
@@ -541,13 +403,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.20094066013715,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.faridabadaravalli@district3011.org",
-    "rotaryId": "12795151",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.faridabadaravalli@district3011.org"
   },
   {
     "id": "c26",
@@ -558,13 +415,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.18113592141871,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.galgotiasuniversity@district3011.org",
-    "rotaryId": "12540985",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.galgotiasuniversity@district3011.org"
   },
   {
     "id": "c27",
@@ -575,13 +427,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.15783420617159,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.gurutegbahadurinstituteoftechnology@district3011.org",
-    "rotaryId": "12831562",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.gurutegbahadurinstituteoftechnology@district3011.org"
   },
   {
     "id": "c28",
@@ -592,12 +439,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.20500974360587,
     "president": "Rtr. Harshita Gupta",
     "isDirector": "",
-    "phone": "8595983188",
-    "email": "Harshitaigcs@gmail.com",
-    "rotaryId": "12249352",
-    "secretary": "Rtr. Khushi Yadav",
-    "secretaryEmail": "Khushiiyadav0504@gmail.com",
-    "secretaryPhone": "7419022068",
     "initiatives": []
   },
   {
@@ -609,13 +450,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.16568193482986,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.krmanglamuniversity@district3011.org",
-    "rotaryId": "12500308",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.krmanglamuniversity@district3011.org"
   },
   {
     "id": "c30",
@@ -626,12 +462,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.16493336879108,
     "president": "Rtr. Garima Malviya",
     "isDirector": "",
-    "phone": "7400992298",
-    "email": "garimamalviya92@gmail.com",
-    "rotaryId": "12159845",
-    "secretary": "Rtr. Krishika Bindal",
-    "secretaryEmail": "krishikabindal@gmail.com",
-    "secretaryPhone": "8168952614",
     "initiatives": []
   },
   {
@@ -643,12 +473,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.19245548949043,
     "president": "Rtr. Ashif Khan",
     "isDirector": "",
-    "phone": "8595704914",
-    "email": "asifkhan989733@gmail.com",
-    "rotaryId": "11940072",
-    "secretary": "Rtr. Gauri Sharma",
-    "secretaryEmail": "racdpsrugaurisharma@gmail.com",
-    "secretaryPhone": "8700106618",
     "initiatives": []
   },
   {
@@ -660,12 +484,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.19004199180921,
     "president": "Rtr. Harpreet Singh Dua",
     "isDirector": "",
-    "phone": "9939036635",
-    "email": "hsdua.02@gmail.com",
-    "rotaryId": "12408805",
-    "secretary": "Rtr. Inderpreet Singh",
-    "secretaryEmail": "inderpreet@nabdelhi.in",
-    "secretaryPhone": "6239561506",
     "initiatives": []
   },
   {
@@ -677,13 +495,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.2096323425443,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.saksham@district3011.org",
-    "rotaryId": "12156948",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.saksham@district3011.org"
   },
   {
     "id": "c34",
@@ -694,13 +507,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.22359199204993,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.shaheedbhagatsinghcollege@district3011.org",
-    "rotaryId": "12793459",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.shaheedbhagatsinghcollege@district3011.org"
   },
   {
     "id": "c35",
@@ -711,13 +519,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.24234740790612,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.shriaurobindocollege@district3011.org",
-    "rotaryId": "12828953",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.shriaurobindocollege@district3011.org"
   },
   {
     "id": "c36",
@@ -728,13 +531,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.26629413311078,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.starexuniversity@district3011.org",
-    "rotaryId": "12123955",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.starexuniversity@district3011.org"
   },
   {
     "id": "c37",
@@ -745,12 +543,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.1787073650442,
     "president": "Rtr. Harish Seth",
     "isDirector": "",
-    "phone": "9999046566",
-    "email": "harishseth2525@gmail.com",
-    "rotaryId": "12116467",
-    "secretary": "Rtr. Sonal Dhingra",
-    "secretaryEmail": "Sonaldhingra.official@gmail.com",
-    "secretaryPhone": "9289828335",
     "initiatives": []
   },
   {
@@ -762,13 +554,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.2,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.activadelhiihe@district3011.org",
-    "rotaryId": "12187229",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.activadelhiihe@district3011.org"
   },
   {
     "id": "c39",
@@ -779,12 +566,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.186964958933,
     "president": "Rtr. Abhinav Jha",
     "isDirector": "",
-    "phone": "9773860195",
-    "email": "Abhinavjha2509@gmail.com",
-    "rotaryId": "12555986",
-    "secretary": "Rtr. Shayna Sharma",
-    "secretaryEmail": "Shaynasharma0412@gmail.com",
-    "secretaryPhone": "8076379391",
     "initiatives": []
   },
   {
@@ -796,12 +577,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.25223951181482,
     "president": "Rtr. Ghazal Sapra",
     "isDirector": "",
-    "phone": "9319513310",
-    "email": "sapra.ghazal16@gmail.com",
-    "rotaryId": "11864134",
-    "secretary": "Rtr. Rishabh Babber",
-    "secretaryEmail": "rtr.rishabh.babber01@gmail.com",
-    "secretaryPhone": "8826841005",
     "initiatives": []
   },
   {
@@ -813,12 +588,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.27344864400148,
     "president": "Rtr. Himank Anand",
     "isDirector": "",
-    "phone": "9873790855",
-    "email": "himankanand2047@gmail.com",
-    "rotaryId": "12458608",
-    "secretary": "Rtr. Avishi Sharma",
-    "secretaryEmail": "official.avishi8@gmail.com",
-    "secretaryPhone": "7982037599",
     "initiatives": []
   },
   {
@@ -830,13 +599,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.17727427435705,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.delhinexus@district3011.org",
-    "rotaryId": "12690841",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.delhinexus@district3011.org"
   },
   {
     "id": "c43",
@@ -847,13 +611,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.1596323425443,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.delhiphilanthropists@district3011.org",
-    "rotaryId": "12871883",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.delhiphilanthropists@district3011.org"
   },
   {
     "id": "c44",
@@ -864,13 +623,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.15094066013715,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.delhivaliantmidwest@district3011.org",
-    "rotaryId": "12893284",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.delhivaliantmidwest@district3011.org"
   },
   {
     "id": "c45",
@@ -881,13 +635,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.13113592141872,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.donboscoinstituteoftechnologysankalp@district3011.org",
-    "rotaryId": "12392689",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.donboscoinstituteoftechnologysankalp@district3011.org"
   },
   {
     "id": "c46",
@@ -898,13 +647,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.10783420617159,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.dronacharyagovtcollegegurugram@district3011.org",
-    "rotaryId": "12360697",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.dronacharyagovtcollegegurugram@district3011.org"
   },
   {
     "id": "c47",
@@ -915,13 +659,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.13047735438091,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.iilm@district3011.org",
-    "rotaryId": "12260438",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.iilm@district3011.org"
   },
   {
     "id": "c48",
@@ -932,13 +671,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.11568193482987,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.catalyst@district3011.org",
-    "rotaryId": "12749915",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.catalyst@district3011.org"
   },
   {
     "id": "c49",
@@ -949,12 +683,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.15861455267573,
     "president": "Rtr. Suvanshi Deb",
     "isDirector": "",
-    "phone": "8448782006",
-    "email": "Suvanshideb@gmail.com",
-    "rotaryId": "12597285",
-    "secretary": "Rtr. Vaishnavi Mishra",
-    "secretaryEmail": "mishravaishnavi926@gmail.com",
-    "secretaryPhone": "9120814792",
     "initiatives": []
   },
   {
@@ -966,13 +694,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.14129514499311,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.maharajaagrasain@district3011.org",
-    "rotaryId": "12271771",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.maharajaagrasain@district3011.org"
   },
   {
     "id": "c51",
@@ -983,12 +706,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.2512485721861,
     "president": "Rtr. Ashmeet Kaur Anand",
     "isDirector": "",
-    "phone": "7011676591",
-    "email": "rtrashmeetkauranand@gmail.com",
-    "rotaryId": "11192426",
-    "secretary": "Rtr. Bhavneet Kaur",
-    "secretaryEmail": "rtr.bhavneetkaur@gmail.com",
-    "secretaryPhone": "8595527979",
     "initiatives": []
   },
   {
@@ -1000,12 +717,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.24264469625777,
     "president": "Rtr. Aarshi Lohia",
     "isDirector": "",
-    "phone": "7982225321",
-    "email": "aarshi1999lohia@gmail.com",
-    "rotaryId": "11300467",
-    "secretary": "Rtr. Bhavika Ghai",
-    "secretaryEmail": "ghaibhavika7@gmail.com",
-    "secretaryPhone": "9871991327",
     "initiatives": []
   },
   {
@@ -1017,12 +728,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.23674954146871,
     "president": "Rtr. Anshdeep Singh",
     "isDirector": "",
-    "phone": "9759309512",
-    "email": "ansh.deepaulakh2.006@gmail.com",
-    "rotaryId": "12594083",
-    "secretary": "Rtr. Bhavya Singh Bhandari",
-    "secretaryEmail": "bhavyasingh760@gmail.com",
-    "secretaryPhone": "9816131593",
     "initiatives": []
   },
   {
@@ -1034,12 +739,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.22595003658816,
     "president": "Rtr. Danish Kaul",
     "isDirector": "",
-    "phone": "9811603710",
-    "email": "danish.230btccse302@sushantuniversity.edu.in",
-    "rotaryId": "12128001",
-    "secretary": "Rtr. Ashutosh Bhandari",
-    "secretaryEmail": "ashutosh.240bca045@sushantuniversity.edu.in",
-    "secretaryPhone": "9582957676",
     "initiatives": []
   },
   {
@@ -1051,12 +750,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.27947603329488,
     "president": "Rtr. Yogya Goyal",
     "isDirector": "",
-    "phone": "9821001937",
-    "email": "yogyagoyal804@gmail.com",
-    "rotaryId": "12253959",
-    "secretary": "Rtr. Ashi Gupta",
-    "secretaryEmail": "Ashi7142@gmail.com",
-    "secretaryPhone": "8851645688",
     "initiatives": []
   },
   {
@@ -1068,12 +761,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.16302179498724,
     "president": "Rtr. Tanisha Sharma",
     "isDirector": "",
-    "phone": "9599668561",
-    "email": "Tanishasharma080504@gmail.com",
-    "rotaryId": "12131349",
-    "secretary": "Rtr. Shashwat Chauhan",
-    "secretaryEmail": "shashwatchauhan2003@gmail.com",
-    "secretaryPhone": "8826290906",
     "initiatives": []
   },
   {
@@ -1085,12 +772,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.16478075390881,
     "president": "Rtr. Philip J. Dolo",
     "isDirector": "",
-    "phone": "9266833394",
-    "email": "dev.engrpjdolo24@gmail.com",
-    "rotaryId": "12508967",
-    "secretary": "Rtr. Aryan Pandey",
-    "secretaryEmail": "aryanpandey38805@gmail.com",
-    "secretaryPhone": "8368151747",
     "initiatives": []
   },
   {
@@ -1102,12 +783,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.20673624051283,
     "president": "Rtr. Kartik Kalra",
     "isDirector": "",
-    "phone": "9266871474",
-    "email": "kartikkalra30@gmail.com",
-    "rotaryId": "12445301",
-    "secretary": "Rtr. Sania Khatter",
-    "secretaryEmail": "Khattersania@gmail.com",
-    "secretaryPhone": "8130370710",
     "initiatives": []
   },
   {
@@ -1119,12 +794,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.13521916969138,
     "president": "Rtr. Sehajleen Kaur",
     "isDirector": "",
-    "phone": "8377036954",
-    "email": "ksehajleen19@gmail.com",
-    "rotaryId": "12702754",
-    "secretary": "Rtr. Lakshita Bansal",
-    "secretaryEmail": "lakshitabansal2022@gmail.com",
-    "secretaryPhone": "7835907905",
     "initiatives": []
   },
   {
@@ -1136,13 +805,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.10414318553428,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.delhialluremidwest@district3011.org",
-    "rotaryId": "12310558",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.delhialluremidwest@district3011.org"
   },
   {
     "id": "c61",
@@ -1153,12 +817,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.15165268111467,
     "president": "Rtr. Rishi Upadhyay",
     "isDirector": "",
-    "phone": "8882350472",
-    "email": "rtrrishiupadhyay@gmail.com",
-    "rotaryId": "12414224",
-    "secretary": "Rtr. Swadha Goswami",
-    "secretaryEmail": "swadhagoswami2007@gmail.com",
-    "secretaryPhone": "9759533433",
     "initiatives": []
   },
   {
@@ -1170,12 +828,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.18746730958935,
     "president": "Rtr. Aditi Singhal",
     "isDirector": "",
-    "phone": "9953926024",
-    "email": "aditi.singhal0706@gmail.com",
-    "rotaryId": "12214363",
-    "secretary": "Rtr. Manvi Khajuria",
-    "secretaryEmail": "Manvikhajuria.work@gmail.com",
-    "secretaryPhone": "9910639168",
     "initiatives": []
   },
   {
@@ -1187,12 +839,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.1547240247481,
     "president": "Rtr. Tanushka Arora",
     "isDirector": "",
-    "phone": "9911237337",
-    "email": "Aroratanushka16@gmail.com",
-    "rotaryId": "12541676",
-    "secretary": "Rtr. Aditya Dev",
-    "secretaryEmail": "adityadev0702@gmail.com",
-    "secretaryPhone": "9311236557",
     "initiatives": []
   },
   {
@@ -1204,13 +850,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.0511359214187,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.delhiphoenixmidwest@district3011.org",
-    "rotaryId": "12215238",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.delhiphoenixmidwest@district3011.org"
   },
   {
     "id": "c65",
@@ -1221,12 +862,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.248710332853,
     "president": "Rtr. Lalit Panghal",
     "isDirector": "",
-    "phone": "8178634241",
-    "email": "lalit.panghal4645@gmail.com",
-    "rotaryId": "12118414",
-    "secretary": "Rtr. Nitika Khatri",
-    "secretaryEmail": "nitikakhatri663@gmail.com",
-    "secretaryPhone": "7042209199",
     "initiatives": []
   },
   {
@@ -1238,12 +873,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.22214731644159,
     "president": "Rtr. Aman Devedi",
     "isDirector": "",
-    "phone": "8929279448",
-    "email": "amandevedi272@gmail.com",
-    "rotaryId": "1214497.0",
-    "secretary": "Rtr. Gayatri Rana",
-    "secretaryEmail": "ranagayatri9090@gmail.com",
-    "secretaryPhone": "9818989003",
     "initiatives": []
   },
   {
@@ -1255,13 +884,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.03568193482985,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.indraprasthacollegeforwomendu@district3011.org",
-    "rotaryId": "12222778",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.indraprasthacollegeforwomendu@district3011.org"
   },
   {
     "id": "c68",
@@ -1272,12 +896,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.25231551466588,
     "president": "Rtr. Dipanita Das",
     "isDirector": "",
-    "phone": "9971100320",
-    "email": "dipanitadas101@gmail.com",
-    "rotaryId": "12412615",
-    "secretary": "Rtr. Afifa Rubani",
-    "secretaryEmail": "xo.afifa0408@gmail.com",
-    "secretaryPhone": "9667022125",
     "initiatives": []
   },
   {
@@ -1289,12 +907,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.14059397452324,
     "president": "Rtr. Tushar Chaudhary",
     "isDirector": "",
-    "phone": "9289240902",
-    "email": "tusharrchaudhary2005@gmail.com",
-    "rotaryId": "12196843",
-    "secretary": "Rtr. Kanishka Singh",
-    "secretaryEmail": "Kanishkasingh3117@gmail.com",
-    "secretaryPhone": "9211380247",
     "initiatives": []
   },
   {
@@ -1306,13 +918,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.06491522876735,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.sgtuniversity@district3011.org",
-    "rotaryId": "12700841",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.sgtuniversity@district3011.org"
   },
   {
     "id": "c71",
@@ -1323,12 +930,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.22883923468433,
     "president": "Rtr. Srishty Priya",
     "isDirector": "",
-    "phone": "9870597260",
-    "email": "srishtypriya05@gmail.com",
-    "rotaryId": "12061748",
-    "secretary": "Rtr. Rishika Ranjan",
-    "secretaryEmail": "rishikaranjan.rotaractsrcc@gmail.com",
-    "secretaryPhone": "9262869926",
     "initiatives": []
   },
   {
@@ -1340,12 +941,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.16437364711133,
     "president": "Rtr. Devina Sharma",
     "isDirector": "",
-    "phone": "7696661990",
-    "email": "23llb006@ncuindia.edu",
-    "rotaryId": "12132183",
-    "secretary": "Rtr. Aryan Yadav",
-    "secretaryEmail": "arryaan30@gmail.com",
-    "secretaryPhone": "8290610907",
     "initiatives": []
   },
   {
@@ -1357,13 +952,8 @@ export const INITIAL_CLUBS = [
     "lng": 77.11234740790611,
     "president": "Rtr. Club President",
     "isDirector": "",
-    "phone": "9811000000",
-    "email": "rac.virasat@district3011.org",
-    "rotaryId": "12128994",
-    "secretary": "Rtr. Club Secretary",
-    "secretaryEmail": "",
-    "secretaryPhone": "",
-    "initiatives": []
+    "initiatives": [],
+    "email": "rac.virasat@district3011.org"
   },
   {
     "id": "c74",
@@ -1374,12 +964,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.2295976744302,
     "president": "Rtr. Anjali Pawar",
     "isDirector": "",
-    "phone": "9315534633",
-    "email": "anjalipawar282006@gmail.com",
-    "rotaryId": "N/A",
-    "secretary": "Rtr. Lakshay Nandwani",
-    "secretaryEmail": "lakshyanandwani40@gmail.com",
-    "secretaryPhone": "9429093090",
     "initiatives": []
   },
   {
@@ -1391,12 +975,6 @@ export const INITIAL_CLUBS = [
     "lng": 77.27127898053878,
     "president": "Rtr. Priyanshi Aggarwal",
     "isDirector": "",
-    "phone": "9319419618",
-    "email": "Priyanshiiaggarwal25@gmail.com",
-    "rotaryId": "12186432",
-    "secretary": "Rtr. Adhira Binny",
-    "secretaryEmail": "binnyadhira@gmail.com",
-    "secretaryPhone": "9891998320",
     "initiatives": []
   }
 ];
