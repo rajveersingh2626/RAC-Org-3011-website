@@ -1,0 +1,39 @@
+# Environment Variables & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Sensitive Contact & Member Excel/CSV Databases
+*.xlsx
+*.xls
+*.csv
+President Database*.xlsx
+Secretary Database*.xlsx
+DAC Database*.xlsx
+
+# Generated SQL Seed Files & Parser Scripts
+parse_databases.js
+build_complete_sql_seed.js
+cleanup_security.js
+supabase_setup.sql
+supabase_seed_all_officers.sql
+*.sql
+
+# Dependencies
+node_modules/
+.pnpm-store
+
+# Build Outputs
+dist/
+build/
+out/
+.vite/
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
