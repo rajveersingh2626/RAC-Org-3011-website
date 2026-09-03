@@ -169,18 +169,22 @@ export const dbService = {
         // Fetch from dedicated 'clubs' table in Supabase with explicit column selection
         const { data: clubsTableData, error: clubsErr } = await supabase
           .from('clubs')
-          .select('id, name, club_name, president, president_name, is_director, isDirector, zone, phone, email, lat, lng, initiatives');
+          .select('id, name, club_name, short_name, shortName, president, president_name, is_director, isDirector, zone, phone, email, rotary_id, rotaryId, secretary, secretary_name, secretary_email, secretaryEmail, secretary_phone, secretaryPhone, lat, lng, initiatives');
 
         if (!clubsErr && clubsTableData && clubsTableData.length > 0) {
           return clubsTableData.map((c, idx) => ({
             id: c.id || `sp-club-${idx}`,
             name: c.name || c.club_name,
-            shortName: (c.name || c.club_name || '').replace(/^(Rotaract\s+(Club\s+of\s+)?|RAC\s+)/i, '').trim(),
+            shortName: c.short_name || c.shortName || (c.name || c.club_name || '').replace(/^(Rotaract\s+(Club\s+of\s+)?|RAC\s+)/i, '').trim(),
             president: c.president || c.president_name || 'Rtr. President',
             isDirector: c.is_director || c.isDirector || '',
             zone: c.zone || 'District 3011',
             phone: c.phone || '',
             email: c.email || '',
+            rotaryId: c.rotary_id || c.rotaryId || '',
+            secretary: c.secretary || c.secretary_name || '',
+            secretaryEmail: c.secretary_email || c.secretaryEmail || '',
+            secretaryPhone: c.secretary_phone || c.secretaryPhone || '',
             lat: c.lat || 28.6139,
             lng: c.lng || 77.2090,
             initiatives: c.initiatives || []

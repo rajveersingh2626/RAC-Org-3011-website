@@ -139,7 +139,11 @@ export default function App() {
                   isDirector: matched.isDirector || c.isDirector || '',
                   zone: matched.zone || c.zone,
                   phone: matched.phone || c.phone,
-                  email: matched.email || c.email
+                  email: matched.email || c.email,
+                  secretary: matched.secretary || c.secretary,
+                  secretaryEmail: matched.secretaryEmail || c.secretaryEmail,
+                  secretaryPhone: matched.secretaryPhone || c.secretaryPhone,
+                  rotaryId: matched.rotaryId || c.rotaryId
                 };
               }
               return c;
