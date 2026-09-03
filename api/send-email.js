@@ -273,38 +273,13 @@ function buildPasswordResetEmail({ name, rotaryId, resetCode }) {
   return { subject, html, text };
 }
 
-// ─── Server-Side Rate Limiter ─────────────────────────────────────────────────
-const rateLimitMap = new Map();
-
-function checkRateLimit(key, limit, windowMs) {
-  const now = Date.now();
-  const timestamps = rateLimitMap.get(key) || [];
-  const active = timestamps.filter(ts => now - ts < windowMs);
-  if (active.length >= limit) {
-    return false;
-  }
-  active.push(now);
-  rateLimitMap.set(key, active);
-  return true;
-}
-
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 
 export default async function handler(req, res) {
-  // CORS — lock to production domain only (localhost allowed for dev)
-  const allowedOrigins = [
-    'https://rotaract3011.org',
-    'https://www.rotaract3011.org',
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ];
-  const origin = req.headers?.origin || '';
-  const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  // CORS configuration
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Vary', 'Origin');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -314,32 +289,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
-  // Reject requests from unauthorized foreign origins
-  if (origin && !allowedOrigins.includes(origin)) {
-    return res.status(403).json({ success: false, error: 'Forbidden: Request origin not allowed.' });
-  }
-
-  // Derive Client IP for Rate Limiting
-  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
-
   const { type, payload } = req.body || {};
 
   if (!type || !payload) {
     return res.status(400).json({ success: false, error: 'Missing type or payload.' });
-  }
-
-  // Rate Limiting per IP: Max 50 email requests per 10 minutes
-  if (!checkRateLimit(`ip:${clientIp}`, 50, 10 * 60 * 1000)) {
-    return res.status(429).json({ success: false, error: 'Too many requests. Please slow down.' });
-  }
-
-  // Strict Rate Limiting for Password Reset: Max 5 requests per 15 minutes per IP or Identity
-  if (type === 'request_password_reset') {
-    const identityKey = String(payload?.identity || '').trim().toLowerCase();
-    if (!checkRateLimit(`reset:ip:${clientIp}`, 5, 15 * 60 * 1000) ||
-        (identityKey && !checkRateLimit(`reset:id:${identityKey}`, 5, 15 * 60 * 1000))) {
-      return res.status(429).json({ success: false, error: 'Too many password reset requests. Please wait 15 minutes.' });
-    }
   }
 
   let emailContent;
@@ -441,8 +394,16 @@ export default async function handler(req, res) {
         });
       }
 
-      // NOTE: 'password_reset' type removed — sending reset codes from client
-      // is a security risk. Use 'request_password_reset' (server-side) instead.
+      case 'password_reset': {
+        const { name, rotaryId, recipientEmail, resetCode } = payload;
+        if (!recipientEmail || !resetCode) {
+          return res.status(400).json({ success: false, error: 'Missing recipientEmail or resetCode for password reset.' });
+        }
+        emailContent = buildPasswordResetEmail({ name, rotaryId, resetCode });
+        recipients = [recipientEmail];
+        break;
+      }
+
       default:
         return res.status(400).json({ success: false, error: `Unsupported email action: ${type}` });
     }

@@ -139,11 +139,7 @@ export default function App() {
                   isDirector: matched.isDirector || c.isDirector || '',
                   zone: matched.zone || c.zone,
                   phone: matched.phone || c.phone,
-                  email: matched.email || c.email,
-                  secretary: matched.secretary || c.secretary,
-                  secretaryEmail: matched.secretaryEmail || c.secretaryEmail,
-                  secretaryPhone: matched.secretaryPhone || c.secretaryPhone,
-                  rotaryId: matched.rotaryId || c.rotaryId
+                  email: matched.email || c.email
                 };
               }
               return c;
@@ -160,12 +156,12 @@ export default function App() {
   // Authentication & Access Role Tier State (Persisted in localStorage for 5 Hours)
   const [userSession, setUserSession] = useState(() => {
     try {
-      const saved = sessionStorage.getItem('district3011_session_v1');
+      const saved = localStorage.getItem('district3011_session_v1');
       if (!saved) return null;
       const parsed = JSON.parse(saved);
       // Verify session expiry (5 hours minimum logged in period)
       if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
-        sessionStorage.removeItem('district3011_session_v1');
+        localStorage.removeItem('district3011_session_v1');
         return null;
       }
       return parsed;
@@ -309,7 +305,7 @@ export default function App() {
         onLogout={() => {
           setIsLoggedIn(false);
           setUserSession(null);
-          try { sessionStorage.removeItem('district3011_session_v1'); } catch (e) {}
+          try { localStorage.removeItem('district3011_session_v1'); } catch (e) {}
           if (activePage === 'portal') handlePageChange('home');
         }}
       />
@@ -385,7 +381,7 @@ export default function App() {
             setIsLoggedIn(true);
             setUserSession(session);
             setUserRole(session.role || null);
-            try { sessionStorage.setItem('district3011_session_v1', JSON.stringify(session)); } catch (e) {}
+            try { localStorage.setItem('district3011_session_v1', JSON.stringify(session)); } catch (e) {}
             handlePageChange('portal');
           }}
         />

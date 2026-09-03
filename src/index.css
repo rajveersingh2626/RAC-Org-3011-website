@@ -711,17 +711,20 @@ body {
 
 .glass-hover-tooltip {
   position: fixed;
-  transform: translate(-50%, -120%);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(216, 27, 96, 0.2);
-  padding: 12px 18px;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(216, 27, 96, 0.25);
+  padding: 14px 18px;
+  border-radius: 16px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
   pointer-events: none;
-  white-space: nowrap;
-  max-width: 320px;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 360px;
+  min-width: 240px;
+  box-sizing: border-box;
+  transition: opacity 0.15s ease, transform 0.1s ease;
 }
 
 /* ==========================================================================
@@ -969,5 +972,44 @@ button,
   .glass-loading-card {
     padding: 20px 14px;
   }
+}
+
+/* ==========================================================================
+   CURRENT DRR MINIMALIST GLOW
+   ========================================================================== */
+@keyframes current-drr-minimal-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 1px rgba(216, 27, 96, 0.35), 0 8px 30px rgba(216, 27, 96, 0.12);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(216, 27, 96, 0.65), 0 12px 36px rgba(216, 27, 96, 0.22);
+  }
+}
+
+@keyframes live-dot-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+.current-drr-card {
+  position: relative !important;
+  border: 1.5px solid rgba(216, 27, 96, 0.5) !important;
+  animation: current-drr-minimal-glow 4s ease-in-out infinite !important;
+}
+
+.live-indicator-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #D81B60;
+  box-shadow: 0 0 8px #D81B60;
+  animation: live-dot-pulse 2s ease-in-out infinite;
 }
 

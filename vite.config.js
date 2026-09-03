@@ -6,16 +6,11 @@ function apiServerPlugin() {
     name: 'api-server-middleware',
     configureServer(server) {
       server.middlewares.use('/api/send-email', async (req, res) => {
-        const origin = req.headers['origin'] || '';
-        const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'https://rotaract3011.org'];
-        const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-
         if (req.method === 'OPTIONS') {
           res.writeHead(200, {
-            'Access-Control-Allow-Origin': corsOrigin,
+            'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Vary': 'Origin'
+            'Access-Control-Allow-Headers': 'Content-Type'
           });
           return res.end();
         }
@@ -31,7 +26,8 @@ function apiServerPlugin() {
           try {
             const parsed = body ? JSON.parse(body) : {};
             const env = loadEnv(server.config.mode, process.cwd(), '');
-            process.env.RESEND_API_KEY = env.RESEND_API_KEY || process.env.RESEND_API_KEY;
+            process.env.RESEND_API_KEY = env.RESEND_API_KEY || env.VITE_RESEND_API_KEY || process.env.RESEND_API_KEY;
+            process.env.VITE_RESEND_API_KEY = env.VITE_RESEND_API_KEY || process.env.VITE_RESEND_API_KEY;
             process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
             process.env.VITE_SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 

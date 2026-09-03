@@ -26,35 +26,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
   const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   
-  const RESET_RATE_LIMIT_KEY = 'district3011_reset_rate_limit_v1';
-  const getStoredResetAttempts = () => {
-    try {
-      const raw = localStorage.getItem(RESET_RATE_LIMIT_KEY);
-      if (!raw) return 0;
-      const parsed = JSON.parse(raw);
-      if (Date.now() - parsed.timestamp > 24 * 60 * 60 * 1000) {
-        localStorage.removeItem(RESET_RATE_LIMIT_KEY);
-        return 0;
-      }
-      return parsed.count || 0;
-    } catch {
-      return 0;
-    }
-  };
-
-  const recordResetAttempt = () => {
-    try {
-      const current = getStoredResetAttempts();
-      const updated = current + 1;
-      localStorage.setItem(RESET_RATE_LIMIT_KEY, JSON.stringify({ count: updated, timestamp: Date.now() }));
-      setResetAttempts(updated);
-      return updated;
-    } catch {
-      return resetAttempts + 1;
-    }
-  };
-
-  const [resetAttempts, setResetAttempts] = useState(getStoredResetAttempts);
+  const [resetAttempts, setResetAttempts] = useState(0);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [resetSuccessMsg, setResetSuccessMsg] = useState('');
 
@@ -92,14 +64,12 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
 
     let secret = user.totpSecret;
     if (!secret) {
-      // Auto-provision a cryptographically random Base32 secret for first-time 2FA setup
+      // Auto-provision a cryptographically random Base32 secret for this user and save it to Supabase
       secret = generateRandomBase32Secret();
       if (user.id) {
         await dbService.saveUserTotpSecret(user.id, secret);
       }
       setShowKeyDetails(true); // Automatically expand setup key box for first-time 2FA setup
-    } else {
-      setShowKeyDetails(false); // Do not expose secret for already configured users
     }
     setTotpSecret(secret);
 
@@ -115,12 +85,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
     }
 
     setIsVerifying(true);
-    // 1. Attempt server RPC verification if available
-    let isValid = await dbService.verifyUserTotp(authenticatedUser?.id, otpCode);
-    // 2. Fallback to client-side Web Crypto verification if RPC not configured
-    if (isValid === null) {
-      isValid = await verifyTOTP(totpSecret, otpCode);
-    }
+    const isValid = await verifyTOTP(totpSecret, otpCode);
     setIsVerifying(false);
 
     if (!isValid) {
@@ -175,7 +140,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
       return;
     }
 
-    if (resetAttempts >= 3 || getStoredResetAttempts() >= 3) {
+    if (resetAttempts >= 3) {
       setErrorMessage('Security Cap Reached: Maximum 3 password reset requests per 24 hours. Please try again tomorrow.');
       return;
     }
@@ -194,7 +159,8 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
       return;
     }
 
-    recordResetAttempt();
+    const newAttempts = resetAttempts + 1;
+    setResetAttempts(newAttempts);
     setCooldownSeconds(60);
 
     const masked = res.maskedEmail || 'your registered email';
@@ -213,8 +179,8 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
       return;
     }
 
-    if (!newPasswordInput || newPasswordInput.length < 8) {
-      setErrorMessage('New password must be at least 8 characters long.');
+    if (!newPasswordInput || newPasswordInput.length < 6) {
+      setErrorMessage('New password must be at least 6 characters long.');
       return;
     }
 
@@ -452,27 +418,22 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                   </div>
                 </div>
 
-                {/* Only show setup key details box if this is a first-time setup or user explicitly expands */}
-                {(!authenticatedUser?.hasTotpConfigured || showKeyDetails) && (
-                  <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '12px', fontSize: '0.8rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
-                        {!authenticatedUser?.hasTotpConfigured ? '⚠️ First-Time 2FA Setup Key' : 'Authenticator Secret Key'}
-                      </span>
-                      {authenticatedUser?.hasTotpConfigured && (
-                        <button
-                          type="button"
-                          onClick={() => setShowKeyDetails(!showKeyDetails)}
-                          style={{ background: 'none', border: 'none', color: 'var(--rotaract-pink)', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}
-                        >
-                          {showKeyDetails ? 'Hide' : 'Show Key'}
-                        </button>
-                      )}
-                    </div>
+                <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '12px', fontSize: '0.8rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>Authenticator Secret Key</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowKeyDetails(!showKeyDetails)}
+                      style={{ background: 'none', border: 'none', color: 'var(--rotaract-pink)', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      {showKeyDetails ? 'Hide Secret' : 'Show Secret / Setup'}
+                    </button>
+                  </div>
 
-                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #E5E7EB' }}>
+                  {showKeyDetails && (
+                    <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #E5E7EB' }}>
                       <p style={{ color: 'var(--text-secondary)', marginBottom: '6px', fontSize: '0.76rem' }}>
-                        Add this key into your Google Authenticator app once:
+                        Add this key into your Google Authenticator app (or scan barcode):
                       </p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', padding: '8px 12px', borderRadius: '8px', border: '1px solid #D1D5DB' }}>
                         <code style={{ fontSize: '0.95rem', fontWeight: 900, letterSpacing: '2px', color: 'var(--rotaract-pink)', flex: 1, fontFamily: 'monospace' }}>
@@ -491,8 +452,8 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                         </button>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)', textAlign: 'center' }}>
@@ -500,14 +461,12 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                   </label>
                   <input
                     type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
                     maxLength="6"
                     placeholder="123456"
                     autoFocus
                     required
                     value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => setOtpCode(e.target.value)}
                     style={{
                       width: '100%',
                       padding: '14px',
@@ -626,14 +585,12 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                   </label>
                   <input
                     type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
                     maxLength="6"
                     placeholder="123456"
                     autoFocus
                     required
                     value={resetCodeInput}
-                    onChange={(e) => setResetCodeInput(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => setResetCodeInput(e.target.value)}
                     style={{
                       width: '100%',
                       padding: '12px',
@@ -656,7 +613,7 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
                   <div style={{ position: 'relative' }}>
                     <input
                       type={showNewPassword ? 'text' : 'password'}
-                      placeholder="Enter new password (min. 8 characters)"
+                      placeholder="Enter new password (min. 6 characters)"
                       required
                       value={newPasswordInput}
                       onChange={(e) => setNewPasswordInput(e.target.value)}
