@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "id": "event_1",
+      "title": "Youth Leadership Assembly",
+      "slug": "youth-leadership-assembly",
+      "startsAt": "2026-09-20T10:00:00.000Z",
+      "endsAt": "2026-09-20T17:00:00.000Z",
+      "location": "India Habitat Centre, New Delhi",
+      "description": "The annual leadership assembly for Rotaractors of the district.",
+      "coverUrl": null,
+      "rsvpOpen": true,
+      "capacity": 300
+    }
+  ]
+}

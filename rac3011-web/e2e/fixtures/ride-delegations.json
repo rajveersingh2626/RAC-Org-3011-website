@@ -1,0 +1,47 @@
+[
+  {
+    "id": "del_japan",
+    "ryYear": 2026,
+    "visitingDistrict": "D2680",
+    "country": "Japan",
+    "startsAt": "2026-10-05",
+    "endsAt": "2026-10-12",
+    "headcount": 8,
+    "contactName": "Aiko Tanaka",
+    "contactEmail": "aiko.tanaka@example.org",
+    "status": "confirmed",
+    "hosts": [{ "id": "host_1", "club": { "id": "club_dse", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East" }, "daysHosted": 4, "membersSent": 3 }],
+    "createdAt": "2026-08-01T10:00:00.000Z",
+    "updatedAt": "2026-08-01T10:00:00.000Z"
+  },
+  {
+    "id": "del_nepal",
+    "ryYear": 2026,
+    "visitingDistrict": "D3292",
+    "country": "Nepal",
+    "startsAt": "2026-11-15",
+    "endsAt": "2026-11-18",
+    "headcount": 5,
+    "contactName": "Bikash Shrestha",
+    "contactEmail": "bikash.shrestha@example.org",
+    "status": "planned",
+    "hosts": [],
+    "createdAt": "2026-08-01T10:00:00.000Z",
+    "updatedAt": "2026-08-01T10:00:00.000Z"
+  },
+  {
+    "id": "del_srilanka",
+    "ryYear": 2026,
+    "visitingDistrict": "D3220",
+    "country": "Sri Lanka",
+    "startsAt": "2026-12-01",
+    "endsAt": "2026-12-04",
+    "headcount": 4,
+    "contactName": "Dinesh Perera",
+    "contactEmail": "dinesh.perera@example.org",
+    "status": "cancelled",
+    "hosts": [],
+    "createdAt": "2026-08-01T10:00:00.000Z",
+    "updatedAt": "2026-08-01T10:00:00.000Z"
+  }
+]

@@ -38,3 +38,5 @@ Thumbs.db
 .idea/
 *.log
 powershell.cmd
+
+**/.git_bak

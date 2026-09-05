@@ -1,0 +1,10 @@
+[
+  {
+    "id": "mp_amanv",
+    "fullName": "Aman Verma",
+    "photoUrl": null,
+    "skills": ["video editing", "cricket"],
+    "interests": ["environment"],
+    "club": { "id": "club_dse", "name": "Rotaract Club of Delhi South East", "shortName": "DSE", "zoneId": "zone_agni", "zoneName": "Zone Agni" }
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "totalUnits": 1240,
+  "target": 3011,
+  "byZone": [
+    { "zoneId": "zone_agni", "zoneName": "Zone Agni", "units": 740 },
+    { "zoneId": "zone_vayu", "zoneName": "Zone Vayu", "units": 500 }
+  ],
+  "latestApprovedCamps": [
+    {
+      "id": "camp_approved_1",
+      "date": "2026-08-01",
+      "venue": "Community Hall",
+      "city": "Delhi",
+      "unitsCollected": 120,
+      "leadClub": { "id": "club_dse", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East" }
+    }
+  ],
+  "perClub": [
+    { "clubId": "club_dse", "clubName": "Rotaract Club of Delhi South East", "campsApproved": 3, "unitsCollected": 740 }
+  ],
+  "updatedAt": "2026-09-01T00:00:00Z"
+}

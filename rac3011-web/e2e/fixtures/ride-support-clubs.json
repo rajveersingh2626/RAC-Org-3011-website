@@ -1,0 +1,28 @@
+[
+  {
+    "id": "rsc_dse",
+    "ryYear": 2026,
+    "club": { "id": "club_dse", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East" },
+    "capacityDelegates": 4,
+    "homestayAvailable": true,
+    "preferredMonths": [10, 11, 12],
+    "contactMemberId": null,
+    "contactPhone": "+919810000010",
+    "notes": null,
+    "createdAt": "2026-08-01T10:00:00.000Z",
+    "updatedAt": "2026-08-01T10:00:00.000Z"
+  },
+  {
+    "id": "rsc_saket",
+    "ryYear": 2026,
+    "club": { "id": "club_saket", "name": "Rotaract Club of Saket", "shortName": "Saket" },
+    "capacityDelegates": 2,
+    "homestayAvailable": false,
+    "preferredMonths": [1, 2],
+    "contactMemberId": null,
+    "contactPhone": "+919810000011",
+    "notes": null,
+    "createdAt": "2026-08-01T10:00:00.000Z",
+    "updatedAt": "2026-08-01T10:00:00.000Z"
+  }
+]

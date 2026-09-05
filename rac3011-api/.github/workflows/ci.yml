@@ -1,0 +1,81 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  image:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: [self-hosted, linux, ARM64, oracle]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/rac3011-api
+          tags: |
+            type=raw,value=main
+            type=sha
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Force-fresh pull of :main before redeploy
+        if: ${{ vars.DOKPLOY_BASE_URL != '' }}
+        env:
+          IMAGE: ghcr.io/${{ github.repository_owner }}/rac3011-api:main
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+        run: |
+          docker rmi -f "$IMAGE" || true
+          # The build/push GITHUB_TOKEN can push new package versions but is
+          # denied on plain pulls of this org-owned package (verified: push
+          # succeeds, then an immediate GITHUB_TOKEN pull 401s every time,
+          # not a propagation-lag issue). Use the same PAT Dokploy already
+          # uses to pull this image in production.
+          echo "$GHCR_PULL_TOKEN" | docker login ghcr.io -u rbansal42 --password-stdin
+          docker pull "$IMAGE"
+          docker logout ghcr.io
+
+      - name: Point Dokploy apps to the new image and redeploy
+        if: ${{ vars.DOKPLOY_BASE_URL != '' }}
+        env:
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          DOKPLOY_BASE_URL: ${{ vars.DOKPLOY_BASE_URL }}
+          IMAGE: ghcr.io/${{ github.repository_owner }}/rac3011-api:main
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+        run: |
+          # saveDockerProvider requires username/password/registryUrl in the
+          # same payload (nonoptional in Dokploy's schema), not just dockerImage
+          # -- omitting them 400s. Same registry credential already saved on
+          # the app (verified via application.one), just re-sent here.
+          for APP_ID in "${{ vars.DOKPLOY_API_APPLICATION_ID }}" "${{ vars.DOKPLOY_WORKER_APPLICATION_ID }}"; do
+            [ -z "$APP_ID" ] && continue
+            curl --fail-with-body --silent --show-error --request POST \
+              "$DOKPLOY_BASE_URL/api/application.saveDockerProvider" \
+              --header "Content-Type: application/json" \
+              --header "x-api-key: $DOKPLOY_API_KEY" \
+              --data "$(jq -n --arg id "$APP_ID" --arg img "$IMAGE" --arg user "rbansal42" --arg pass "$GHCR_PULL_TOKEN" --arg url "ghcr.io" '{applicationId:$id, dockerImage:$img, username:$user, password:$pass, registryUrl:$url}')"
+            curl --fail-with-body --silent --show-error --request POST \
+              "$DOKPLOY_BASE_URL/api/application.redeploy" \
+              --header "Content-Type: application/json" \
+              --header "x-api-key: $DOKPLOY_API_KEY" \
+              --data "$(jq -n --arg id "$APP_ID" --arg t "CI deploy" --arg d "${{ github.sha }}" '{applicationId:$id, title:$t, description:$d}')"
+          done

@@ -1,0 +1,6 @@
+{
+  "items": [
+    { "id": "drr_1", "name": "Rtr. Archit Bhatia", "slug": "archit-bhatia-2026-27", "terms": ["2026-27"], "homeClubId": "club_1", "photoUrl": null, "bio": "Led the district's most ambitious blood donation drive to date.", "isLowResPhoto": false },
+    { "id": "drr_2", "name": "Rtr. Rishika Khanna", "slug": "rishika-khanna-2025-26", "terms": ["2025-26"], "homeClubId": null, "photoUrl": null, "bio": null, "isLowResPhoto": true }
+  ]
+}

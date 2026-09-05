@@ -1,0 +1,5 @@
+[
+  { "teamId": "team_saket", "teamName": "Saket Warriors", "clubName": "Rotaract Club of Saket", "played": 2, "won": 1, "lost": 1, "tied": 0, "points": 2, "nrr": 0.2 },
+  { "teamId": "team_agni", "teamName": "Agni Strikers", "clubName": "Rotaract Club of Agni Zone Central", "played": 2, "won": 2, "lost": 0, "tied": 0, "points": 4, "nrr": 1.5 },
+  { "teamId": "team_dse", "teamName": "Delhi South East Strikers", "clubName": "Rotaract Club of Delhi South East", "played": 1, "won": 0, "lost": 1, "tied": 0, "points": 0, "nrr": -1.5 }
+]

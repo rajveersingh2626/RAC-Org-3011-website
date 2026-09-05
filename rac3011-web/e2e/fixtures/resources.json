@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "id": "res_1", "category": "documents", "title": "Club officer handbook", "description": "Roles and responsibilities for the year.", "url": "https://example.org/handbook.pdf", "isLocked": false, "comingSoonMonth": null },
+    { "id": "res_2", "category": "documents", "title": "Reporting template", "description": null, "url": null, "isLocked": true, "comingSoonMonth": null },
+    { "id": "res_3", "category": "branding", "title": "Brand kit", "description": null, "url": null, "isLocked": false, "comingSoonMonth": "October 2026" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "get-involved": {
+    "new_club_intro": { "type": "richtext", "value": "<p>Interested in chartering a Rotaract club? Tell us about your group.</p>" },
+    "sponsor_intro": { "type": "richtext", "value": "<p>Partner with the district to fund projects that reach thousands.</p>" }
+  },
+  "contact": {
+    "intro": { "type": "richtext", "value": "<p>Reach the district secretariat.</p>" },
+    "address": { "type": "text", "value": "Rotaract District 3011, New Delhi" }
+  },
+  "privacy-policy": {
+    "body": { "type": "richtext", "value": "<p>Placeholder privacy policy. Replace before launch.</p>" }
+  },
+  "terms-of-service": {
+    "body": { "type": "richtext", "value": "<p>Placeholder terms of service. Replace before launch.</p>" }
+  }
+}

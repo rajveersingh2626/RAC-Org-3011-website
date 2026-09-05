@@ -1,0 +1,14 @@
+[
+  {
+    "id": "fix_1",
+    "season": 2026,
+    "homeTeamId": "team_agni",
+    "homeTeam": { "id": "team_agni", "name": "Agni Strikers", "clubId": "club_agni" },
+    "awayTeamId": "team_saket",
+    "awayTeam": { "id": "team_saket", "name": "Saket Warriors", "clubId": "club_saket" },
+    "scheduledAt": "2026-09-20T09:00:00.000Z",
+    "venue": "Thyagaraj Sports Complex",
+    "status": "scheduled",
+    "result": null
+  }
+]

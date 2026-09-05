@@ -1,0 +1,10 @@
+@import "./styles/tokens.css";
+@import "./user_frontend/index.css";
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+
+

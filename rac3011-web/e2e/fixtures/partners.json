@@ -1,0 +1,6 @@
+{
+  "items": [
+    { "id": "partner_1", "name": "BraveHearts Cancer24x7", "logoUrl": null, "tier": "gold", "website": "https://example.org", "permissionStatus": "granted" },
+    { "id": "partner_2", "name": "MindWeal", "logoUrl": null, "tier": "silver", "website": null, "permissionStatus": "pending" }
+  ]
+}

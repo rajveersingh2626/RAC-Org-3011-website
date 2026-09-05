@@ -1,0 +1,36 @@
+{
+  "id": "club_1",
+  "name": "Rotaract Club of Delhi South East",
+  "shortName": "Delhi South East",
+  "slug": "delhi-south-east",
+  "zoneId": "zone_1",
+  "lat": 28.55,
+  "lng": 77.28,
+  "president": "Rtr. Aisha Khan",
+  "phone": "+91 98765 43210",
+  "email": "president@delhisoutheast.example",
+  "logoUrl": null,
+  "memberCount": 42,
+  "secretary": "Rtr. Dev Sharma",
+  "secretaryEmail": "secretary@delhisoutheast.example",
+  "secretaryPhone": "+91 90000 11111",
+  "meetingInfo": "Every second Saturday, 6pm",
+  "socialLinks": null,
+  "charterDate": "2018-07-01",
+  "board": [
+    { "id": "board_1", "name": "Rtr. Aisha Khan", "position": "President", "bloodGroup": "O+", "phone": "+91 98765 43210", "email": "president@delhisoutheast.example", "ryYear": 2026 },
+    { "id": "board_2", "name": "Rtr. Dev Sharma", "position": "Secretary", "bloodGroup": "B+", "phone": "+91 90000 11111", "email": "secretary@delhisoutheast.example", "ryYear": 2026 }
+  ],
+  "projects": [
+    {
+      "id": "proj_1",
+      "slug": "blood-donation-camp",
+      "title": "Blood donation camp",
+      "summary": "180 units collected in a single day.",
+      "category": "community-service",
+      "date": "2026-06-12",
+      "photos": [],
+      "leadClub": { "id": "club_1", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East", "slug": "delhi-south-east" }
+    }
+  ]
+}

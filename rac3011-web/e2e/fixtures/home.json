@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "badge": "Rotaract District 3011",
+    "title": "Service above self, across Delhi NCR",
+    "subtitle": "Young leaders in clubs across four zones, working on community, vocational and international service.",
+    "ctaPrimary": "Explore our clubs",
+    "ctaSecondary": "See the showcase"
+  },
+  "footerTagline": "Rotaract District 3011 · Rotary International District 3011",
+  "stats": { "zones": 4, "focusAreas": 7, "foundedYear": 1968, "ageRange": "18–30" },
+  "flagship": [
+    { "title": "Mahadan 9.0", "summary": "The district-wide blood donation drive, now in its ninth edition." },
+    { "title": "Clean Yamuna & Green NCR", "summary": "River clean-ups and plantation drives across the NCR." },
+    { "title": "Digital Literacy Labs", "summary": "Computer literacy labs for under-served schools." },
+    { "title": "Pediatric Health Screening", "summary": "Health camps screening children in partnership with hospitals." },
+    { "title": "Youth Leadership Assembly", "summary": "The annual leadership assembly for Rotaractors of the district." }
+  ],
+  "latestProjects": [
+    {
+      "id": "proj_1",
+      "slug": "blood-donation-camp",
+      "title": "Blood donation camp",
+      "summary": "180 units collected in a single day.",
+      "category": "community-service",
+      "date": "2026-06-12",
+      "photos": [],
+      "leadClub": { "id": "club_1", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East", "slug": "delhi-south-east" }
+    }
+  ],
+  "visits": { "year": 2026, "count": 12480 }
+}

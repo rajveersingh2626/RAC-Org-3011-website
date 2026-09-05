@@ -1,0 +1,38 @@
+[
+  {
+    "id": "camp_1",
+    "leadClub": { "id": "club_dse", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East" },
+    "date": "2026-08-10",
+    "venue": "Delhi South East Community Hall",
+    "city": "Delhi",
+    "unitsCollected": 85,
+    "donorsRegistered": 90,
+    "partnerBloodBank": "Rotary Blood Bank",
+    "photos": [],
+    "status": "submitted",
+    "submittedById": "usr_e2e",
+    "reviewedById": null,
+    "reviewedAt": null,
+    "rejectionReason": null,
+    "participatingClubs": [],
+    "createdAt": "2026-08-10T00:00:00Z"
+  },
+  {
+    "id": "camp_2",
+    "leadClub": { "id": "club_other", "name": "Rotaract Club of Saket", "shortName": "Saket" },
+    "date": "2026-07-20",
+    "venue": "Saket Grounds",
+    "city": "Delhi",
+    "unitsCollected": 60,
+    "donorsRegistered": 65,
+    "partnerBloodBank": null,
+    "photos": [],
+    "status": "approved",
+    "submittedById": "usr_other",
+    "reviewedById": "usr_admin",
+    "reviewedAt": "2026-07-21T00:00:00Z",
+    "rejectionReason": null,
+    "participatingClubs": [],
+    "createdAt": "2026-07-20T00:00:00Z"
+  }
+]

@@ -1,0 +1,5 @@
+[
+  { "id": "zone_agni", "name": "Zone Agni", "order": 1 },
+  { "id": "zone_1", "name": "Zone Prithvi", "order": 2 },
+  { "id": "zone_2", "name": "Zone Vayu", "order": 3 }
+]

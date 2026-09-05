@@ -1,0 +1,13 @@
+{
+  "operatedCount": 42,
+  "target": 100,
+  "pipelineCounts": { "screened": 20, "scheduled": 10, "operated": 42, "followup": 8, "closed": 30 },
+  "hospitals": [
+    { "hospital": "Shroff Eye Hospital", "surgeries": 25 },
+    { "hospital": "Centre for Sight", "surgeries": 17 }
+  ],
+  "perClub": [
+    { "clubId": "club_dse", "clubName": "Rotaract Club of Delhi South East", "beneficiaries": 30, "operated": 18 }
+  ],
+  "updatedAt": "2026-09-01T00:00:00Z"
+}

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "team_agni",
+    "season": 2026,
+    "clubId": "club_agni",
+    "club": { "id": "club_agni", "name": "Rotaract Club of Agni Zone Central", "shortName": "Agni Central" },
+    "name": "Agni Strikers",
+    "captainName": "Vikram Singh",
+    "captainPhone": "+919810000001",
+    "status": "confirmed",
+    "players": [
+      { "id": "ply_agni_1", "teamId": "team_agni", "memberId": null, "name": "Vikram Singh", "role": "Captain" },
+      { "id": "ply_agni_2", "teamId": "team_agni", "memberId": null, "name": "Arjun Mehta", "role": "Bowler" }
+    ],
+    "createdById": "usr_agni",
+    "createdAt": "2026-08-01T10:00:00.000Z",
+    "updatedAt": "2026-08-01T10:00:00.000Z"
+  },
+  {
+    "id": "team_saket",
+    "season": 2026,
+    "clubId": "club_saket",
+    "club": { "id": "club_saket", "name": "Rotaract Club of Saket", "shortName": "Saket" },
+    "name": "Saket Warriors",
+    "captainName": "Kabir Anand",
+    "captainPhone": "+919810000002",
+    "status": "confirmed",
+    "players": [
+      { "id": "ply_saket_1", "teamId": "team_saket", "memberId": null, "name": "Kabir Anand", "role": "Captain" },
+      { "id": "ply_saket_2", "teamId": "team_saket", "memberId": null, "name": "Rohan Kapoor", "role": "Batter" }
+    ],
+    "createdById": "usr_saket",
+    "createdAt": "2026-08-01T10:00:00.000Z",
+    "updatedAt": "2026-08-01T10:00:00.000Z"
+  }
+]

@@ -1,0 +1,97 @@
+@import "tailwindcss";
+@theme {
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --color-pink: #D81B60; --color-pink-hover: #C21350; --color-pink-light: #FDF0F5; --color-pink-subtle: #FBE4EC; --color-pink-bright: #F0407F; --color-pink-soft: #F7A8C4;
+  --color-cranberry: #880E4F; --color-navy: #123499; --color-maroon: #8A1027; --color-maroon-dark: #7A1024;
+  --color-ink: #1E1E24; --color-ink-2: #4A4A5A; --color-ink-3: #71717A; --color-ink-4: #8E8A90;
+  --color-cream: #FDF8FA; --color-cream-2: #F5F2F3; --color-canvas: #EFE9EC; --color-line: #F3E5EB; --color-line-2: #C9C4C7;
+  --color-dark-0: #131316; --color-dark-1: #17171B; --color-dark-2: #18181B; --color-dark-3: #1B1B20; --color-dark-4: #2C2C33; --color-dark-plum: #1A0A12; --color-dark-plum-2: #2A1520; --color-dark-plum-3: #3A2029;
+  --radius-card: 16px; --radius-control: 8px; --radius-pill: 999px;
+  --shadow-card: 0 4px 15px rgba(216,27,96,0.04); --shadow-pop: 0 20px 50px rgba(216,27,96,0.14);
+}
+:root, [data-theme="light"] {
+  --bg: #FDF8FA;
+  --surface: #FFFFFF;
+  --fg: #1E1E24;
+  --fg-2: #4A4A5A;
+  --fg-3: #71717A;
+  --border: #F3E5EB;
+  --border-accent: rgba(216, 27, 96, 0.15);
+  --accent: #D81B60;
+  --accent-hover: #C21350;
+  --accent-fg: #FFFFFF;
+  --accent-soft: #FDF0F5;
+  --accent-deep: #880E4F;
+  --track: #FBE4EC;
+  --danger: #8A1027;
+  --danger-fg: #8A1027;
+  --input-bg: #FFFFFF;
+  --shadow-raised: 0 4px 20px rgba(216, 27, 96, 0.06);
+  --shadow-overlay: 0 18px 44px rgba(216, 27, 96, 0.14);
+  --shadow-button: 0 6px 20px rgba(216, 27, 96, 0.25);
+  --portal-bar: #FFFFFF;
+}
+[data-theme="dark"] {
+  --bg: #0C0E14;
+  --surface: #141722;
+  --fg: #F8F9FA;
+  --fg-2: #B0B5C3;
+  --fg-3: #757D92;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(216, 27, 96, 0.35);
+  --accent: #E91E63;
+  --accent-hover: #F06292;
+  --accent-fg: #FFFFFF;
+  --accent-soft: rgba(216, 27, 96, 0.16);
+  --accent-deep: #FF6090;
+  --track: rgba(216, 27, 96, 0.12);
+  --danger: #E53935;
+  --danger-fg: #FFCDD2;
+  --input-bg: #10131B;
+  --shadow-raised: 0 6px 20px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: 0 20px 50px rgba(0, 0, 0, 0.6);
+  --shadow-button: 0 6px 20px rgba(216, 27, 96, 0.4);
+  --portal-bar: #141722;
+}
+[data-surface="drishti"] { --accent: #123499; --accent-hover: #0C2470; --accent-soft: #EEF1FA; --accent-deep: #0C2470; --accent-fg: #FFFFFF; }
+[data-surface="rcl"] { --accent: #0F7B6C; --accent-hover: #0A5347; --accent-soft: #E9F5F2; --accent-deep: #0A5347; --accent-fg: #FFFFFF; }
+[data-surface="careerbridge"] { --accent: #6B3FA0; --accent-hover: #4A2570; --accent-soft: #F3EEF9; --accent-deep: #4A2570; --accent-fg: #FFFFFF; }
+[data-surface="ride"] { --accent: #B8541A; --accent-hover: #8A3E10; --accent-soft: #FDF1E7; --accent-deep: #8A3E10; --accent-fg: #FFFFFF; }
+[data-theme="dark"][data-surface="drishti"], [data-theme="dark"][data-surface="rcl"], [data-theme="dark"][data-surface="careerbridge"], [data-theme="dark"][data-surface="ride"] { --accent-soft: var(--color-dark-plum-2); }
+
+@utility bg-page { background-color: var(--bg); }
+@utility bg-surface { background-color: var(--surface); }
+@utility bg-input { background-color: var(--input-bg); }
+@utility text-fg { color: var(--fg); }
+@utility text-fg-2 { color: var(--fg-2); }
+@utility text-fg-3 { color: var(--fg-3); }
+@utility border-line { border-color: var(--border); }
+@utility border-line-accent { border-color: var(--border-accent); }
+@utility bg-accent { background-color: var(--accent); }
+@utility bg-accent-hover { background-color: var(--accent-hover); }
+@utility text-accent { color: var(--accent); }
+@utility text-accent-fg { color: var(--accent-fg); }
+@utility text-accent-deep { color: var(--accent-deep); }
+@utility border-accent { border-color: var(--accent); }
+@utility bg-accent-soft { background-color: var(--accent-soft); }
+@utility bg-track { background-color: var(--track); }
+@utility bg-danger { background-color: var(--danger); }
+@utility text-danger { color: var(--danger); }
+@utility text-danger-fg { color: var(--danger-fg); }
+@utility border-danger { border-color: var(--danger); }
+@utility shadow-raised { box-shadow: var(--shadow-raised); }
+@utility shadow-overlay { box-shadow: var(--shadow-overlay); }
+@utility shadow-button { box-shadow: var(--shadow-button); }
+@utility bg-portal-bar { background-color: var(--portal-bar); }
+@utility control { min-height: 44px; }
+
+/* Layered (not bare) so Tailwind utility classes — e.g. text-white/72 on an <a> — can override these resets; unlayered CSS beats every @layer regardless of specificity. */
+@layer base {
+  html { font-family: var(--font-sans); background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+  body { margin: 0; font-size: 13.5px; line-height: 1.65; }
+  a { color: var(--accent); text-decoration: none; }
+  ::selection { background: var(--color-pink-subtle); }
+  [data-theme="dark"] ::selection { background: var(--color-dark-plum-3); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+}

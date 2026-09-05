@@ -1,0 +1,33 @@
+{
+  "items": [
+    {
+      "id": "club_1",
+      "name": "Rotaract Club of Delhi South East",
+      "shortName": "Delhi South East",
+      "slug": "delhi-south-east",
+      "zoneId": "zone_1",
+      "lat": 28.55,
+      "lng": 77.28,
+      "president": "Rtr. Aisha Khan",
+      "phone": "+91 98765 43210",
+      "email": "president@delhisoutheast.example",
+      "logoUrl": null,
+      "memberCount": 42
+    },
+    {
+      "id": "club_2",
+      "name": "Rotaract Club of Delhi Heights",
+      "shortName": "Delhi Heights",
+      "slug": "delhi-heights",
+      "zoneId": "zone_2",
+      "lat": null,
+      "lng": null,
+      "president": "Rtr. Karan Mehta",
+      "phone": "+91 91234 56789",
+      "email": "president@delhiheights.example",
+      "logoUrl": null,
+      "memberCount": 31
+    }
+  ],
+  "total": 2
+}

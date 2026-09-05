@@ -1,0 +1,26 @@
+{
+  "id": "club_dse",
+  "name": "Rotaract Club of Delhi South East",
+  "shortName": "Delhi South East",
+  "slug": "delhi-south-east",
+  "zone": null,
+  "zoneId": "zone_agni",
+  "lat": null,
+  "lng": null,
+  "president": null,
+  "phone": "011-2345-6789",
+  "email": "club@example.org",
+  "rotaryId": null,
+  "secretary": null,
+  "secretaryEmail": null,
+  "secretaryPhone": null,
+  "charterDate": null,
+  "isActive": true,
+  "meetingInfo": "Every Saturday, 6pm",
+  "socialLinks": null,
+  "logoUrl": null,
+  "memberCount": 38,
+  "board": [
+    { "id": "b1", "clubId": "club_dse", "memberId": null, "name": "Rtr. Dhruv Kumar Jha", "position": "President", "bloodGroup": "B+", "phone": null, "email": null, "ryYear": 2026, "order": 0 }
+  ]
+}

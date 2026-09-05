@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "key": "mission3011",
+      "label": "Mission 3011",
+      "description": "District-wide blood donation drive, target 3,011 units.",
+      "status": "active",
+      "leadClubId": "club_1",
+      "summary": {
+        "headline": "Units collected",
+        "value": 1847,
+        "target": 3011,
+        "unit": "units",
+        "secondary": [{ "label": "Camps held", "value": 12 }],
+        "updatedAt": "2026-08-01T00:00:00.000Z"
+      }
+    },
+    { "key": "drishti", "label": "Drishti", "description": "Cataract screening and surgery pipeline, target 100 surgeries.", "status": "unreachable", "leadClubId": "club_2" },
+    { "key": "rcl", "label": "RCL", "description": "Rotaract Cricket League — team registration, fixtures and standings.", "status": "unassigned" },
+    { "key": "careerbridge", "label": "Career Bridge", "description": "Job, internship and mentorship listings for Rotaractors.", "status": "unassigned" },
+    { "key": "ride", "label": "RIDE", "description": "Inbound delegation hosting across the district's clubs.", "status": "unassigned" }
+  ]
+}

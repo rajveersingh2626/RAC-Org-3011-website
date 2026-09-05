@@ -1,0 +1,76 @@
+[
+  {
+    "id": "rep_draft",
+    "clubId": "club_dse",
+    "ryYear": 2026,
+    "month": "2026-08-01",
+    "schemaVersion": 4,
+    "status": "draft",
+    "values": { "activities": [] },
+    "notes": null,
+    "submittedById": null,
+    "submittedAt": null,
+    "filedOnTime": null,
+    "scoredAt": null
+  },
+  {
+    "id": "rep_submitted",
+    "clubId": "club_dse",
+    "ryYear": 2026,
+    "month": "2026-07-01",
+    "schemaVersion": 4,
+    "status": "submitted",
+    "values": {
+      "physical_meetings": 4,
+      "activities": [
+        { "activity_title": "Blood donation camp", "activity_date": "2026-07-18", "avenue": "community", "area_of_focus": "disease_prevention", "initiated_by": "rotaract", "people_reached": 180, "members_participated": 20, "collaborating_clubs": [] }
+      ]
+    },
+    "notes": null,
+    "submittedById": "usr_e2e",
+    "submittedAt": "2026-08-01T10:00:00.000Z",
+    "filedOnTime": true,
+    "scoredAt": null
+  },
+  {
+    "id": "rep_queried",
+    "clubId": "club_dse",
+    "ryYear": 2026,
+    "month": "2026-06-01",
+    "schemaVersion": 4,
+    "status": "queried",
+    "values": {
+      "physical_meetings": 3,
+      "activities": [
+        { "activity_title": "RO plant handover", "activity_date": "2026-06-12", "avenue": "community", "area_of_focus": "water_and_sanitation", "initiated_by": "rotaract", "people_reached": 420, "members_participated": 12, "collaborating_clubs": [] }
+      ]
+    },
+    "notes": null,
+    "submittedById": "usr_e2e",
+    "submittedAt": "2026-07-02T10:00:00.000Z",
+    "filedOnTime": true,
+    "scoredAt": null,
+    "queries": [
+      { "id": "q1", "reportId": "rep_queried", "askedById": "usr_officer", "question": "Is 420 the daily user count or the whole school?", "reply": null, "repliedById": null, "repliedAt": null, "createdAt": "2026-07-03T09:00:00.000Z" }
+    ]
+  },
+  {
+    "id": "rep_scored",
+    "clubId": "club_dse",
+    "ryYear": 2026,
+    "month": "2026-05-01",
+    "schemaVersion": 4,
+    "status": "scored",
+    "values": {
+      "physical_meetings": 4,
+      "activities": [
+        { "activity_title": "Club installation", "activity_date": "2026-05-28", "avenue": "club", "area_of_focus": "basic_education", "initiated_by": "rotaract", "people_reached": 120, "members_participated": 30, "collaborating_clubs": [] }
+      ]
+    },
+    "notes": null,
+    "submittedById": "usr_e2e",
+    "submittedAt": "2026-06-02T10:00:00.000Z",
+    "filedOnTime": true,
+    "scoredAt": "2026-06-10T10:00:00.000Z"
+  }
+]

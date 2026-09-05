@@ -1,0 +1,17 @@
+{
+  "items": [
+    {
+      "id": "proj_1",
+      "slug": "blood-donation-camp",
+      "title": "Blood donation camp",
+      "summary": "180 units collected in a single day.",
+      "category": "community-service",
+      "date": "2026-06-12",
+      "photos": [],
+      "leadClub": { "id": "club_1", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East", "slug": "delhi-south-east" }
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "pageSize": 12
+}

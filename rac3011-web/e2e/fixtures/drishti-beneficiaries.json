@@ -1,0 +1,49 @@
+[
+  {
+    "id": "ben_1",
+    "club": { "id": "club_dse", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East" },
+    "name": "Kamla Devi",
+    "age": 62,
+    "gender": "female",
+    "phone": "9999900001",
+    "eye": "both",
+    "screenedOn": "2026-08-01",
+    "campLocation": "Delhi South East Community Hall",
+    "stage": "scheduled",
+    "notes": null,
+    "surgeries": [],
+    "createdAt": "2026-08-01T00:00:00Z"
+  },
+  {
+    "id": "ben_2",
+    "club": { "id": "club_dse", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East" },
+    "name": "Ram Prasad",
+    "age": 70,
+    "gender": "male",
+    "phone": "•••1234",
+    "eye": "left",
+    "screenedOn": "2026-07-15",
+    "campLocation": "Delhi South East Community Hall",
+    "stage": "operated",
+    "notes": null,
+    "surgeries": [
+      { "id": "sur_1", "hospital": "Shroff Eye Hospital", "operatedOn": "2026-07-20", "outcome": "Successful", "followupOn": "2026-08-20" }
+    ],
+    "createdAt": "2026-07-15T00:00:00Z"
+  },
+  {
+    "id": "ben_3",
+    "club": { "id": "club_other", "name": "Rotaract Club of Saket", "shortName": "Saket" },
+    "name": "Sunita Kumari",
+    "age": 55,
+    "gender": "female",
+    "phone": null,
+    "eye": "right",
+    "screenedOn": "2026-06-01",
+    "campLocation": "Saket Grounds",
+    "stage": "screened",
+    "notes": null,
+    "surgeries": [],
+    "createdAt": "2026-06-01T00:00:00Z"
+  }
+]

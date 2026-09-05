@@ -1,0 +1,11 @@
+[
+  {
+    "id": "req_1",
+    "title": "Installation details for the district directory",
+    "description": "Tell us when and where your club installed its new board.",
+    "questions": ["Installation date?", "Venue?", "Chief guest?"],
+    "audience": { "all": true },
+    "dueAt": "2026-09-30T00:00:00.000Z",
+    "createdById": "usr_officer"
+  }
+]

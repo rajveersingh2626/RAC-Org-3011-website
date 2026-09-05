@@ -1,0 +1,29 @@
+[
+  {
+    "id": "rg_2025_1",
+    "year": 2025,
+    "url": "https://picsum.photos/seed/ride-2025-1/1200/800",
+    "kind": "photo",
+    "caption": "District 3011 hosts the visiting Bangladesh delegation, 2025",
+    "order": 0,
+    "createdAt": "2025-11-01T10:00:00.000Z"
+  },
+  {
+    "id": "rg_2026_1",
+    "year": 2026,
+    "url": "https://picsum.photos/seed/ride-2026-1/1200/800",
+    "kind": "photo",
+    "caption": "Welcoming the Philippines delegation at the airport",
+    "order": 0,
+    "createdAt": "2026-08-10T10:00:00.000Z"
+  },
+  {
+    "id": "rg_2026_2",
+    "year": 2026,
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "kind": "video",
+    "caption": "RIDE 2026 highlights reel",
+    "order": 1,
+    "createdAt": "2026-08-11T10:00:00.000Z"
+  }
+]

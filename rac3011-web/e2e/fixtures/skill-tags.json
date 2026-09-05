@@ -1,0 +1,5 @@
+[
+  { "id": "st_1", "label": "video editing", "kind": "skill" },
+  { "id": "st_2", "label": "photography", "kind": "skill" },
+  { "id": "st_3", "label": "environment", "kind": "interest" }
+]

@@ -1,0 +1,37 @@
+{
+  "user": { "id": "usr_e2e", "name": "Rtr. Rahul Bansal", "email": "president@example.org", "twoFactorEnabled": true },
+  "profile": {
+    "id": "mp_e2e",
+    "fullName": "Rtr. Rahul Bansal",
+    "email": "president@example.org",
+    "clubId": "club_dse",
+    "photoUrl": null,
+    "status": "approved",
+    "directoryOptIn": true,
+    "themePreference": "light"
+  },
+  "roles": [
+    { "roleKey": "member", "scope": { "type": "club", "id": "club_dse" } },
+    { "roleKey": "president", "scope": { "type": "club", "id": "club_dse" } }
+  ],
+  "grants": {
+    "reports:submit": [{ "type": "club", "id": "club_dse" }],
+    "reports:review": [{ "type": "zone", "id": "zone_agni" }],
+    "requests:manage": [{ "type": "none" }],
+    "members:approve": [{ "type": "club", "id": "club_dse" }],
+    "members:import": [{ "type": "club", "id": "club_dse" }],
+    "members:view": [{ "type": "club", "id": "club_dse" }],
+    "directory:view": [{ "type": "club", "id": "club_dse" }],
+    "clubs:edit": [{ "type": "club", "id": "club_dse" }],
+    "clubs:view": [{ "type": "club", "id": "club_dse" }],
+    "showcase:submit": [{ "type": "club", "id": "club_dse" }],
+    "club_events:log": [{ "type": "club", "id": "club_dse" }],
+    "profile:edit": [{ "type": "none" }],
+    "subdomain:drishti:manage": [{ "type": "project", "id": "drishti" }],
+    "subdomain:rcl:manage": [{ "type": "project", "id": "rcl" }],
+    "subdomain:careerbridge:manage": [{ "type": "project", "id": "careerbridge" }],
+    "subdomain:ride:manage": [{ "type": "project", "id": "ride" }]
+  },
+  "clubs": [{ "id": "club_dse", "name": "Rotaract Club of Delhi South East", "shortName": "Delhi South East", "zoneId": "zone_agni" }],
+  "theme": "light"
+}

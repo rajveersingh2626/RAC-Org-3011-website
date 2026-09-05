@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "id": "team_1", "name": "Rtn. Sanjeev Rai Mehra", "designation": "District Governor, RID 3011", "kind": "core", "photoUrl": null, "phone": null, "email": null, "bio": null, "clubId": null },
+    { "id": "team_2", "name": "Rtr. Ananya Sharma", "designation": "District Rotaract Representative (DRR)", "kind": "core", "photoUrl": null, "phone": "+91 99999 00000", "email": "drr@rac3011.example", "bio": "Leads the district's Rotaract program for RY 2026-27.", "clubId": null },
+    { "id": "team_3", "name": "Rtr. Ayush Rai", "designation": "Assistant DRR — Zone Prithvi", "kind": "dsc", "photoUrl": null, "phone": null, "email": null, "bio": null, "clubId": null }
+  ]
+}
