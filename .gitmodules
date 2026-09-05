@@ -1,0 +1,6 @@
+[submodule "rac3011-api"]
+	path = rac3011-api
+	url = https://github.com/round-robin-solutions/rac3011-api.git
+[submodule "rac3011-web"]
+	path = rac3011-web
+	url = https://github.com/round-robin-solutions/rac3011-web.git
