@@ -2,5 +2,5 @@ name = "rac-org-3011-website"
 compatibility_date = "2026-09-05"
 
 [assets]
-directory = "./dist"
+directory = "./rac3011-web/dist"
 not_found_handling = "single-page-application"
